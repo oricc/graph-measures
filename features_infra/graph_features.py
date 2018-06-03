@@ -70,7 +70,7 @@ class GraphFeatures(dict):
                 self._load_feature(name)
 
     # a single process means it is calculated serially
-    def build(self, num_processes: int = 1, include: set = None, should_dump: bool = False):  # , exclude: set=None):
+    def build(self, num_processes: int = 1, include: set = None, should_dump: bool = False, force_build=False):  # , exclude: set=None):
         # if exclude is None:
         #     exclude = set()
         if include is None:
@@ -82,7 +82,7 @@ class GraphFeatures(dict):
                 dump_path = self._base_dir
                 if not os.path.exists(dump_path):
                     os.makedirs(dump_path)
-            return self._build_serially(include, dump_path=dump_path)
+            return self._build_serially(include, dump_path=dump_path, force_build=force_build)
 
         request_queue = Queue()
         workers = [Worker(request_queue, self, include, logger=self._logger) for _ in range(num_processes)]
