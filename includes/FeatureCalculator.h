@@ -2,7 +2,7 @@
 
 #include <vector>
 #include "stdafx.h"
-#include "GraphSnapshot.h"
+#include "CacheGraph.h"
 
 using namespace std;
 
@@ -12,14 +12,14 @@ public:
 	FeatureCalculator();
 	virtual T CalculateCpu() = 0;
 	virtual ~FeatureCalculator();
-	GraphSnapshot* getGraph();
-	void setGraph(GraphSnapshot* graph);
+	CacheGraph* getGraph();
+	void setGraph(CacheGraph* graph);
 private:
 	void init();
 
 protected:
 	virtual bool checkGPUEnabled() = 0;
-	GraphSnapshot* mGraph;
+	CacheGraph* mGraph;
 
 private:
 	bool isGPUEnabled;
@@ -33,7 +33,7 @@ FeatureCalculator<T>::FeatureCalculator():
 }
 
 template<typename T>
-void FeatureCalculator<T>::setGraph(GraphSnapshot* graph)
+void FeatureCalculator<T>::setGraph(CacheGraph* graph)
 {
 	this->mGraph = graph;
 };
@@ -50,7 +50,7 @@ FeatureCalculator<T>::~FeatureCalculator()
 }
 
 template<typename T>
-GraphSnapshot* FeatureCalculator<T>::getGraph()
+CacheGraph* FeatureCalculator<T>::getGraph()
 {
 	return this->mGraph;
 }

@@ -1,5 +1,4 @@
-#include "stdafx.h"
-#include "ClusteringCoefficient.h"
+#include "../includes/ClusteringCoefficient.h"
 
 
 ClusteringCoefficient::ClusteringCoefficient()
@@ -16,11 +15,11 @@ float ClusteringCoefficient::CalculateCpu()
 
 	//Get the neighbors
 	const unsigned int* neighborList = mGraph->GetNeighborList();
-	const __int64* offsetList = mGraph->GetOffsetList();
+	const int64* offsetList = mGraph->GetOffsetList();
 	
 	//sum all of the local clustering coefficients
 	unsigned int numOfNodes = mGraph->GetNumberOfNodes();
-	__int64 begin_offset, end_offset;
+	int64 begin_offset, end_offset;
 	for (unsigned int i = 0; i < numOfNodes; i++) {
 		begin_offset = offsetList[i];
 		end_offset = offsetList[i + 1];
