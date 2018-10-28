@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include "stdafx.h"
 #include "GraphSnapshot.h"
 
 using namespace std;

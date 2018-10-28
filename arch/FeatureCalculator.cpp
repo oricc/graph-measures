@@ -1,5 +1,4 @@
-#include "stdafx.h"
-#include "FeatureCalculator.h"
+#include "../includes/FeatureCalculator.h"
 
 //template<class T>
 //FeatureCalculator<T>::FeatureCalculator()

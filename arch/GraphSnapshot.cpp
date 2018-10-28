@@ -1,15 +1,4 @@
-#include "stdafx.h"
-#include "GraphSnapshot.h"
-#include <iomanip>
-#include <exception>
-//#include <boost/graph/adjacency_list.hpp>
-#pragma warning(push)
-#pragma warning(disable: 4996) //4996 for _CRT_SECURE_NO_WARNINGS equivalent
-#include <numeric>
-#include <random>
-#pragma warning(pop)
-
-//#include <set>
+#include "../includes/GraphSnapshot.h"
 
 /*
 	Clear up all memory allocations and internal variables.
@@ -24,15 +13,15 @@ void GraphSnapshot::Clear()
 /*
 	Initialize the graph from two lists (the offset list and the adjacency list).
 */
-void GraphSnapshot::Assign(const std::vector<unsigned __int64>& NodeOffsets, const std::vector<unsigned int>& Neighbours)
+void GraphSnapshot::Assign(const std::vector<__int64>& NodeOffsets, const std::vector<unsigned int>& Neighbours)
 {
 	//Clear the graph so we can assign new data
 	Clear(); 
 
 	//copy the offset list into a new array
 	m_NumberOfNodes = static_cast<unsigned int>(NodeOffsets.size()-1);
-	m_Offsets = new unsigned __int64[m_NumberOfNodes + 1];
-	std::memcpy(m_Offsets, &NodeOffsets[0], NodeOffsets.size() * sizeof(unsigned __int64));
+	m_Offsets = new __int64[m_NumberOfNodes + 1];
+	std::memcpy(m_Offsets, &NodeOffsets[0], NodeOffsets.size() * sizeof(__int64));
 	
 	//copy the adjacency list into a new array
 	m_Graph = new unsigned int[m_Offsets[m_NumberOfNodes]];
@@ -51,8 +40,8 @@ bool GraphSnapshot::SaveToFile(const std::string& FileName) const
 	
 	//write the class variables to the file
 	std::fwrite(&m_NumberOfNodes, sizeof(unsigned int), 1, hFile);
-	std::fwrite(&m_Offsets[m_NumberOfNodes], sizeof(unsigned __int64), 1, hFile);
-	std::fwrite(m_Offsets, sizeof(unsigned __int64), m_NumberOfNodes+1, hFile);
+	std::fwrite(&m_Offsets[m_NumberOfNodes], sizeof(__int64), 1, hFile);
+	std::fwrite(m_Offsets, sizeof(__int64), m_NumberOfNodes+1, hFile);
 	std::fwrite(m_Graph, sizeof(unsigned int), m_Offsets[m_NumberOfNodes], hFile);
 	
 	//close the file
@@ -105,12 +94,12 @@ bool GraphSnapshot::LoadFromFile(const std::string& FileName)
 	std::fread(&m_NumberOfNodes,sizeof(unsigned int),1, hFile);
 
 	//read the number of edges
-	unsigned __int64 NumberOfEdges = 0; 
-	std::fread(&NumberOfEdges, sizeof(unsigned __int64), 1, hFile);
+	__int64 NumberOfEdges = 0; 
+	std::fread(&NumberOfEdges, sizeof(__int64), 1, hFile);
 	
 	//create an array to store the indices (offsets) of the nodes in the graph array and read into it
-	m_Offsets = new unsigned __int64[m_NumberOfNodes + 1];
-	std::fread(m_Offsets, sizeof(unsigned __int64), m_NumberOfNodes + 1, hFile);
+	m_Offsets = new __int64[m_NumberOfNodes + 1];
+	std::fread(m_Offsets, sizeof(__int64), m_NumberOfNodes + 1, hFile);
 	
 	//create the main array containing the lists of neighbors.
 	/*
@@ -133,13 +122,13 @@ bool GraphSnapshot::LoadFromFile(const std::string& FileName)
 void GraphSnapshot::InverseGraph(GraphSnapshot& InvertedGraph) const
 {
 	//get the number of edges in the graph
-	const unsigned __int64 NumberOfEdges = m_Offsets[m_NumberOfNodes];
+	const __int64 NumberOfEdges = m_Offsets[m_NumberOfNodes];
 	//clear the inverted graph
 	InvertedGraph.Clear();
 	//assign the member variables to the inverted graph
 	InvertedGraph.m_NumberOfNodes = m_NumberOfNodes;
 	//allocate the needed memory
-	InvertedGraph.m_Offsets = new unsigned __int64[m_NumberOfNodes + 1]; 
+	InvertedGraph.m_Offsets = new __int64[m_NumberOfNodes + 1]; 
 	InvertedGraph.m_Graph = new unsigned int[NumberOfEdges];
 	
 	//invert the adjancency list
@@ -166,14 +155,14 @@ void GraphSnapshot::InverseGraph(GraphSnapshot& InvertedGraph) const
 void GraphSnapshot::CureateUndirectedGraph(const GraphSnapshot& InvertedGraph, GraphSnapshot& UndirectedGraph) const
 {
 	//calculate the number of edges in the graph
-	const unsigned __int64 NumberOfEdges = m_Offsets[m_NumberOfNodes];
+	const __int64 NumberOfEdges = m_Offsets[m_NumberOfNodes];
 	//clear the new graph
 	UndirectedGraph.Clear();
 	//assign member variables
 	UndirectedGraph.m_NumberOfNodes = m_NumberOfNodes;
 	//allocate memory
-	UndirectedGraph.m_Offsets = new unsigned __int64[m_NumberOfNodes + 1];
-	std::memset(UndirectedGraph.m_Offsets, 0, (m_NumberOfNodes) * sizeof(unsigned __int64));
+	UndirectedGraph.m_Offsets = new __int64[m_NumberOfNodes + 1];
+	std::memset(UndirectedGraph.m_Offsets, 0, (m_NumberOfNodes) * sizeof(__int64));
 	//note that in an undirected graph, there are twice as many edges in the
 	//adjacency list as in a directed graph.
 	unsigned int* temp_Graph = new unsigned int[2 * NumberOfEdges];
@@ -206,13 +195,13 @@ void GraphSnapshot::CureateUndirectedGraph(const GraphSnapshot& InvertedGraph, G
 		}
 		if (p1 < m_Graph + m_Offsets[NodeID + 1])
 		{
-			unsigned __int64 RemainingElements = m_Graph + m_Offsets[NodeID + 1] - p1;
+			__int64 RemainingElements = m_Graph + m_Offsets[NodeID + 1] - p1;
 			std::memcpy(temp_graph_pointer, p1, sizeof(unsigned int)*RemainingElements);
 			temp_graph_pointer += RemainingElements;
 		}
 		else if (p2 < InvertedGraph.m_Graph + InvertedGraph.m_Offsets[NodeID + 1])
 		{
-			unsigned __int64 RemainingElements = InvertedGraph.m_Graph + InvertedGraph.m_Offsets[NodeID + 1] - p2;
+			__int64 RemainingElements = InvertedGraph.m_Graph + InvertedGraph.m_Offsets[NodeID + 1] - p2;
 			std::memcpy(temp_graph_pointer, p2, sizeof(unsigned int)*RemainingElements);
 			temp_graph_pointer += RemainingElements;
 		}
@@ -341,7 +330,7 @@ template <typename  value_type> bool GraphSnapshot::SaveValueToFile(const std::v
 }
 template bool GraphSnapshot::SaveValueToFile<unsigned int>(const std::vector<unsigned int>& values, const std::string& FileName, bool IsNewFile);
 template bool GraphSnapshot::SaveValueToFile<float>(const std::vector<float>& values, const std::string& FileName, bool IsNewFile);
-template bool GraphSnapshot::SaveValueToFile<unsigned __int64>(const std::vector<unsigned __int64>& values, const std::string& FileName, bool IsNewFile);
+template bool GraphSnapshot::SaveValueToFile<__int64>(const std::vector<__int64>& values, const std::string& FileName, bool IsNewFile);
 template bool GraphSnapshot::SaveValueToFile<unsigned short>(const std::vector<unsigned short>& values, const std::string& FileName, bool IsNewFile);
 /*
 typedef boost::adjacency_list<boost::listS, boost::vecS, boost::undirectedS> MyGraph;

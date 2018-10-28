@@ -1644,15 +1644,15 @@ class DateTime : base::StaticClass {
 #if ELPP_OS_WINDOWS
     if (tv != nullptr) {
 #  if ELPP_COMPILER_MSVC || defined(_MSC_EXTENSIONS)
-      const unsigned __int64 delta_ = 11644473600000000Ui64;
+      const __int64 delta_ = 11644473600000000Ui64;
 #  else
-      const unsigned __int64 delta_ = 11644473600000000ULL;
+      const __int64 delta_ = 11644473600000000ULL;
 #  endif  // ELPP_COMPILER_MSVC || defined(_MSC_EXTENSIONS)
       const double secOffSet = 0.000001;
       const unsigned long usecOffSet = 1000000;
       FILETIME fileTime;
       GetSystemTimeAsFileTime(&fileTime);
-      unsigned __int64 present = 0;
+      __int64 present = 0;
       present |= fileTime.dwHighDateTime;
       present = present << 32;
       present |= fileTime.dwLowDateTime;

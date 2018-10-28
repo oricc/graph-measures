@@ -1,5 +1,5 @@
 #pragma once
-#include "arch/FeatureCalculator.h"
+#include "FeatureCalculator.h"
 
 /*
 	Calculate the average clustering coefficient of a network.

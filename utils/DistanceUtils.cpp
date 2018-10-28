@@ -53,7 +53,7 @@ std::vector<int> DistanceUtils::BfsSingleSourceShortestPath(const GraphSnapshot 
 
 	//Get the neighbors
 	const unsigned int* neighborList = g->GetNeighborList();
-	const unsigned __int64* offsetList = g->GetOffsetList();
+	const __int64* offsetList = g->GetOffsetList();
 
 	// standard BFS algorithm
 	while (!queue.empty()) {
@@ -74,7 +74,7 @@ std::vector<int> DistanceUtils::BfsSingleSourceShortestPath(const GraphSnapshot 
 		//	}
 		//}
 
-		unsigned __int64 begin_offset, end_offset;
+		__int64 begin_offset, end_offset;
 		begin_offset = offsetList[u];
 		end_offset = offsetList[u + 1];
 

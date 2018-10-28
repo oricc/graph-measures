@@ -1,13 +1,26 @@
-#pragma once
-#include "stdafx.h"
+#ifndef graph_snapshot_h
+#define graph_snapshot_h
 //#include "Utilities.h"
 #include <string>
 #include <vector>
+#include <iomanip>
+#include <exception>
+//#include <boost/graph/adjacency_list.hpp>
+#pragma warning(push)
+#pragma warning(disable: 4996) //4996 for _CRT_SECURE_NO_WARNINGS equivalent
+#include <numeric>
+#include <random>
+#pragma warning(pop)
+#include "stdafx.h"
+
+
+//#include <set>
 //#include "IncludeBoostLogger.h"
+
 #define _CRT_SECURE_NO_WARNINGS
 /*
 	This class is based on the code from Lev's lab.
-	The class encalpsulates a graph that is saved in memory with two lists:
+	The class encapsulates a graph that is saved in memory with two lists:
 	1) An ordered adjacency list of all nodes
 	2) A list of offsets that saves the index of the beginning of every node's section 
 		in the adjacency list.
@@ -25,7 +38,7 @@ public:
 	const GraphSnapshot& operator=(const GraphSnapshot&) = delete; 
 
 	void Clear(); 
-	void Assign(const std::vector<unsigned __int64>& NodeOffsets, const std::vector<unsigned int>& Neighbours);
+	void Assign(const std::vector<__int64>& NodeOffsets, const std::vector<unsigned int>& Neighbours);
 	bool SaveToFile(const std::string& FileName) const; 
 	bool LoadFromFile(const std::string& FileName);
 	bool LoadFromFile(const std::string& DirectroyName, const std::string& BaseFileName);
@@ -34,7 +47,7 @@ public:
 
 	const unsigned int GetNumberOfNodes() const { return m_NumberOfNodes; }
 	const unsigned int* GetNeighborList() const { return m_Graph; }
-	const unsigned __int64* GetOffsetList() const { return m_Offsets; }
+	const __int64* GetOffsetList() const { return m_Offsets; }
 
 	void InverseGraph(GraphSnapshot& InvertedGraph) const;
 	void CureateUndirectedGraph(const GraphSnapshot& InvertedGraph, GraphSnapshot& UndirectedGraph) const;
@@ -52,5 +65,7 @@ public:
 private:
 	unsigned int m_NumberOfNodes;
 	unsigned int *m_Graph; 
-	unsigned __int64* m_Offsets; 
+	__int64* m_Offsets; 
 };
+
+#endif
