@@ -63,7 +63,7 @@ public:
 	template <typename  value_type>
 	static bool SaveValueToFile(const std::vector<value_type>& values, const std::string& FileName, bool IsNewFile);
 
-	bool areNeighbors(const unsigned int p, const unsigned int q);
+	bool areNeighbors(const unsigned int p, const unsigned int q) const;
 
 private:
 	unsigned int m_NumberOfNodes;

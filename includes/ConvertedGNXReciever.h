@@ -24,12 +24,12 @@ using namespace boost::python;
   	  b) Memory management: this object also holds a pointer to the CacheGraph, and the graph will be
   	  	  	  	  deleted alongside to converter at the end of the converter's scope.
   	  	  	  	  This will usually occur at the end of the wrapper function (that is exposed to Python)
-  	  	  	  	  and so the graph will be cleaned automatically at the end of the calulation.
+  	  	  	  	  and so the graph will be cleaned automatically at the end of the calculation.
  */
 class ConvertedGNXReciever {
 public:
 	ConvertedGNXReciever(dict converted_graph);
-	CacheGraph* getCacheGraph(){return mGraph;};
+	const CacheGraph* getCacheGraph(){return mGraph;};
 	virtual ~ConvertedGNXReciever();
 
 private:

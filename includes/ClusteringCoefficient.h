@@ -11,7 +11,7 @@ class ClusteringCoefficient :
 {
 public:
 	ClusteringCoefficient();
-	virtual float CalculateCpu();
+	virtual float Calculate();
 	
 	virtual bool checkGPUEnabled(){
 		return false;

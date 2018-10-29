@@ -10,7 +10,7 @@ class BfsMomentsCalculator :
 {
 public:
 	BfsMomentsCalculator();
-	virtual vector<tuple<float,float>> CalculateCpu();
+	virtual vector<tuple<float,float>> Calculate();
 
 	virtual ~BfsMomentsCalculator();
 

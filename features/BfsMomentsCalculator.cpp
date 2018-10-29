@@ -9,7 +9,7 @@ BfsMomentsCalculator::BfsMomentsCalculator()
 {
 }
 
-vector<tuple<float, float>> BfsMomentsCalculator::CalculateCpu()
+vector<tuple<float, float>> BfsMomentsCalculator::Calculate()
 {
 
 	const int numOfNodes = mGraph->GetNumberOfNodes();

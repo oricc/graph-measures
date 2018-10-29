@@ -20,7 +20,7 @@
 
 	The code is based on the code found here:https://www.geeksforgeeks.org/shortest-path-unweighted-graph/
 */
-std::vector<int> DistanceUtils::BfsSingleSourceShortestPath(const GraphSnapshot * g, int src)
+std::vector<int> DistanceUtils::BfsSingleSourceShortestPath(const CacheGraph * g, int src)
 {
 	const unsigned int numOfNodes = g->GetNumberOfNodes();
 
@@ -53,7 +53,7 @@ std::vector<int> DistanceUtils::BfsSingleSourceShortestPath(const GraphSnapshot 
 
 	//Get the neighbors
 	const unsigned int* neighborList = g->GetNeighborList();
-	const __int64* offsetList = g->GetOffsetList();
+	const int64* offsetList = g->GetOffsetList();
 
 	// standard BFS algorithm
 	while (!queue.empty()) {
@@ -74,7 +74,7 @@ std::vector<int> DistanceUtils::BfsSingleSourceShortestPath(const GraphSnapshot 
 		//	}
 		//}
 
-		__int64 begin_offset, end_offset;
+		int64 begin_offset, end_offset;
 		begin_offset = offsetList[u];
 		end_offset = offsetList[u + 1];
 
@@ -113,7 +113,7 @@ std::vector<int> DistanceUtils::BfsSingleSourceShortestPath(const GraphSnapshot 
 	The code is based on the code found here:https://www.geeksforgeeks.org/greedy-algorithms-set-6-dijkstras-shortest-path-algorithm/
 		
 */
-std::vector<float> DistanceUtils::DijkstraSingleSourceShortestPath(const GraphSnapshot * g, int src)
+std::vector<float> DistanceUtils::DijkstraSingleSourceShortestPath(const CacheGraph * g, int src)
 {
 	const int numOfNodes = g->GetNumberOfNodes();
 

@@ -320,7 +320,7 @@ std::vector<unsigned short> CacheGraph::ComputeKCore() const {
 		and so we use binary search.
 		Usage of the binary search keeps the proccess to O(log(V))
 */
-bool CacheGraph::areNeighbors(const unsigned int p, const unsigned int q) {
+bool CacheGraph::areNeighbors(const unsigned int p, const unsigned int q) const {
 	unsigned int first = m_Offsets[p],  //first array element
 			last = m_Offsets[p+1] - 1,     //last array element
 			middle;                       //mid point of search

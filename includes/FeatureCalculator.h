@@ -10,16 +10,16 @@ template<typename T> class FeatureCalculator
 {
 public:
 	FeatureCalculator();
-	virtual T CalculateCpu() = 0;
+	virtual T Calculate() = 0;
 	virtual ~FeatureCalculator();
-	CacheGraph* getGraph();
-	void setGraph(CacheGraph* graph);
+	const CacheGraph* getGraph();
+	void setGraph(const CacheGraph* graph);
 private:
 	void init();
 
 protected:
 	virtual bool checkGPUEnabled() = 0;
-	CacheGraph* mGraph;
+	const CacheGraph* mGraph;
 
 private:
 	bool isGPUEnabled;
@@ -33,7 +33,7 @@ FeatureCalculator<T>::FeatureCalculator():
 }
 
 template<typename T>
-void FeatureCalculator<T>::setGraph(CacheGraph* graph)
+void FeatureCalculator<T>::setGraph(const CacheGraph* graph)
 {
 	this->mGraph = graph;
 };
@@ -50,7 +50,7 @@ FeatureCalculator<T>::~FeatureCalculator()
 }
 
 template<typename T>
-CacheGraph* FeatureCalculator<T>::getGraph()
+const CacheGraph* FeatureCalculator<T>::getGraph()
 {
 	return this->mGraph;
 }

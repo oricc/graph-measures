@@ -8,12 +8,12 @@ ClusteringCoefficient::ClusteringCoefficient()
 /*
 	Calculate the average CC of the network
 */
-float ClusteringCoefficient::CalculateCpu()
+float ClusteringCoefficient::Calculate()
 {
 	//The clustering average
 	float clusteringCoef = 0;
 
-	//Get the neighbors
+	//Get the neighbors and offsets
 	const unsigned int* neighborList = mGraph->GetNeighborList();
 	const int64* offsetList = mGraph->GetOffsetList();
 	
