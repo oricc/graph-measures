@@ -12,13 +12,15 @@ public:
 	FeatureCalculator();
 	virtual T Calculate() = 0;
 	virtual ~FeatureCalculator();
-	const CacheGraph* getGraph();
-	void setGraph(const CacheGraph* graph);
+	virtual const CacheGraph* getGraph();
+	virtual void setGraph(const CacheGraph* graph);
 private:
 	void init();
 
 protected:
-	virtual bool checkGPUEnabled() = 0;
+	virtual bool checkGPUEnabled(){
+		return false;
+	}
 	const CacheGraph* mGraph;
 
 private:

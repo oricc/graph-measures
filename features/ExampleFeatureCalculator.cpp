@@ -15,6 +15,9 @@ ExampleFeatureCalculator::ExampleFeatureCalculator() {
 
 /**
  * The actual calculation goes here
+ * For the example feature, we would just like to know that the graph has been passed down correctly into a CacheGraph instance,
+ * and so we print out the nodes and neighbor lists as a validation.
+ * This also has the added benefit of making sure that our standard code templates can run without errors.
  */
 float ExampleFeatureCalculator::Calculate() {
 	return (float) mGraph->GetNumberOfNodes();
