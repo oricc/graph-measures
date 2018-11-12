@@ -10,6 +10,7 @@
 
 #include <boost/python/dict.hpp>
 #include <boost/python/list.hpp>
+#include <boost/python.hpp>
 #include <vector>
 
 #include "stdafx.h"

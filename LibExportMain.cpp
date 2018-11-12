@@ -7,14 +7,14 @@
 
 #include <stdio.h>
 #include <boost/python.hpp>
-#include "../wrappers/ExampleWrapper.h"
+#include "wrappers/ExampleWrapper.h"
 // ... other imports ...
 
 /*
  * Check that exporting to Python works
  */
-void test_export(str name){
-	std::cout << "Hello " << name <<std::endl;
+void test_export(){
+	std::cout << "Hello Test!"<<std::endl;
 }
 
 BOOST_PYTHON_MODULE(_features)

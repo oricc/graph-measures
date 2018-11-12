@@ -67,6 +67,7 @@ public:
 
 private:
 	unsigned int m_NumberOfNodes;
+	unsigned int m_NumberOfEdges;
 	unsigned int *m_Graph;
 	int64* m_Offsets;
 };

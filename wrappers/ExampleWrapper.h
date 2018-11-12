@@ -18,7 +18,7 @@
 
 using namespace boost::python;
 void BoostDefExampleCalculator();
-void ExampleCalculatorWrapper(dict converted_graph);
+float ExampleCalculatorWrapper(dict converted_graph);
 
 
 #endif /* WRAPPERS_EXAMPLEWRAPPER_H_ */

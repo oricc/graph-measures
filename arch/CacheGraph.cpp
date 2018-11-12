@@ -11,6 +11,7 @@
 
 void CacheGraph::Clear() {
 	m_NumberOfNodes = 0;
+	m_NumberOfEdges = 0;
 	delete m_Graph;
 	m_Graph = NULL;
 	delete m_Offsets;
@@ -30,12 +31,14 @@ void CacheGraph::Assign(const std::vector<int64>& NodeOffsets,
 	m_Offsets = new int64[m_NumberOfNodes + 1];
 	std::memcpy(m_Offsets, &NodeOffsets[0], NodeOffsets.size() * sizeof(int64));
 
+	m_NumberOfEdges = m_Offsets[m_NumberOfNodes];
 	//copy the adjacency list into a new array
-	m_Graph = new unsigned int[m_Offsets[m_NumberOfNodes]];
+	m_Graph = new unsigned int[m_NumberOfEdges];
 	std::memcpy(m_Graph, &Neighbours[0],
 			Neighbours.size() * sizeof(unsigned int));
 	/*LOG(INFO) << m_NumberOfNodes << '\t' << m_Offsets[m_NumberOfNodes];*/
-	std::cout << m_NumberOfNodes << '\t' << m_Offsets[m_NumberOfNodes];
+	std::cout << "Nodes: " << m_NumberOfNodes << " Edges:" << m_NumberOfEdges
+			<< std::endl;
 
 }
 
@@ -49,7 +52,7 @@ bool CacheGraph::SaveToFile(const std::string& FileName) const {
 
 	//write the class variables to the file
 	std::fwrite(&m_NumberOfNodes, sizeof(unsigned int), 1, hFile);
-	std::fwrite(&m_Offsets[m_NumberOfNodes], sizeof(int64), 1, hFile);
+	std::fwrite(&m_NumberOfEdges, sizeof(int64), 1, hFile);
 	std::fwrite(m_Offsets, sizeof(int64), m_NumberOfNodes + 1, hFile);
 	std::fwrite(m_Graph, sizeof(unsigned int), m_Offsets[m_NumberOfNodes],
 			hFile);
@@ -88,7 +91,7 @@ bool CacheGraph::LoadFromFile(const std::string& FileName) {
 	//read the number of edges
 	int64 NumberOfEdges = 0;
 	std::fread(&NumberOfEdges, sizeof(int64), 1, hFile);
-
+	m_NumberOfEdges = NumberOfEdges;
 	//create an array to store the indices (offsets) of the nodes in the graph array and read into it
 	m_Offsets = new int64[m_NumberOfNodes + 1];
 	std::fread(m_Offsets, sizeof(int64), m_NumberOfNodes + 1, hFile);
@@ -312,33 +315,31 @@ std::vector<unsigned short> CacheGraph::ComputeKCore() const {
 }
 
 /*
-	Check wether q is a neighbor of p (i.e. if there exists an edge p -> q)
-	For an undirected graph, the order does not matter.
-	Input: the two nodes to check
-	Output: whether there is an edge p->q
-	Note: we are working under the assumption that the list of p's neighbors is ordered,
-		and so we use binary search.
-		Usage of the binary search keeps the proccess to O(log(V))
-*/
-bool CacheGraph::areNeighbors(const unsigned int p, const unsigned int q) const {
+ Check wether q is a neighbor of p (i.e. if there exists an edge p -> q)
+ For an undirected graph, the order does not matter.
+ Input: the two nodes to check
+ Output: whether there is an edge p->q
+ Note: we are working under the assumption that the list of p's neighbors is ordered,
+ and so we use binary search.
+ Usage of the binary search keeps the proccess to O(log(V))
+ */
+bool CacheGraph::areNeighbors(const unsigned int p,
+		const unsigned int q) const {
 	unsigned int first = m_Offsets[p],  //first array element
-			last = m_Offsets[p+1] - 1,     //last array element
+			last = m_Offsets[p + 1] - 1,     //last array element
 			middle;                       //mid point of search
 
-		while (first <= last)
-		{
-			middle = (first + last) / 2; //this finds the mid point
-			if (m_Graph[middle] == q) {
-				return true;
-			}
-			else if (m_Graph[middle]> q) // if it's in the lower half
-			{
-				last = middle - 1;
-			}
-			else {
-				first = middle + 1;      //if it's in the upper half
-			}
+	while (first <= last) {
+		middle = (first + last) / 2; //this finds the mid point
+		if (m_Graph[middle] == q) {
+			return true;
+		} else if (m_Graph[middle] > q) // if it's in the lower half
+				{
+			last = middle - 1;
+		} else {
+			first = middle + 1;      //if it's in the upper half
 		}
-		return false;  // not found
+	}
+	return false;  // not found
 
 }

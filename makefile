@@ -13,16 +13,35 @@ BOOST_LIB =/usr/local/boost_1_67_0/stage/lib
 TARGET = LibExportMain
 # TODO: add FEATURE to compile list
 FEATURE = ExampleFeatureCalculator
-MORE = wrappers/ExampleWrapper
+WRAPPER = ExampleWrapper
+
+OUTPUT_NAME = _features
+
+CACHE_GRAPH = CacheGraph
+CONVERTER = ConvertedGNXReciever
+FEATURE_TEMPLATE=FeatureCalculator
  
-$(TARGET).so: $(TARGET).o $(MORE).o
-	g++ -shared -Wl,--export-dynamic $(TARGET).o $(MORE).o -L$(BOOST_LIB) -lboost_python$(PYTHON_VERSION_SHORT) -L/usr/lib/python$(PYTHON_VERSION)/config-3.6m-x86_64-linux-gnu -lpython$(PYTHON_VERSION) -o $(TARGET).so
+$(OUTPUT_NAME).so: $(TARGET).o $(WRAPPER).o $(CONVERTER).o $(FEATURE).o $(CACHE_GRAPH).o $(FEATURE_TEMPLATE).o
+	g++ -shared -Wl,--export-dynamic $^ -L$(BOOST_LIB) -lboost_python$(PYTHON_VERSION_SHORT) -L/usr/lib/python$(PYTHON_VERSION)/config-3.6m-x86_64-linux-gnu -lpython$(PYTHON_VERSION) -o $(OUTPUT_NAME).so
   
 
-$(TARGET).o: $(TARGET).cpp $(MORE).h
-	g++ -I$(PYTHON_INCLUDE) -I$(BOOST_INC) -l$(MORE) -fPIC -c $^
-$(MORE).o: $(MORE).cpp
-	g++ -I$(PYTHON_INCLUDE) -I$(BOOST_INC) -fPIC -c $(MORE).cpp
+$(TARGET).o: $(TARGET).cpp
+	g++  $^  -fPIC -c -I$(PYTHON_INCLUDE) -I$(BOOST_INC)
+	
+$(FEATURE).o: features/$(FEATURE).cpp includes/$(CACHE_GRAPH).h
+	g++ -fPIC -c  $^
+
+$(CACHE_GRAPH).o: arch/$(CACHE_GRAPH).cpp
+	g++ -fPIC -c $^
+
+$(WRAPPER).o: wrappers/$(WRAPPER).cpp includes/$(FEATURE).h includes/$(CONVERTER).h
+	g++ $^ -fPIC -c -I$(PYTHON_INCLUDE) -I$(BOOST_INC) 
+
+$(CONVERTER).o: utils/$(CONVERTER).cpp includes/$(CACHE_GRAPH).h
+	g++ $^ -fPIC -c -I$(PYTHON_INCLUDE) -I$(BOOST_INC) 
+
+$(FEATURE_TEMPLATE).o: arch/$(FEATURE_TEMPLATE).cpp
+	g++ -fPIC -c $^
 
 clean:
-	rm $(TARGET).o $(TARGET).so $(MORE).o $(MORE).h.gch 
+	rm $(OUTPUT_NAME).so $(TARGET).o $(WRAPPER).o $(FEATURE).o $(CONVERTER).o $(CACHE_GRAPH).o $(FEATURE_TEMPLATE).o

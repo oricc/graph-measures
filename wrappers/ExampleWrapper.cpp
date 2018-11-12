@@ -13,7 +13,7 @@ void BoostDefExampleCalculator() {
 
 float ExampleCalculatorWrapper(dict converted_graph) {
 	ConvertedGNXReciever reciever(converted_graph);
-	ExampleFeatureCalculator calc();
+	ExampleFeatureCalculator calc;
 	calc.setGraph(reciever.getCacheGraph());
 	return calc.Calculate();
 // At this point in time the graph is also deleted
