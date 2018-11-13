@@ -1,14 +1,14 @@
-#include "../includes/ClusteringCoefficient.h"
+#include "../includes/ClusteringCoefficientCalculatorCalculator.h"
 
 
-ClusteringCoefficient::ClusteringCoefficient()
+ClusteringCoefficientCalculator::ClusteringCoefficientCalculator()
 {
 }
 
 /*
 	Calculate the average CC of the network
 */
-float ClusteringCoefficient::Calculate()
+float ClusteringCoefficientCalculator::Calculate()
 {
 	//The clustering average
 	float clusteringCoef = 0;
@@ -39,7 +39,7 @@ float ClusteringCoefficient::Calculate()
 		neighborList - the list of neighbors for each node. Sorted by nodes and with the neighbors themselves sorted.
 
 */
-float ClusteringCoefficient::LocalClusteringCoefficient(unsigned int i,unsigned int begin_offset, unsigned int end_offset, const unsigned int* neighborList) {
+float ClusteringCoefficientCalculator::LocalClusteringCoefficient(unsigned int i,unsigned int begin_offset, unsigned int end_offset, const unsigned int* neighborList) {
 
 	//The Clustering Coefficient
 	float cc = 0;
@@ -69,6 +69,6 @@ float ClusteringCoefficient::LocalClusteringCoefficient(unsigned int i,unsigned 
 }
 
 
-ClusteringCoefficient::~ClusteringCoefficient()
+ClusteringCoefficientCalculator::~ClusteringCoefficientCalculator()
 {
 }

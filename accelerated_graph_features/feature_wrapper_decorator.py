@@ -1,4 +1,4 @@
-from graph_converter import convert_graph_to_db_dict
+from src.accelerated_graph_features.graph_converter import convert_graph_to_db_dict
 
 
 class FeatureWrapper(object):

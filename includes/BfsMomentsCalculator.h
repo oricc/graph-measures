@@ -2,7 +2,7 @@
 #include "NodeFeatureCalculator.h"
 #include <vector>
 #include <tuple>
-#include "GraphSnapshot.h"
+#include "CacheGraph.h"
 
 using namespace std;
 class BfsMomentsCalculator :

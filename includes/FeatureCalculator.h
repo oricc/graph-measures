@@ -38,7 +38,7 @@ template<typename T>
 void FeatureCalculator<T>::setGraph(const CacheGraph* graph)
 {
 	this->mGraph = graph;
-};
+}
 
 template<typename T>
 void FeatureCalculator<T>::init()

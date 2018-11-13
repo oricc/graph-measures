@@ -12,7 +12,7 @@ float MathUtils::calculateStd(const std::vector<float>& data)
 	for (int i = 0; i < len; i++) 
 		standartDeviation += pow(data[i] - mean, 2);
 	
-	standartDeviation = sqrt(standartDeviation / len);
+	standartDeviation = sqrt(standartDeviation / len - 1);
 
 	return standartDeviation;
 }
