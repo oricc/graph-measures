@@ -1,12 +1,14 @@
-#pragma once
-#include "NodeFeatureCalculator.h"
+#ifndef BFS_MOMENTS_CALCULATOR_H_
+#define BFS_MOMENTS_CALCULATOR_H_
+
+#include "FeatureCalculator.h"
 #include <vector>
 #include <tuple>
 #include "CacheGraph.h"
 
 using namespace std;
 class BfsMomentsCalculator :
-	public NodeFeatureCalculator<vector<tuple<float,float>>>
+	public FeatureCalculator<vector<tuple<float,float>>>
 {
 public:
 	BfsMomentsCalculator();
@@ -20,3 +22,4 @@ protected:
 	}
 };
 
+#endif
