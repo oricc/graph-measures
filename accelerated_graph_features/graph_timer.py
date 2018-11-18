@@ -10,19 +10,21 @@ class FeatureTimer:
     and the actual feature calculation separately.
 
     Note
-    -----
+    ^^^^
     The same instance of FeatureTimer can be used for multiple runs, where all runs use the same interim points
     (i.e. the titles are the same for all runs).
 
     Terms
-    ------
-    Start - when the id is given and the run begins
+    ^^^^^
+    Start - when the id is given and the run begins.
+
     Mark - a point in the middle of the run where we want to save the time until and from now.
+
     Stop - the end of the run, where the times of the run are calculated and written to the file.
 
 
     Example Usage
-    -------------
+    ^^^^^^^^^^^^^
 
     >>> t = FeatureTimer('example_feature_times',['Conversion Time','Feature calculation time'])
     >>> t.start('example_50_nodes_100_edges')
@@ -48,7 +50,7 @@ class FeatureTimer:
         :param num_of_interim_stops: the number of marks in the middle of the run.
 
         Note
-        -----
+        ^^^^
         Either titles or num_of_interim_stops must be given. If both are given and the lengths do not match,
         the length of titles overrides num_of_interim_stops.
 
@@ -70,14 +72,31 @@ class FeatureTimer:
         self.run_id = ''
 
     def start(self, run_id):
+        """
+        Start running the timer.
+
+        :param run_id: the id of the current run, to be used in the results csv
+
+        """
         self.run_id = run_id
         self._clear()
         self.mark()
 
     def mark(self):
+        """
+        Mark this point as a midpoint for the time measurements, essentially starting a new section of the run.
+
+        """
         self.times.append(datetime.now())
 
     def stop(self):
+        """
+        End the timer's run.
+
+        This function also writes the run's results to the csv file.
+
+
+        """
         self.mark()
         self._write()
         self._clear()

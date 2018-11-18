@@ -38,7 +38,7 @@ void ExampleFeatureCalculator::printOffsets() {
 void ExampleFeatureCalculator::printNodeRanks() {
 	std::vector<unsigned int> Degrees = mGraph->ComputeNodeDegrees();
 	for (int i = 0; i < Degrees.size(); i++)
-//		std::cout<< i << ":" << Degrees[i] << std::endl;
+		std::cout<< i << ":" << Degrees[i] << std::endl;
 }
 
 float ExampleFeatureCalculator::Calculate() {
