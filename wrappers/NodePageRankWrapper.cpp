@@ -16,6 +16,6 @@ py::list NodePageRankWrapper(dict converted_graph, float dumping, unsigned int n
 	NodePageRankFeatureCalculator calc(dumping,numOfIterations);
 	calc.setGraph(reciever.getCacheGraph());
 	std::vector<float> res = calc.Calculate();
-	return std_vector_to_py_list(res);
+	return vectorToPythonList<float>(res);
 
 }

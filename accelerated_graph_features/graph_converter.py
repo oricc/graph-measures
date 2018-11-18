@@ -61,14 +61,14 @@ def convert_graph_to_db_format(input_graph: nx.Graph, with_weights=False, cast_t
     neighbor_nodes = []
 
     nodes = [node for node in graph.nodes()]
-    print(nodes)
+    # print(nodes)
     nodes.sort()
     neighbors = [sorted([x for x in graph.neighbors(node)]) for node in nodes]
 
     # Create the indices and neighbor nodes lists
     for neighbor_list in neighbors:
         neighbor_list.sort()
-        print(neighbor_list)
+        # print(neighbor_list)
         neighbor_nodes.extend(neighbor_list)
         indices.append(indices[-1] + len(neighbor_list))
 

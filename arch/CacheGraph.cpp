@@ -36,9 +36,9 @@ void CacheGraph::Assign(const std::vector<int64>& NodeOffsets,
 	m_Graph = new unsigned int[m_NumberOfEdges];
 	std::memcpy(m_Graph, &Neighbours[0],
 			Neighbours.size() * sizeof(unsigned int));
-	/*LOG(INFO) << m_NumberOfNodes << '\t' << m_Offsets[m_NumberOfNodes];*/
+/*	LOG(INFO) << m_NumberOfNodes << '\t' << m_Offsets[m_NumberOfNodes];
 	std::cout << "Nodes: " << m_NumberOfNodes << " Edges:" << m_NumberOfEdges
-			<< std::endl;
+			<< std::endl;*/
 
 }
 
@@ -62,7 +62,7 @@ bool CacheGraph::SaveToFile(const std::string& FileName) const {
 	hFile = NULL;
 
 	//LOG(INFO) << m_NumberOfNodes << '\t' << m_Offsets[m_NumberOfNodes];
-	std::cout << m_NumberOfNodes << '\t' << m_Offsets[m_NumberOfNodes];
+//	std::cout << m_NumberOfNodes << '\t' << m_Offsets[m_NumberOfNodes];
 
 	return true;
 
@@ -80,8 +80,8 @@ bool CacheGraph::LoadFromFile(const std::string& FileName) {
 		hFile = std::fopen(FileName.c_str(), "rb");
 	} catch (std::exception e) {
 		/*LOG(ERROR) << " Missing network file. Run CacheGraph::LoadFromFile - " << FileName; return false;*/
-		std::cout << " Missing network file. Run CacheGraph::LoadFromFile - "
-				<< FileName;
+//		std::cout << " Missing network file. Run CacheGraph::LoadFromFile - "
+//				<< FileName;
 		return false;
 	}
 

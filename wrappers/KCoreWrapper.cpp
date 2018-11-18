@@ -16,6 +16,6 @@ boost::python::list KCoreCalculatorWrapper(dict converted_graph) {
 	KCoreFeatureCalculator calc;
 	calc.setGraph(reciever.getCacheGraph());
 	std::vector<unsigned short> vecResults = calc.Calculate();
-
-	return std_vector_to_py_list(vecResults);
+//	std::cout<< "After k_core calc"<<std::endl;
+	return vectorToPythonList<unsigned short>(vecResults);
 }

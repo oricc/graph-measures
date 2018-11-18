@@ -1,11 +1,11 @@
 import sys
 import os
+
 # Leave the path changes here!!!
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from src.accelerated_graph_features.feature_wrapper_decorator import FeatureWrapper
-
 
 
 @FeatureWrapper
@@ -22,3 +22,32 @@ def example_feature(graph, **kargs):
     # Any post-processing goes here
     return res
 
+
+@FeatureWrapper
+def clustering_coefficient(graph, **kwargs):
+    import src.accelerated_graph_features._features as feat
+
+    res = feat.clustering_coefficient(graph)
+
+    return res
+
+
+@FeatureWrapper
+def k_core(graph, **kwargs):
+    import src.accelerated_graph_features._features as feat
+
+    res = feat.k_core(graph)
+
+    return res
+
+
+@FeatureWrapper
+def node_page_rank(graph, **kwargs):
+    import src.accelerated_graph_features._features as feat
+
+    dumping = kwargs.get('dumping', 0.85)
+    max_iter = kwargs.get('max_iters', 100)
+
+    res = feat.node_page_rank(graph, dumping, max_iter)
+
+    return res

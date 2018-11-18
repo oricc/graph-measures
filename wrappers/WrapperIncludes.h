@@ -20,14 +20,17 @@ using namespace boost::python;
 
 namespace py = boost::python;
 
-template<class T>
-py::list std_vector_to_py_list(const std::vector<T>& v)
-{
-    py::object get_iter = py::iterator<std::vector<T> >();
-    py::object iter = get_iter(v);
-    py::list l(iter);
-    return l;
-}
 
+template<class T>
+py::list vectorToPythonList(const std::vector<T>& v){
+	py::list l;
+//	std::cout<<"After list create"<<std::endl;
+	for(int i=0;i<v.size();i++){
+//		std::cout<<"In loop iter "<<i<<std::endl;
+		l.append<T>(v[i]);
+	}
+
+	return l;
+}
 
 #endif /* WRAPPERS_WRAPPERINCLUDES_H_ */

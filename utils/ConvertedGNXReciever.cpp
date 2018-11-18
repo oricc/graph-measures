@@ -15,9 +15,9 @@ ConvertedGNXReciever::ConvertedGNXReciever(dict converted_graph) {
 	this->offsets = new std::vector<int64>();
 	this->neighbors = new std::vector<unsigned int>();
 
-	std::cout << "Offset List:" << std::endl;
+//	std::cout << "Offset List:" << std::endl;
 	for (int i = 0; i < len(offsetList); ++i) {
-		std::cout << extract<int>(offsetList[i]) << std::endl;
+//		std::cout << extract<int>(offsetList[i]) << std::endl;
 		int64 currentOffset;
 		currentOffset =
 				static_cast<int64>(extract<unsigned int>(offsetList[i]));
@@ -25,15 +25,34 @@ ConvertedGNXReciever::ConvertedGNXReciever(dict converted_graph) {
 		this->offsets->push_back(currentOffset);
 	}
 
-	std::cout << "Neighbor List:" << std::endl;
+//	std::cout << "Neighbor List:" << std::endl;
 	for (int i = 0; i < len(neighborList); ++i) {
-		std::cout << extract<int>(neighborList[i]) << std::endl;
+//		std::cout << extract<int>(neighborList[i]) << std::endl;
 		unsigned int currentNeighbor = extract<unsigned int>(neighborList[i]);
 		this->neighbors->push_back(currentNeighbor);
 	}
 
 	this->mGraph = new CacheGraph();
 	mGraph->Assign(*offsets, *neighbors);
+
+}
+
+ConvertedGNXReciever::ConvertedGNXReciever(const char* loadFileName) {
+
+	this->neighbors = NULL;
+	this->offsets = NULL;
+	this->mGraph = new CacheGraph();
+	mGraph->LoadFromFile(loadFileName);
+
+}
+
+ConvertedGNXReciever::ConvertedGNXReciever(dict converted_graph,
+		const char* saveFileName) {
+	this->neighbors = NULL;
+	this->offsets = NULL;
+	this->mGraph = NULL;
+	ConvertedGNXReciever(converted_graph);
+	this->mGraph->SaveToFile(saveFileName);
 
 }
 

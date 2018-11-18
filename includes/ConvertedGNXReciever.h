@@ -30,6 +30,8 @@ using namespace boost::python;
 class ConvertedGNXReciever {
 public:
 	ConvertedGNXReciever(dict converted_graph);
+	ConvertedGNXReciever(dict converted_graph,const char* saveGraph);
+	ConvertedGNXReciever(const char* load_file_name);
 	const CacheGraph* getCacheGraph(){return mGraph;};
 	virtual ~ConvertedGNXReciever();
 

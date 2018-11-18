@@ -66,4 +66,4 @@ $(FEATURE_TEMPLATE).o: arch/$(FEATURE_TEMPLATE).cpp
 	g++ $(CXX) $^
 
 clean:
-	rm accelerated_graph_features/$(OUTPUT_NAME).so $(TARGET).o $(WRAPPER_OBJ_FILES).o $(CONVERTER).o $(FEATURE_OBJ_FILES).o $(CACHE_GRAPH).o $(FEATURE_TEMPLATE).o
+	rm accelerated_graph_features/$(OUTPUT_NAME).so $(TARGET).o $(WRAPPER_OBJ_FILES) $(CONVERTER).o $(FEATURE_OBJ_FILES) $(CACHE_GRAPH).o $(FEATURE_TEMPLATE).o

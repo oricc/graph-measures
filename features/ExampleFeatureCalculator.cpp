@@ -31,14 +31,14 @@ void ExampleFeatureCalculator::printOffsets() {
 				p < neighborList + end_offset; ++p) {
 			//p is a pointer to the nodes in the adjacency list.
 			//Example usage: the offset of the current node is offsetList[*p]
-			std::cout << offsetList[*p] << std::endl;
+//			std::cout << offsetList[*p] << std::endl;
 		}
 	}
 }
 void ExampleFeatureCalculator::printNodeRanks() {
 	std::vector<unsigned int> Degrees = mGraph->ComputeNodeDegrees();
 	for (int i = 0; i < Degrees.size(); i++)
-		std::cout<< i << ":" << Degrees[i] << std::endl;
+//		std::cout<< i << ":" << Degrees[i] << std::endl;
 }
 
 float ExampleFeatureCalculator::Calculate() {
