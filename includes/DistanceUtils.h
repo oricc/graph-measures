@@ -1,8 +1,10 @@
-#pragma once
-#include "../includes/CacheGraph.h"
+#ifndef DISTANCE_UTILS_H_
+#define DISTANCE_UTILS_H_
+#include "CacheGraph.h"
+#include "fiboqueue.h"
+#include <list>
 #include <vector>
-
-#define INT_MAX 99999999999999999999999999999999
+#include <limits.h>
 
 class DistanceUtils
 {
@@ -11,3 +13,4 @@ public:
 	static std::vector<float> DijkstraSingleSourceShortestPath(const CacheGraph * g, int src);
 };
 
+#endif

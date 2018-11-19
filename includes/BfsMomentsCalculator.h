@@ -2,17 +2,23 @@
 #define BFS_MOMENTS_CALCULATOR_H_
 
 #include "FeatureCalculator.h"
+#include "CacheGraph.h"
+#include "DistanceUtils.h"
+#include "MathUtils.h"
+#include <unordered_map>
 #include <vector>
 #include <tuple>
-#include "CacheGraph.h"
+
+
+typedef std::tuple<float,float> floatTuple;
 
 using namespace std;
 class BfsMomentsCalculator :
-	public FeatureCalculator<vector<tuple<float,float>>>
+	public FeatureCalculator<vector<floatTuple>>
 {
 public:
 	BfsMomentsCalculator();
-	virtual vector<tuple<float,float>> Calculate();
+	virtual vector<floatTuple> Calculate();
 
 	virtual ~BfsMomentsCalculator();
 

@@ -12,7 +12,7 @@
 #include "wrappers/ExampleWrapper.h"
 #include "wrappers/KCoreWrapper.h"
 #include "wrappers/NodePageRankWrapper.h"
-//#include "wrappers/BFSMomentsWrapper.h"
+#include "wrappers/BFSMomentsWrapper.h"
 // ... other imports ...
 
 /*
@@ -31,6 +31,6 @@ BOOST_PYTHON_MODULE(_features)
 	BoostDefKCore();
 	BoostDefNodePageRank();
 	BoostDefClusteringCoefficient();
-//	BoostDefBFSMoments();
+	BoostDefBFSMoments();
 }
 

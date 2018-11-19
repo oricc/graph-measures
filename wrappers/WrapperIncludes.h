@@ -14,7 +14,11 @@
 #include "../includes/FeatureCalculator.h"
 
 #include <boost/python/list.hpp>
+#include <boost/python/tuple.hpp>
 #include <vector>
+#include <tuple>
+
+typedef std::tuple<float,float> floatTuple;
 
 using namespace boost::python;
 
@@ -32,5 +36,21 @@ py::list vectorToPythonList(const std::vector<T>& v){
 
 	return l;
 }
+
+template<>
+py::list vectorToPythonList<floatTuple>(const std::vector<floatTuple>& v){
+	py::list l;
+//	std::cout<<"After list create"<<std::endl;
+	for(int i=0;i<v.size();i++){
+//		std::cout<<"In loop iter "<<i<<std::endl;
+		std::tuple<float,float> current = v[i];
+
+		py::tuple py_tuple = py::make_tuple<float,float>(std::get<0>(current),std::get<1>(current));
+		l.append<py::tuple>(py_tuple);
+	}
+
+	return l;
+}
+
 
 #endif /* WRAPPERS_WRAPPERINCLUDES_H_ */

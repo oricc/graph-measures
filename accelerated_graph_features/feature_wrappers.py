@@ -51,3 +51,12 @@ def node_page_rank(graph, **kwargs):
     res = feat.node_page_rank(graph, dumping, max_iter)
 
     return res
+
+
+@FeatureWrapper
+def bfs_moments(graph, **kwargs):
+    import src.accelerated_graph_features._features as feat
+
+    res = feat.bfs_moments(graph)
+
+    return res

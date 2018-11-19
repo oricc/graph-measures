@@ -18,7 +18,7 @@ private:
 	void init();
 
 protected:
-	virtual bool checkGPUEnabled(){
+	bool checkGPUEnabled(){
 		return false;
 	}
 	const CacheGraph* mGraph;

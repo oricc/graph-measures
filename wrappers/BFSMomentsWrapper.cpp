@@ -16,8 +16,8 @@ py::list BFSMomentWrapper(dict converted_dict) {
 	ConvertedGNXReciever reciever(converted_dict);
 	BfsMomentsCalculator calc;
 	calc.setGraph(reciever.getCacheGraph());
-
+//	std::cout<<"After conversion"<<std::endl;
 	std::vector<std::tuple<float, float>> resVec = calc.Calculate();
-	return std_vector_to_py_list(resVec);
+	return vectorToPythonList(resVec);
 
 }

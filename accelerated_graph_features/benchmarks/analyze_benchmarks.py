@@ -17,12 +17,12 @@ def plot_benchmark_comparison(feature_name):
     python_results = get_number_data(python_file)
 
     cpp_conversion_time = [d['Conversion Time'] / 10 ** 6 for d in cpp_results]
-    cc=cpp_conversion_time
+    cc = cpp_conversion_time
     cpp_feature_time = [d['Feature calculation time'] / 10 ** 6 for d in cpp_results]
     cf = cpp_feature_time
 
     python_feature_time = [d['Feature calculation time'] / 10 ** 6 for d in python_results]
-    pf =python_feature_time
+    pf = python_feature_time
 
     runs = [d['run id'] for d in python_results]
 
@@ -47,7 +47,7 @@ def plot_benchmark_comparison(feature_name):
     # Plot difference line plot
     plt.figure(2)
 
-    total_difference = [pf[i] - (cc[i]+cf[i]) for i in range(N)]
+    total_difference = [pf[i] - (cc[i] + cf[i]) for i in range(N)]
     feature_difference = [pf[i] - cf[i] for i in range(N)]
 
     plt.plot(total_difference, label='Total difference')

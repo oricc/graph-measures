@@ -5,15 +5,17 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
-from src.accelerated_graph_features.feature_wrappers import clustering_coefficient, k_core, node_page_rank
+from src.accelerated_graph_features.feature_wrappers import clustering_coefficient, k_core, node_page_rank, bfs_moments
 from src.accelerated_graph_features.graph_timer import FeatureTimer
+from src.accelerated_graph_features.original_features_check import original_bfs_moments
 
 import networkx as nx
 
 matching_python_functions = {
-    'clustering': [clustering_coefficient, nx.average_clustering],
-    'k_core': [k_core, nx.k_core],
-    'page_rank': [node_page_rank, nx.pagerank]
+    # 'clustering': [clustering_coefficient, nx.average_clustering],
+    # 'k_core': [k_core, nx.k_core],
+    # 'page_rank': [node_page_rank, nx.pagerank]
+    'BFSMoments': [bfs_moments, original_bfs_moments]
 }
 
 SEED = 123456

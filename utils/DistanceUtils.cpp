@@ -1,7 +1,5 @@
-#include "stdafx.h"
-#include "DistanceUtils.h"
-#include <list>
-#include "fiboqueue.h"
+#include "../includes/DistanceUtils.h"
+
 
 
 
