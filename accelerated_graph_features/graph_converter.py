@@ -2,40 +2,38 @@ import networkx as nx
 
 
 def convert_graph_to_db_format(input_graph: nx.Graph, with_weights=False, cast_to_directed=False):
-    """
-    Converts a given graph into a DB format, which consists of two or three lists:
-        1) Index list: a list where the i-th position contains the index of the beginning of the list of
-            adjacent nodes (in the second list).
-        2) Node list: for each node, we list (in order) all the nodes which are adjacent to it.
-        3) Weight list: if the weight parameter is True, includes the weights of the edges, corresponds to the nodes list
+    """Converts a given graph into a DB format, which consists of two or three lists
 
-    Assumptions
-    -----------
+
+        1. **Index list:** a list where the i-th position contains the index of the beginning of the list of adjacent nodes (in the second list).
+        2. **Node list:** for each node, we list (in order) all the nodes which are adjacent to it.
+        3. **Weight list:** if the weight parameter is True, includes the weights of the edges, corresponds to the nodes list
+
+    **Assumptions:**
 
     The code has several preexisting assumptions:
+
         a) The nodes are labeled with numbers
         b) Those numbers are the sequence [0,...,num_of_nodes-1]
         c) If there are weights, they are floats
         d) If there are weights, they are initialized for all edges
         e) If there are weights, the weight key is 'weight'
 
-    Note
-    ----
-    The code behaves differently for directed and undirected graphs.
-    For undirected graph, every edge is actually counted twice (p->q and q->p).
+    .. Note::
+        The code behaves differently for directed and undirected graphs.
+	For undirected graph, every edge is actually counted twice (p->q and q->p).
 
-    Example
-    -------
-    For the simple directed graph (0->1, 0->2,0->3,2->0,3->1,3->2):
-        Indices: [0, 3, 3, 4, 6]
-        Neighbors: [1, 2, 3, 0, 1, 2]
+    Example::
+		For the simple directed graph (0->1, 0->2,0->3,2->0,3->1,3->2):
 
-        Note that index[1] is the same as index[2]. That is because 1 has no neighbors, and so his neighbor list is of
-            size 0, but we still need to have an index for the node on
+		`Indices: [0, 3, 3, 4, 6]`
+		`Neighbors: [1, 2, 3, 0, 1, 2]`
+
+        Note that index[1] is the same as index[2]. That is because 1 has no neighbors, and so his neighbor list is of size 0, but we still need to have an index for the node on.
 
     For the same graph when it is undirected:
-        Indices: [0, 3, 5, 7, 10]
-        Neighbors: [1, 2, 3, 0, 3, 0, 3, 0, 1, 2]
+        `Indices: [0, 3, 5, 7, 10]`
+        `Neighbors: [1, 2, 3, 0, 3, 0, 3, 0, 1, 2]`
 
         Note that the number of edges isn't doubled because in the directed version there is a bidirectional edge.
 
