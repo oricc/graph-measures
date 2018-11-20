@@ -5,7 +5,7 @@
  *      Author: ori
  */
 
-#include "ClusteringCoefficientCalculatorWrapper.h"
+#include "ClusteringCoefficientWrapper.h"
 
 void BoostDefClusteringCoefficient() {
 	def("clustering_coefficient",ClusteringCoefWrapper);

@@ -8,7 +8,7 @@
 #ifndef UTILS_CLUSTERINGCOEFFICIENTWRAPPER_H_
 #define UTILS_CLUSTERINGCOEFFICIENTWRAPPER_H_
 
-#include "../includes/ClusteringCoefficientCalculatorCalculator.h"
+#include "../includes/ClusteringCoefficientCalculator.h"
 #include "WrapperIncludes.h"
 void BoostDefClusteringCoefficient();
 

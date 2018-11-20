@@ -8,11 +8,12 @@
 #include <stdio.h>
 #include <boost/python.hpp>
 
-#include "wrappers/ClusteringCoefficientCalculatorWrapper.h"
+#include "wrappers/WrapperIncludes.h"
 #include "wrappers/ExampleWrapper.h"
 #include "wrappers/KCoreWrapper.h"
 #include "wrappers/NodePageRankWrapper.h"
 #include "wrappers/BFSMomentsWrapper.h"
+#include "wrappers/ClusteringCoefficientWrapper.h"
 // ... other imports ...
 
 /*

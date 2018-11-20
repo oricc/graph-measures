@@ -14,6 +14,7 @@ FEATURE_SRC_DIR := features
 FEATURE_OBJ_DIR := obj/feature_obj
 FEATURE_SRC_FILES := $(wildcard $(FEATURE_SRC_DIR)/*.cpp)
 FEATURE_OBJ_FILES := $(patsubst $(FEATURE_SRC_DIR)/%.cpp,$(FEATURE_OBJ_DIR)/%.o,$(FEATURE_SRC_FILES))
+INCLUDES_DIR = includes
 
 WRAPPER_SRC_DIR := wrappers
 WRAPPER_OBJ_DIR := obj/wrapper_obj
@@ -43,11 +44,11 @@ accelerated_graph_features/$(OUTPUT_NAME).so: $(TARGET).o $(WRAPPER_OBJ_FILES) $
 	g++ -shared -Wl,--export-dynamic $^ -L$(BOOST_LIB) -lboost_python$(PYTHON_VERSION_SHORT) -L/usr/lib/python$(PYTHON_VERSION)/config-3.6m-x86_64-linux-gnu -lpython$(PYTHON_VERSION) -o $@
 
 ################  Changes for each feature #######################
-$(FEATURE_OBJ_DIR)/%.o: $(FEATURE_SRC_DIR)/%.cpp
-	g++ $(CFLAGS) -o $@ $^
+$(FEATURE_OBJ_DIR)/%.o: $(FEATURE_SRC_DIR)/%.cpp $(INCLUDES_DIR)/%.h
+	g++ $(CFLAGS) -o $@ $<
    
-$(WRAPPER_OBJ_DIR)/%.o: $(WRAPPER_SRC_DIR)/%.cpp
-	g++ $(CFLAGS) -I$(PYTHON_INCLUDE) -I$(BOOST_INC) -o $@ $^
+$(WRAPPER_OBJ_DIR)/%.o: $(WRAPPER_SRC_DIR)/%.cpp $(WRAPPER_SRC_DIR)/%.h
+	g++ $(CFLAGS) -I$(PYTHON_INCLUDE) -I$(BOOST_INC) -o $@ $<
 
 
 

@@ -1,4 +1,4 @@
-#include "../includes/ClusteringCoefficientCalculatorCalculator.h"
+#include "../includes/ClusteringCoefficientCalculator.h"
 
 
 ClusteringCoefficientCalculator::ClusteringCoefficientCalculator()
