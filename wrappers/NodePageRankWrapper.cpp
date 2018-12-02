@@ -17,5 +17,4 @@ py::list NodePageRankWrapper(dict converted_graph, float dumping, unsigned int n
 	calc.setGraph(reciever.getCacheGraph());
 	std::vector<float> res = calc.Calculate();
 	return vectorToPythonList<float>(res);
-
 }

@@ -36,9 +36,9 @@ void CacheGraph::Assign(const std::vector<int64>& NodeOffsets,
 	m_Graph = new unsigned int[m_NumberOfEdges];
 	std::memcpy(m_Graph, &Neighbours[0],
 			Neighbours.size() * sizeof(unsigned int));
-/*	LOG(INFO) << m_NumberOfNodes << '\t' << m_Offsets[m_NumberOfNodes];
-	std::cout << "Nodes: " << m_NumberOfNodes << " Edges:" << m_NumberOfEdges
-			<< std::endl;*/
+	/*	LOG(INFO) << m_NumberOfNodes << '\t' << m_Offsets[m_NumberOfNodes];
+	 std::cout << "Nodes: " << m_NumberOfNodes << " Edges:" << m_NumberOfEdges
+	 << std::endl;*/
 
 }
 
@@ -78,7 +78,7 @@ bool CacheGraph::LoadFromFile(const std::string& FileName) {
 	//open network file
 	try {
 		hFile = std::fopen(FileName.c_str(), "rb");
-	} catch (std::exception e) {
+	} catch (std::exception& e) {
 		/*LOG(ERROR) << " Missing network file. Run CacheGraph::LoadFromFile - " << FileName; return false;*/
 //		std::cout << " Missing network file. Run CacheGraph::LoadFromFile - "
 //				<< FileName;
@@ -342,4 +342,22 @@ bool CacheGraph::areNeighbors(const unsigned int p,
 	}
 	return false;  // not found
 
+}
+
+std::vector<unsigned int> CacheGraph::SortedNodesByDegree() const{
+	std::vector<unsigned int> sortedNodes;
+	sortedNodes.reserve(m_NumberOfNodes);
+
+	std::vector<unsigned int> nodeDegrees = ComputeNodeDegrees();
+	std::vector<NodeWithDegree> nodesWithDegrees;
+	nodesWithDegrees.reserve(m_NumberOfNodes);
+	for (unsigned int node = 0; node < m_NumberOfNodes; node++)
+		nodesWithDegrees.push_back( { node, nodeDegrees[node] });
+
+	std::sort(nodesWithDegrees.begin(), nodesWithDegrees.end(),
+			cmpNodesByDegree);
+
+	for (NodeWithDegree nd : nodesWithDegrees)
+		sortedNodes.push_back(nd.node);
+	return sortedNodes;
 }

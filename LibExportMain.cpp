@@ -14,6 +14,7 @@
 #include "wrappers/NodePageRankWrapper.h"
 #include "wrappers/BFSMomentsWrapper.h"
 #include "wrappers/ClusteringCoefficientWrapper.h"
+#include "wrappers/MotifWrapper.h"
 // ... other imports ...
 
 /*
@@ -33,5 +34,6 @@ BOOST_PYTHON_MODULE(_features)
 	BoostDefNodePageRank();
 	BoostDefClusteringCoefficient();
 	BoostDefBFSMoments();
+	BoostDefMotif();
 }
 

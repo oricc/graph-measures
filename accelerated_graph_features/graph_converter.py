@@ -111,5 +111,5 @@ def convert_graph_to_db_dict(graph: nx.Graph, with_weights=False, cast_to_direct
         ret_dict['indices'] = i
         ret_dict['neighbors'] = n
 
+    ret_dict['directed'] = graph.is_directed();
     return ret_dict
-

@@ -20,7 +20,7 @@ private:
 protected:
 	bool checkGPUEnabled(){
 		return false;
-	}
+	};
 	const CacheGraph* mGraph;
 
 private:
