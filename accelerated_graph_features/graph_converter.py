@@ -106,10 +106,12 @@ def convert_graph_to_db_dict(graph: nx.Graph, with_weights=False, cast_to_direct
         ret_dict['indices'] = i
         ret_dict['neighbors'] = n
         ret_dict['weights'] = w
+        ret_dict['with_weights'] = True
     else:
         i, n = convert_graph_to_db_format(graph, with_weights, cast_to_directed)
         ret_dict['indices'] = i
         ret_dict['neighbors'] = n
+        ret_dict['with_weights'] = False
 
-    ret_dict['directed'] = graph.is_directed();
+    ret_dict['directed'] = graph.is_directed()
     return ret_dict

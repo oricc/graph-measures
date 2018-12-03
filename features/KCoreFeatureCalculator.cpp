@@ -8,7 +8,7 @@
 #include "../includes/KCoreFeatureCalculator.h"
 
 KCoreFeatureCalculator::KCoreFeatureCalculator() {
-	// TODO Auto-generated constructor stub
+
 
 }
 
@@ -19,6 +19,5 @@ std::vector<unsigned short> KCoreFeatureCalculator::Calculate() {
 }
 
 KCoreFeatureCalculator::~KCoreFeatureCalculator() {
-	// TODO Auto-generated destructor stub
 }
 

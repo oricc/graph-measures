@@ -11,11 +11,18 @@ ConvertedGNXReciever::ConvertedGNXReciever(dict converted_graph) {
 
 	list offsetList = extract<list>(converted_graph["indices"]);
 	list neighborList = extract<list>(converted_graph["neighbors"]);
+	bool withWeights = extract<bool>(converted_graph["with_weights"]);
+	bool directed = extract<bool>(converted_graph["directed"]);
+	list weightsList;
+	if(withWeights)
+		weightsList = extract<list>(converted_graph["weights"]);
+
 
 	this->offsets = new std::vector<int64>();
 	this->offsets->reserve(len(offsetList));
 	this->neighbors = new std::vector<unsigned int>();
 	this->neighbors->reserve(len(neighborList));
+	this->weights = new std::vector<double>();
 
 //	std::cout << "Offset List:" << std::endl;
 	for (int i = 0; i < len(offsetList); ++i) {
@@ -33,9 +40,21 @@ ConvertedGNXReciever::ConvertedGNXReciever(dict converted_graph) {
 		unsigned int currentNeighbor = extract<unsigned int>(neighborList[i]);
 		this->neighbors->push_back(currentNeighbor);
 	}
+	this->mGraph = new CacheGraph(directed);
+	if(withWeights){
+		for (int i = 0; i < len(weightsList); ++i) {
+		//		std::cout << extract<int>(neighborList[i]) << std::endl;
+				double currentNeighbor = extract<double>(weightsList[i]);
+				this->weights->push_back(currentNeighbor);
+			}
+		mGraph->Assign(*offsets, *neighbors,*weights);
 
-	this->mGraph = new CacheGraph();
-	mGraph->Assign(*offsets, *neighbors);
+	}else{
+		mGraph->Assign(*offsets, *neighbors);
+
+	}
+
+
 
 }
 
@@ -59,7 +78,7 @@ ConvertedGNXReciever::ConvertedGNXReciever(dict converted_graph) {
 //}
 
 ConvertedGNXReciever::~ConvertedGNXReciever() {
-	// TODO Auto-generated destructor stub
+
 	delete offsets;
 	delete neighbors;
 	delete mGraph;

@@ -42,6 +42,15 @@ void CacheGraph::Assign(const std::vector<int64>& NodeOffsets,
 
 }
 
+void CacheGraph::Assign(const std::vector<int64>& NodeOffsets,
+		const std::vector<unsigned int>& Neighbours,
+		const std::vector<double>& weights) {
+	this->Assign(NodeOffsets, Neighbours);
+	m_Weights = new double[m_NumberOfEdges];
+	std::memcpy(m_Weights, &weights[0], weights.size() * sizeof(double));
+	weighted = true;
+}
+
 /*
  Save the graph to a binary file.
  */
@@ -54,8 +63,10 @@ bool CacheGraph::SaveToFile(const std::string& FileName) const {
 	std::fwrite(&m_NumberOfNodes, sizeof(unsigned int), 1, hFile);
 	std::fwrite(&m_NumberOfEdges, sizeof(int64), 1, hFile);
 	std::fwrite(m_Offsets, sizeof(int64), m_NumberOfNodes + 1, hFile);
-	std::fwrite(m_Graph, sizeof(unsigned int), m_Offsets[m_NumberOfNodes],
-			hFile);
+	std::fwrite(m_Graph, sizeof(unsigned int), m_NumberOfEdges, hFile);
+	std::fwrite(&weighted, sizeof(bool), 1, hFile);
+	std::fwrite(m_Weights, sizeof(double), m_NumberOfEdges, hFile);
+	std::fwrite(&directed, sizeof(bool), 1, hFile);
 
 	//close the file
 	std::fclose(hFile);
@@ -105,6 +116,9 @@ bool CacheGraph::LoadFromFile(const std::string& FileName) {
 	 */
 	m_Graph = new unsigned int[NumberOfEdges];
 	std::fread(m_Graph, sizeof(unsigned int), NumberOfEdges, hFile);
+	std::fread(&weighted, sizeof(bool), 1, hFile);
+	std::fread(m_Weights, sizeof(double), m_NumberOfEdges, hFile);
+	std::fread(&directed, sizeof(bool), 1, hFile);
 
 	std::fclose(hFile);
 	hFile = NULL;
@@ -344,7 +358,7 @@ bool CacheGraph::areNeighbors(const unsigned int p,
 
 }
 
-std::vector<unsigned int> CacheGraph::SortedNodesByDegree() const{
+std::vector<unsigned int> CacheGraph::SortedNodesByDegree() const {
 	std::vector<unsigned int> sortedNodes;
 	sortedNodes.reserve(m_NumberOfNodes);
 

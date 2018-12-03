@@ -19,6 +19,6 @@ std::vector<float> NodePageRankFeatureCalculator::Calculate() {
 }
 
 NodePageRankFeatureCalculator::~NodePageRankFeatureCalculator() {
-	// TODO Auto-generated destructor stub
+
 }
 

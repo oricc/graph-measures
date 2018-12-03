@@ -143,6 +143,6 @@ int MotifCalculator::GetGroupNumber(std::vector<unsigned int> group) {
 }
 
 MotifCalculator::~MotifCalculator() {
-// TODO Auto-generated destructor stub
+
 }
 

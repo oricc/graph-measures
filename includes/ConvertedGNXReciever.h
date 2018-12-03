@@ -38,6 +38,7 @@ public:
 private:
 	std::vector<int64>* offsets;
 	std::vector<unsigned int>* neighbors;
+	std::vector<double>* weights;
 	CacheGraph* mGraph;
 
 

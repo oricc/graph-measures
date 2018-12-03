@@ -36,8 +36,12 @@ class CacheGraph {
 public:
 	CacheGraph() :
 			m_NumberOfNodes(0), m_NumberOfEdges(0), m_Graph(NULL), m_Offsets(
-			NULL) {
+			NULL), m_Weights(NULL), weighted(false), directed(true) {
 	}
+	CacheGraph(bool directed):CacheGraph(),directed(directed){
+
+	}
+
 	CacheGraph(const CacheGraph&) = delete;
 	~CacheGraph() {
 		Clear();
@@ -47,6 +51,9 @@ public:
 	void Clear();
 	void Assign(const std::vector<int64>& NodeOffsets,
 			const std::vector<unsigned int>& Neighbours);
+	void Assign(const std::vector<int64>& NodeOffsets,
+			const std::vector<unsigned int>& Neighbours,
+			const std::vector<double>& weights);
 	bool SaveToFile(const std::string& FileName) const;
 	bool LoadFromFile(const std::string& FileName);
 	bool LoadFromFile(const std::string& DirectroyName,
@@ -64,6 +71,22 @@ public:
 	const int64* GetOffsetList() const {
 		return m_Offsets;
 	}
+
+	const double* GetWeights() const {
+		if(!weighted)
+			throw std::exception("Graph is not weighted");
+		else
+			return this->m_Weights;
+	}
+
+	bool isWeighted() const{
+		return this->weighted;
+	}
+
+	bool isDirected() const{
+		return this->directed;
+	}
+
 
 	void InverseGraph(CacheGraph& InvertedGraph) const;
 	void CureateUndirectedGraph(const CacheGraph& InvertedGraph,
@@ -87,6 +110,8 @@ private:
 	unsigned int m_NumberOfEdges;
 	unsigned int *m_Graph;
 	int64* m_Offsets;
+	double* m_Weights;
+	bool weighted, directed;
 
 	typedef struct {
 		unsigned int node;
