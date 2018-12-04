@@ -46,6 +46,19 @@ vector<vector<unsigned int> *> *combinations(vector<unsigned int> &nbunch) {
     return all_perm;
 }
 
+
+vector<vector<unsigned int> *> *neighbors_combinations(const unsigned int* neighbors, int64 start, int64 end){
+    vector<vector<unsigned int> *> *all_perm = new vector<vector<unsigned int> *>();
+    for (int64 i = start; i < end; i++) {
+        for (int64 j = i + 1; j < end; j++) {
+            vector<unsigned int> *curr_perm = new vector<unsigned int>{i, j};
+            all_perm->push_back(curr_perm);
+        }
+    }
+    return all_perm;
+}
+
+
 vector<vector<int> *> *combinations(vector<int> &nbunch) {
     vector<vector<int> *> *all_perm = new vector<vector<int> *>();
     for (int i = 0; i < nbunch.size(); i++) {

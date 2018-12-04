@@ -8,6 +8,7 @@
 #ifndef INCLUDES_MOTIFUTILS_H_
 #define INCLUDES_MOTIFUTILS_H_
 
+#include "stdafx.h"
 #include <vector>
 using namespace std;
 

@@ -102,10 +102,49 @@ vector<std::map<unsigned int, unsigned int>*>* MotifCalculator::Calculate() {
 	return this->features;
 }
 
-void MotifCalculator::Motif3Subtree(unsigned int node) {
+void MotifCalculator::Motif3Subtree(unsigned int root) {
 	// Instead of yield call GroupUpdater function
 	// Don't forget to check each time that the nodes are in the graph (check removal index).
+	std::map<unsigned int,int> visited_vertices;
+	visited_vertices[root] = 0;
+	int visit_idx = 1;
+
+	const unsigned int* neighbors = mGraph->GetNeighborList();
+	const int64* offsets = mGraph->GetOffsetList();
+
+	// TODO problem with dual edges
+	for(int64 i= offsets[root]; i< offsets[root + 1]; i++){ 						// loop first neighbors
+		visited_vertices[neighbors[i]] = visit_idx++;
+	}
+
+	for(int64 n1_idx= offsets[root]; n1_idx< offsets[root + 1]; n1_idx++){			// loop first neighbors
+		unsigned int n1 = neighbors[n1_idx];
+		for(int64 n2_idx= offsets[n1]; n2_idx< offsets[n1 + 1]; n2_idx++){			// loop second neighbors
+			unsigned int n2 = neighbors[n2_idx]
+			if (visited_vertices.find(n2) != visited_vertices.end())				// check if n2 was visited &&
+				if	(visited_vertices[n1] < visited_vertices[n2])	                // n2 discovered after n1
+					this->GroupUpdater(std::vector<unsigned int>{root, n1, n2});	// update motif counter [r,n1,n2]
+			else {
+					visited_vertices[n2] = visit_idx++;
+					this->GroupUpdater(
+							std::vector < unsigned int > {root, n1, n2});    // update motif counter [r,n1,n2]
+				}	// end ELSE
+		}	// end LOOP_SECOND_NEIGHBORS
+
+	}	// end LOOP_FIRST_NEIGHBORS
+
+	vector<vector<unsigned int> *> *n1_comb = neighbors_combinations(neighbors, offsets[root], offsets[root + 1]);
+	for(auto it = n1_comb->begin(); it != n1_comb->end(); ++it) {
+		unsigned int n1 = (*it)[0];
+		unsigned int n2 = (*it)[1];
+		if ((visited_vertices[n1] < visited_vertices[n2]) &&
+			!( mGraph->areNeighbors(n1, n2) || mGraph->areNeighbors(n2, n1)))	  // check n1, n2 not neighbors
+			this->GroupUpdater(std::vector<unsigned int>{root, n1, n2});		  // update motif counter [r,n1,n2]
+	}	// end loop COMBINATIONS_NEIGHBORS_N1
+
+
 }
+
 
 void MotifCalculator::Motif4Subtree(unsigned int node) {
 }
