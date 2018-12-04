@@ -358,9 +358,9 @@ bool CacheGraph::areNeighbors(const unsigned int p,
 
 }
 
-std::vector<unsigned int> CacheGraph::SortedNodesByDegree() const {
-	std::vector<unsigned int> sortedNodes;
-	sortedNodes.reserve(m_NumberOfNodes);
+std::vector<unsigned int>* CacheGraph::SortedNodesByDegree() const {
+	std::vector<unsigned int>* sortedNodes = new std::vector<unsigned int>();
+	sortedNodes->reserve(m_NumberOfNodes);
 
 	std::vector<unsigned int> nodeDegrees = ComputeNodeDegrees();
 	std::vector<NodeWithDegree> nodesWithDegrees;
@@ -372,6 +372,6 @@ std::vector<unsigned int> CacheGraph::SortedNodesByDegree() const {
 			cmpNodesByDegree);
 
 	for (NodeWithDegree nd : nodesWithDegrees)
-		sortedNodes.push_back(nd.node);
+		sortedNodes->push_back(nd.node);
 	return sortedNodes;
 }

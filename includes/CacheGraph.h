@@ -34,12 +34,14 @@
  */
 class CacheGraph {
 public:
-	CacheGraph() :
+	CacheGraph(bool directed) :
 			m_NumberOfNodes(0), m_NumberOfEdges(0), m_Graph(NULL), m_Offsets(
-			NULL), m_Weights(NULL), weighted(false), directed(true) {
-	}
-	CacheGraph(bool directed):CacheGraph(),directed(directed){
+			NULL), m_Weights(NULL), weighted(false), directed(directed) {
 
+	}
+
+	CacheGraph() :
+			CacheGraph(false) {
 	}
 
 	CacheGraph(const CacheGraph&) = delete;
@@ -73,20 +75,19 @@ public:
 	}
 
 	const double* GetWeights() const {
-		if(!weighted)
-			throw std::exception("Graph is not weighted");
+		if (!weighted)
+			throw std::runtime_error("Graph is not weighted");
 		else
 			return this->m_Weights;
 	}
 
-	bool isWeighted() const{
+	bool isWeighted() const {
 		return this->weighted;
 	}
 
-	bool isDirected() const{
+	bool isDirected() const {
 		return this->directed;
 	}
-
 
 	void InverseGraph(CacheGraph& InvertedGraph) const;
 	void CureateUndirectedGraph(const CacheGraph& InvertedGraph,
@@ -103,7 +104,7 @@ public:
 			const std::string& FileName, bool IsNewFile);
 
 	bool areNeighbors(const unsigned int p, const unsigned int q) const;
-	std::vector<unsigned int> SortedNodesByDegree() const;
+	std::vector<unsigned int>* SortedNodesByDegree() const;
 
 private:
 	unsigned int m_NumberOfNodes;

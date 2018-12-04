@@ -5,7 +5,7 @@
  *      Author: ori
  */
 
-#include "MotifCalculator.h"
+#include "../includes/MotifCalculator.h"
 
 MotifCalculator::MotifCalculator(int level, bool directed):
 directed(directed),nodeVariations(NULL),allMotifs(NULL),removalIndex(NULL),sortedNodesByDegree(NULL)
@@ -28,7 +28,7 @@ void MotifCalculator::InitFeatureCounters() {
 	for (int node = 0; node < mGraph->GetNumberOfNodes(); node++) {
 		std::map<unsigned int, unsigned int>* motifCounter = new std::map<
 				unsigned int, unsigned int>;
-		for (auto motif : this->allMotifs)
+		for (auto motif : *(this->allMotifs))
 			if (motif != -1)
 				(*motifCounter)[motif] = 0;
 
@@ -37,6 +37,7 @@ void MotifCalculator::InitFeatureCounters() {
 }
 
 void MotifCalculator::LoadMotifVariations(int level, bool directed) {
+
 	this->nodeVariations = new std::map<unsigned int,int>();
 
 	string suffix;
@@ -67,12 +68,11 @@ void MotifCalculator::LoadMotifVariations(int level, bool directed) {
 void MotifCalculator::SetAllMotifs() {
 	this->allMotifs = new std::vector<int>();
 
-	for (const auto& x : this->nodeVariations)
+	for (const auto& x : *(this->nodeVariations))
 		this->allMotifs->push_back(x.second);
 }
 
 void MotifCalculator::SetSortedNodes() {
-	this->sortedNodesByDegree = new std::vector<unsigned int>();
 	this->sortedNodesByDegree = mGraph->SortedNodesByDegree();
 }
 /**
@@ -92,7 +92,8 @@ void MotifCalculator::SetRemovalIndex() {
 }
 
 vector<std::map<unsigned int, unsigned int>*>* MotifCalculator::Calculate() {
-	for (auto node : this->sortedNodesByDegree) {
+
+	for (auto node : *(this->sortedNodesByDegree)) {
 		if (this->level == 3)
 			Motif3Subtree(node);
 		else
@@ -105,7 +106,8 @@ vector<std::map<unsigned int, unsigned int>*>* MotifCalculator::Calculate() {
 void MotifCalculator::Motif3Subtree(unsigned int root) {
 	// Instead of yield call GroupUpdater function
 	// Don't forget to check each time that the nodes are in the graph (check removal index).
-	std::map<unsigned int,int> visited_vertices;
+	int idx_root = this->removalIndex[root];									   // root_idx is also our current iteration -
+	std::map<unsigned int,int> visited_vertices;								   // every node_idx smaller than root_idx is already handled
 	visited_vertices[root] = 0;
 	int visit_idx = 1;
 
@@ -113,21 +115,25 @@ void MotifCalculator::Motif3Subtree(unsigned int root) {
 	const int64* offsets = mGraph->GetOffsetList();
 
 	// TODO problem with dual edges
-	for(int64 i= offsets[root]; i< offsets[root + 1]; i++){ 						// loop first neighbors
-		visited_vertices[neighbors[i]] = visit_idx++;
-	}
+	for(int64 i= offsets[root]; i< offsets[root + 1]; i++) 							// loop first neighbors
+		if (this->removalIndex[neighbors[i]] > idx_root)							// n1 not handled yet
+			visited_vertices[neighbors[i]] = visit_idx++;
 
 	for(int64 n1_idx= offsets[root]; n1_idx< offsets[root + 1]; n1_idx++){			// loop first neighbors
 		unsigned int n1 = neighbors[n1_idx];
+		if(this->removalIndex[n1] < idx_root)										// n1 already handled
+			continue;
 		for(int64 n2_idx= offsets[n1]; n2_idx< offsets[n1 + 1]; n2_idx++){			// loop second neighbors
-			unsigned int n2 = neighbors[n2_idx]
+			unsigned int n2 = neighbors[n2_idx];
+			if(this->removalIndex[n2] < idx_root)									// n2 already handled
+						continue;
 			if (visited_vertices.find(n2) != visited_vertices.end())				// check if n2 was visited &&
-				if	(visited_vertices[n1] < visited_vertices[n2])	                // n2 discovered after n1
+				if(visited_vertices[n1] < visited_vertices[n2])	               	    // n2 discovered after n1
 					this->GroupUpdater(std::vector<unsigned int>{root, n1, n2});	// update motif counter [r,n1,n2]
 			else {
 					visited_vertices[n2] = visit_idx++;
 					this->GroupUpdater(
-							std::vector < unsigned int > {root, n1, n2});    // update motif counter [r,n1,n2]
+							std::vector < unsigned int > {root, n1, n2});   	    // update motif counter [r,n1,n2]
 				}	// end ELSE
 		}	// end LOOP_SECOND_NEIGHBORS
 
@@ -135,11 +141,13 @@ void MotifCalculator::Motif3Subtree(unsigned int root) {
 
 	vector<vector<unsigned int> *> *n1_comb = neighbors_combinations(neighbors, offsets[root], offsets[root + 1]);
 	for(auto it = n1_comb->begin(); it != n1_comb->end(); ++it) {
-		unsigned int n1 = (*it)[0];
-		unsigned int n2 = (*it)[1];
+		unsigned int n1 = (**it)[0];
+		unsigned int n2 = (**it)[1];
+		if (this->removalIndex[n1] < idx_root || this->removalIndex[n2] < idx_root)	 // motif already handled
+			continue;
 		if ((visited_vertices[n1] < visited_vertices[n2]) &&
-			!( mGraph->areNeighbors(n1, n2) || mGraph->areNeighbors(n2, n1)))	  // check n1, n2 not neighbors
-			this->GroupUpdater(std::vector<unsigned int>{root, n1, n2});		  // update motif counter [r,n1,n2]
+			!( mGraph->areNeighbors(n1, n2) || mGraph->areNeighbors(n2, n1)))		 // check n1, n2 not neighbors
+			this->GroupUpdater(std::vector<unsigned int>{root, n1, n2});		 	 // update motif counter [r,n1,n2]
 	}	// end loop COMBINATIONS_NEIGHBORS_N1
 
 
@@ -147,10 +155,13 @@ void MotifCalculator::Motif3Subtree(unsigned int root) {
 
 
 void MotifCalculator::Motif4Subtree(unsigned int node) {
+
+
+
 }
 
 void MotifCalculator::GroupUpdater(std::vector<unsigned int> group) {
-
+	// TODO: count overall number of motifs in graph (maybe different class)?
 	unsigned int groupNumber = GetGroupNumber(group);
 	int motifNumber = (*(this->nodeVariations))[groupNumber];
 	if (motifNumber != -1)

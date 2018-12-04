@@ -41,7 +41,7 @@ FEATURE_TEMPLATE=FeatureCalculator
 
 
 accelerated_graph_features/$(OUTPUT_NAME).so: $(TARGET).o $(WRAPPER_OBJ_FILES) $(UTILS_OBJ_FILES) $(FEATURE_OBJ_FILES) $(CACHE_GRAPH).o $(FEATURE_TEMPLATE).o
-	g++ -shared -Wl,--export-dynamic $^ -L$(BOOST_LIB) -lboost_python$(PYTHON_VERSION_SHORT) -L/usr/lib/python$(PYTHON_VERSION)/config-3.6m-x86_64-linux-gnu -lpython$(PYTHON_VERSION) -o $@
+	g++ -shared -Wl,--export-dynamic $^ -L/usr/lib/python$(PYTHON_VERSION)/config-3.6m-x86_64-linux-gnu -lpython$(PYTHON_VERSION) -L$(BOOST_LIB) -lboost_python$(PYTHON_VERSION_SHORT)  -o $@
 
 ################  Changes for each feature #######################
 $(FEATURE_OBJ_DIR)/%.o: $(FEATURE_SRC_DIR)/%.cpp $(INCLUDES_DIR)/%.h

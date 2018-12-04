@@ -8,7 +8,7 @@
 #include "MotifWrapper.h"
 
 void BoostDefMotif() {
-	def("motif",MotifWrapper);
+	def("motif",MotifCalculatorWrapper);
 }
 
 void addDictToList(py::list& dict_list,std::map<unsigned int, unsigned int>* map){
@@ -28,7 +28,7 @@ py::list convertMapVectorToDictList(vector<std::map<unsigned int, unsigned int>*
 	return dict_list;
 }
 
-py::list MotifWrapper(dict converted_dict,int level) {
+py::list MotifCalculatorWrapper(dict converted_dict,int level) {
 	bool directed = extract<bool>(converted_dict["directed"]);
 	ConvertedGNXReciever reciever(converted_dict);
 	MotifCalculator calc(level,directed);
