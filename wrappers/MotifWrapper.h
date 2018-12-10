@@ -13,7 +13,7 @@
 
 void BoostDefMotif();
 
-py::list MotifCalculatorWrapper(dict converted_dict);
+py::list MotifCalculatorWrapper(dict converted_dict,int level);
 
 
 

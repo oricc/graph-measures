@@ -65,7 +65,8 @@ bool CacheGraph::SaveToFile(const std::string& FileName) const {
 	std::fwrite(m_Offsets, sizeof(int64), m_NumberOfNodes + 1, hFile);
 	std::fwrite(m_Graph, sizeof(unsigned int), m_NumberOfEdges, hFile);
 	std::fwrite(&weighted, sizeof(bool), 1, hFile);
-	std::fwrite(m_Weights, sizeof(double), m_NumberOfEdges, hFile);
+	if (weighted)
+		std::fwrite(m_Weights, sizeof(double), m_NumberOfEdges, hFile);
 	std::fwrite(&directed, sizeof(bool), 1, hFile);
 
 	//close the file
@@ -117,7 +118,8 @@ bool CacheGraph::LoadFromFile(const std::string& FileName) {
 	m_Graph = new unsigned int[NumberOfEdges];
 	std::fread(m_Graph, sizeof(unsigned int), NumberOfEdges, hFile);
 	std::fread(&weighted, sizeof(bool), 1, hFile);
-	std::fread(m_Weights, sizeof(double), m_NumberOfEdges, hFile);
+	if (weighted)
+		std::fread(m_Weights, sizeof(double), m_NumberOfEdges, hFile);
 	std::fread(&directed, sizeof(bool), 1, hFile);
 
 	std::fclose(hFile);
@@ -161,6 +163,7 @@ void CacheGraph::InverseGraph(CacheGraph& InvertedGraph) const {
 	//allocate the needed memory
 	InvertedGraph.m_Offsets = new int64[m_NumberOfNodes + 1];
 	InvertedGraph.m_Graph = new unsigned int[NumberOfEdges];
+	InvertedGraph.m_Weights = new double[NumberOfEdges];
 
 	//invert the adjancency list
 	unsigned int* InDegrees = new unsigned int[m_NumberOfNodes];
@@ -172,10 +175,14 @@ void CacheGraph::InverseGraph(CacheGraph& InvertedGraph) const {
 	std::partial_sum(InDegrees, InDegrees + m_NumberOfNodes,
 			InvertedGraph.m_Offsets + 1);
 	for (unsigned int NodeID = 0; NodeID < m_NumberOfNodes; ++NodeID) {
-		for (const unsigned int* peer = m_Graph + m_Offsets[NodeID];
-				peer < m_Graph + m_Offsets[NodeID + 1]; ++peer) {
-			InvertedGraph.m_Graph[InvertedGraph.m_Offsets[*peer]] = NodeID;
-			++InvertedGraph.m_Offsets[*peer];
+//		for (const unsigned int* peer = m_Graph + m_Offsets[NodeID];
+//				peer < m_Graph + m_Offsets[NodeID + 1]; ++peer) {
+		for (int peerIndex = m_Offsets[NodeID];
+				peerIndex < m_Offsets[NodeID + 1]; peerIndex++) {
+			unsigned int peer = m_Graph[peerIndex];
+			InvertedGraph.m_Graph[InvertedGraph.m_Offsets[peer]] = NodeID;
+			InvertedGraph.m_Weights[InvertedGraph.m_Offsets[peer]] = m_Weights[peerIndex];
+			++InvertedGraph.m_Offsets[peer];
 		}
 	}
 	InvertedGraph.m_Offsets[0] = 0;
@@ -194,7 +201,7 @@ void CacheGraph::InverseGraph(CacheGraph& InvertedGraph) const {
 void CacheGraph::CureateUndirectedGraph(const CacheGraph& InvertedGraph,
 		CacheGraph& UndirectedGraph) const {
 	//calculate the number of edges in the graph
-	const int64 NumberOfEdges = m_Offsets[m_NumberOfNodes];
+	int64 NumberOfEdges = m_Offsets[m_NumberOfNodes];
 	//clear the new graph
 	UndirectedGraph.Clear();
 	//assign member variables
@@ -206,50 +213,79 @@ void CacheGraph::CureateUndirectedGraph(const CacheGraph& InvertedGraph,
 	//note that in an undirected graph, there are twice as many edges in the
 	//adjacency list as in a directed graph.
 	unsigned int* temp_Graph = new unsigned int[2 * NumberOfEdges];
+	double* temp_weights = new double[2 * NumberOfEdges];
 	std::memset(temp_Graph, 0, 2 * NumberOfEdges * sizeof(unsigned int));
 	unsigned int *temp_graph_pointer = temp_Graph;
+	double* temp_weight_pointer = temp_weights;
 
 	//combine the inverted and normal graphs into an undirected one.
 	for (unsigned int NodeID = 0; NodeID < m_NumberOfNodes; ++NodeID) {
-		auto p1 = m_Graph + m_Offsets[NodeID];
-		auto p2 = InvertedGraph.m_Graph + InvertedGraph.m_Offsets[NodeID];
+		auto p1 = m_Graph + m_Offsets[NodeID]; //current neighbor
+		auto p2 = InvertedGraph.m_Graph + InvertedGraph.m_Offsets[NodeID]; //inverted current neighbor
+
+		auto w1 = m_Weights + m_Offsets[NodeID]; //current weight
+		auto w2 = InvertedGraph.m_Weights + InvertedGraph.m_Offsets[NodeID]; //inverted current weight
+
 		while (p1 < m_Graph + m_Offsets[NodeID + 1]
 				&& p2
 						< InvertedGraph.m_Graph
-								+ InvertedGraph.m_Offsets[NodeID + 1]) {
-			if (*p1 == *p2) {
+								+ InvertedGraph.m_Offsets[NodeID + 1]) { //while we are in both neighbor lists
+			if (*p1 == *p2) { //bi-directional edge
 				*temp_graph_pointer = *p1;
+				*temp_weight_pointer = *w1;
 				++p1;
 				++p2;
+				++w1;
+				++w2;
 			} else if (*p1 < *p2) {
 				*temp_graph_pointer = *p1;
+				*temp_weight_pointer = *w1;
 				++p1;
+				++w1;
 			} else // if (*p1>*p2)
 			{
 				*temp_graph_pointer = *p2;
+				*temp_weight_pointer = *w2;
 				++p2;
+				++w2;
 			}
 			++temp_graph_pointer;
-		}
-		if (p1 < m_Graph + m_Offsets[NodeID + 1]) {
+		} //END WHILE
+		if (p1 < m_Graph + m_Offsets[NodeID + 1]) { //if we haven't read all of the neighbors of the node
 			int64 RemainingElements = m_Graph + m_Offsets[NodeID + 1] - p1;
 			std::memcpy(temp_graph_pointer, p1,
 					sizeof(unsigned int) * RemainingElements);
+			std::memcpy(temp_weight_pointer, p1,
+					sizeof(double) * RemainingElements);
 			temp_graph_pointer += RemainingElements;
-		} else if (p2
-				< InvertedGraph.m_Graph + InvertedGraph.m_Offsets[NodeID + 1]) {
+			temp_weight_pointer += RemainingElements;
+ 		} else if (p2 < InvertedGraph.m_Graph + InvertedGraph.m_Offsets[NodeID + 1]) { //or if we haven't read all the neighbors in the inverted graph
 			int64 RemainingElements = InvertedGraph.m_Graph
 					+ InvertedGraph.m_Offsets[NodeID + 1] - p2;
 			std::memcpy(temp_graph_pointer, p2,
 					sizeof(unsigned int) * RemainingElements);
+			std::memcpy(temp_weight_pointer, p2,
+					sizeof(double) * RemainingElements);
 			temp_graph_pointer += RemainingElements;
+			temp_weight_pointer += RemainingElements;
+
 		}
+		//Otherwise - we've read all neighbors
+
 		UndirectedGraph.m_Offsets[NodeID + 1] = temp_graph_pointer - temp_Graph;
 	}
+
+	UndirectedGraph.m_NumberOfEdges = UndirectedGraph.m_Offsets[m_NumberOfNodes];
+
+	// Copy neighbor list from temp
 	UndirectedGraph.m_Graph =
-			new unsigned int[UndirectedGraph.m_Offsets[m_NumberOfNodes]];
+			new unsigned int[UndirectedGraph.m_NumberOfEdges];
 	std::memcpy(UndirectedGraph.m_Graph, temp_Graph,
-			UndirectedGraph.m_Offsets[m_NumberOfNodes] * sizeof(unsigned int));
+			UndirectedGraph.m_NumberOfEdges * sizeof(unsigned int));
+
+	//Copy weights from temp
+	UndirectedGraph.m_Weights = new double[UndirectedGraph.m_NumberOfEdges];
+	std::memcpy(UndirectedGraph.m_Weights,temp_weights,UndirectedGraph.m_NumberOfEdges*sizeof(double));
 	//clear memory
 	delete[] temp_Graph;
 }

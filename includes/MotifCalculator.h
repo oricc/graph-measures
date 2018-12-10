@@ -50,7 +50,6 @@ private:
 
 	//the results, node -> {motif-> motif_count}
 	vector<std::map<unsigned int,unsigned int>*>* features;
-	int iterNumber;
 
 
 };

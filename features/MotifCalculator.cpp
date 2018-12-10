@@ -106,7 +106,7 @@ vector<std::map<unsigned int, unsigned int>*>* MotifCalculator::Calculate() {
 void MotifCalculator::Motif3Subtree(unsigned int root) {
 	// Instead of yield call GroupUpdater function
 	// Don't forget to check each time that the nodes are in the graph (check removal index).
-	int idx_root = this->removalIndex[root];									   // root_idx is also our current iteration -
+	int idx_root = this->removalIndex->at(root);									   // root_idx is also our current iteration -
 	std::map<unsigned int,int> visited_vertices;								   // every node_idx smaller than root_idx is already handled
 	visited_vertices[root] = 0;
 	int visit_idx = 1;
@@ -116,16 +116,16 @@ void MotifCalculator::Motif3Subtree(unsigned int root) {
 
 	// TODO problem with dual edges
 	for(int64 i= offsets[root]; i< offsets[root + 1]; i++) 							// loop first neighbors
-		if (this->removalIndex[neighbors[i]] > idx_root)							// n1 not handled yet
+		if (this->removalIndex->at(neighbors[i]) > idx_root)							// n1 not handled yet
 			visited_vertices[neighbors[i]] = visit_idx++;
 
 	for(int64 n1_idx= offsets[root]; n1_idx< offsets[root + 1]; n1_idx++){			// loop first neighbors
 		unsigned int n1 = neighbors[n1_idx];
-		if(this->removalIndex[n1] < idx_root)										// n1 already handled
+		if(this->removalIndex->at(n1) < idx_root)										// n1 already handled
 			continue;
 		for(int64 n2_idx= offsets[n1]; n2_idx< offsets[n1 + 1]; n2_idx++){			// loop second neighbors
 			unsigned int n2 = neighbors[n2_idx];
-			if(this->removalIndex[n2] < idx_root)									// n2 already handled
+			if(this->removalIndex->at(n2) < idx_root)									// n2 already handled
 						continue;
 			if (visited_vertices.find(n2) != visited_vertices.end())				// check if n2 was visited &&
 				if(visited_vertices[n1] < visited_vertices[n2])	               	    // n2 discovered after n1
@@ -143,7 +143,7 @@ void MotifCalculator::Motif3Subtree(unsigned int root) {
 	for(auto it = n1_comb->begin(); it != n1_comb->end(); ++it) {
 		unsigned int n1 = (**it)[0];
 		unsigned int n2 = (**it)[1];
-		if (this->removalIndex[n1] < idx_root || this->removalIndex[n2] < idx_root)	 // motif already handled
+		if (this->removalIndex->at(n1) < idx_root || this->removalIndex->at(n2) < idx_root)	 // motif already handled
 			continue;
 		if ((visited_vertices[n1] < visited_vertices[n2]) &&
 			!( mGraph->areNeighbors(n1, n2) || mGraph->areNeighbors(n2, n1)))		 // check n1, n2 not neighbors
