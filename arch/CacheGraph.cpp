@@ -163,7 +163,7 @@ void CacheGraph::InverseGraph(CacheGraph& InvertedGraph) const {
 	//allocate the needed memory
 	InvertedGraph.m_Offsets = new int64[m_NumberOfNodes + 1];
 	InvertedGraph.m_Graph = new unsigned int[NumberOfEdges];
-	InvertedGraph.m_Weights = new double[NumberOfEdges];
+//	InvertedGraph.m_Weights = new double[NumberOfEdges]; // TODO M_WEIGHTS
 
 	//invert the adjancency list
 	unsigned int* InDegrees = new unsigned int[m_NumberOfNodes];
@@ -181,7 +181,7 @@ void CacheGraph::InverseGraph(CacheGraph& InvertedGraph) const {
 				peerIndex < m_Offsets[NodeID + 1]; peerIndex++) {
 			unsigned int peer = m_Graph[peerIndex];
 			InvertedGraph.m_Graph[InvertedGraph.m_Offsets[peer]] = NodeID;
-			InvertedGraph.m_Weights[InvertedGraph.m_Offsets[peer]] = m_Weights[peerIndex];
+//			InvertedGraph.m_Weights[InvertedGraph.m_Offsets[peer]] = m_Weights[peerIndex];  // TODO M_WEIGHTS
 			++InvertedGraph.m_Offsets[peer];
 		}
 	}
@@ -213,18 +213,18 @@ void CacheGraph::CureateUndirectedGraph(const CacheGraph& InvertedGraph,
 	//note that in an undirected graph, there are twice as many edges in the
 	//adjacency list as in a directed graph.
 	unsigned int* temp_Graph = new unsigned int[2 * NumberOfEdges];
-	double* temp_weights = new double[2 * NumberOfEdges];
+//	double* temp_weights = new double[2 * NumberOfEdges];  // TODO M_WEIGHTS
 	std::memset(temp_Graph, 0, 2 * NumberOfEdges * sizeof(unsigned int));
 	unsigned int *temp_graph_pointer = temp_Graph;
-	double* temp_weight_pointer = temp_weights;
+//	double* temp_weight_pointer = temp_weights;     // TODO M_WEIGHTS
 
 	//combine the inverted and normal graphs into an undirected one.
 	for (unsigned int NodeID = 0; NodeID < m_NumberOfNodes; ++NodeID) {
 		auto p1 = m_Graph + m_Offsets[NodeID]; //current neighbor
 		auto p2 = InvertedGraph.m_Graph + InvertedGraph.m_Offsets[NodeID]; //inverted current neighbor
 
-		auto w1 = m_Weights + m_Offsets[NodeID]; //current weight
-		auto w2 = InvertedGraph.m_Weights + InvertedGraph.m_Offsets[NodeID]; //inverted current weight
+//		auto w1 = m_Weights + m_Offsets[NodeID]; //current weight  // TODO M_WEIGHTS
+//		auto w2 = InvertedGraph.m_Weights + InvertedGraph.m_Offsets[NodeID]; //inverted current weight // TODO M_WEIGHTS
 
 		while (p1 < m_Graph + m_Offsets[NodeID + 1]
 				&& p2
@@ -232,22 +232,22 @@ void CacheGraph::CureateUndirectedGraph(const CacheGraph& InvertedGraph,
 								+ InvertedGraph.m_Offsets[NodeID + 1]) { //while we are in both neighbor lists
 			if (*p1 == *p2) { //bi-directional edge
 				*temp_graph_pointer = *p1;
-				*temp_weight_pointer = *w1;
+//				*temp_weight_pointer = *w1;  // TODO M_WEIGHTS
 				++p1;
 				++p2;
-				++w1;
-				++w2;
+//				++w1;                        // TODO M_WEIGHTS
+//				++w2;                        // TODO M_WEIGHTS
 			} else if (*p1 < *p2) {
 				*temp_graph_pointer = *p1;
-				*temp_weight_pointer = *w1;
+//				*temp_weight_pointer = *w1;  // TODO M_WEIGHTS
 				++p1;
-				++w1;
+//				++w1;                        // TODO M_WEIGHTS
 			} else // if (*p1>*p2)
 			{
 				*temp_graph_pointer = *p2;
-				*temp_weight_pointer = *w2;
+//				*temp_weight_pointer = *w2;  // TODO M_WEIGHTS
 				++p2;
-				++w2;
+//				++w2;                        // TODO M_WEIGHTS
 			}
 			++temp_graph_pointer;
 		} //END WHILE
@@ -255,19 +255,19 @@ void CacheGraph::CureateUndirectedGraph(const CacheGraph& InvertedGraph,
 			int64 RemainingElements = m_Graph + m_Offsets[NodeID + 1] - p1;
 			std::memcpy(temp_graph_pointer, p1,
 					sizeof(unsigned int) * RemainingElements);
-			std::memcpy(temp_weight_pointer, p1,
-					sizeof(double) * RemainingElements);
+//			std::memcpy(temp_weight_pointer, p1,
+//					sizeof(double) * RemainingElements);     // TODO M_WEIGHTS
 			temp_graph_pointer += RemainingElements;
-			temp_weight_pointer += RemainingElements;
+//			temp_weight_pointer += RemainingElements;        // TODO M_WEIGHTS
  		} else if (p2 < InvertedGraph.m_Graph + InvertedGraph.m_Offsets[NodeID + 1]) { //or if we haven't read all the neighbors in the inverted graph
 			int64 RemainingElements = InvertedGraph.m_Graph
 					+ InvertedGraph.m_Offsets[NodeID + 1] - p2;
 			std::memcpy(temp_graph_pointer, p2,
 					sizeof(unsigned int) * RemainingElements);
-			std::memcpy(temp_weight_pointer, p2,
-					sizeof(double) * RemainingElements);
+//			std::memcpy(temp_weight_pointer, p2,
+//					sizeof(double) * RemainingElements);      // TODO M_WEIGHTS
 			temp_graph_pointer += RemainingElements;
-			temp_weight_pointer += RemainingElements;
+//			temp_weight_pointer += RemainingElements;         // TODO M_WEIGHTS
 
 		}
 		//Otherwise - we've read all neighbors
@@ -285,7 +285,7 @@ void CacheGraph::CureateUndirectedGraph(const CacheGraph& InvertedGraph,
 
 	//Copy weights from temp
 	UndirectedGraph.m_Weights = new double[UndirectedGraph.m_NumberOfEdges];
-	std::memcpy(UndirectedGraph.m_Weights,temp_weights,UndirectedGraph.m_NumberOfEdges*sizeof(double));
+//	std::memcpy(UndirectedGraph.m_Weights,temp_weights,UndirectedGraph.m_NumberOfEdges*sizeof(double));  // TODO M_WEIGHTS
 	//clear memory
 	delete[] temp_Graph;
 }

@@ -12,7 +12,7 @@ vector<vector<unsigned int> *> *permutations(vector<unsigned int> &nbunch) {
     for (int i = 0; i < nbunch.size(); i++) {
         for (int j = 0; j < nbunch.size(); j++) {
             if (i != j) {
-                vector<unsigned int> *curr_perm = new vector<unsigned int>{i, j};
+                vector<unsigned int> *curr_perm = new vector<unsigned int>{nbunch[i], nbunch[j]};
                 all_perm->push_back(curr_perm);
             }
 
@@ -26,7 +26,7 @@ vector<vector<int> *> *permutations(vector<int> &nbunch) {
     for (int i = 0; i < nbunch.size(); i++) {
         for (int j = 0; j < nbunch.size(); j++) {
             if (i != j) {
-                vector<int> *curr_perm = new vector<int>{i, j};
+                vector<int> *curr_perm = new vector<int>{nbunch[i], nbunch[j]};
                 all_perm->push_back(curr_perm);
             }
 
@@ -51,7 +51,7 @@ vector<vector<unsigned int> *> *neighbors_combinations(const unsigned int* neigh
     vector<vector<unsigned int> *> *all_perm = new vector<vector<unsigned int> *>();
     for (int64 i = start; i < end; i++) {
         for (int64 j = i + 1; j < end; j++) {
-            vector<unsigned int> *curr_perm = new vector<unsigned int>{i, j};
+            vector<unsigned int> *curr_perm = new vector<unsigned int>{neighbors[i], neighbors[j]};
             all_perm->push_back(curr_perm);
         }
     }
@@ -63,7 +63,7 @@ vector<vector<int> *> *combinations(vector<int> &nbunch) {
     vector<vector<int> *> *all_perm = new vector<vector<int> *>();
     for (int i = 0; i < nbunch.size(); i++) {
         for (int j = i + 1; j < nbunch.size(); j++) {
-            vector<int> *curr_perm = new vector<int>{i, j};
+            vector<int> *curr_perm = new vector<int>{nbunch[i], nbunch[j]};
             all_perm->push_back(curr_perm);
         }
     }

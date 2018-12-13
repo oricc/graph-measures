@@ -14,10 +14,10 @@ public:
 	virtual ~FeatureCalculator();
 	virtual const CacheGraph* getGraph();
 	virtual void setGraph(const CacheGraph* graph);
-private:
-	void init();
+
 
 protected:
+	virtual void init();
 	bool checkGPUEnabled(){
 		return false;
 	};
@@ -31,13 +31,14 @@ template<class T>
 FeatureCalculator<T>::FeatureCalculator():
 	mGraph(NULL)
 {
-	init();
+
 }
 
 template<typename T>
 void FeatureCalculator<T>::setGraph(const CacheGraph* graph)
 {
 	this->mGraph = graph;
+	init();
 }
 
 template<typename T>

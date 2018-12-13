@@ -12,12 +12,14 @@
 #include "MotifUtils.h"
 #include <stdexcept>
 #include <string>
+#include <algorithm>
+
 /**
  * The motif calc returns a list for each node counting the motifs in it.
  */
 class MotifCalculator: public FeatureCalculator<vector<std::map<unsigned int,unsigned int>*>*> {
 public:
-	MotifCalculator(int level,bool directed);
+	MotifCalculator(int level,bool directed, string motif_path);
 	virtual vector<std::map<unsigned int,unsigned int>*>* Calculate();
 	virtual ~MotifCalculator();
 
@@ -30,9 +32,12 @@ private:
 	void SetAllMotifs();
 	void SetSortedNodes();
 	void SetRemovalIndex();
-
+	virtual void init();
 	void GroupUpdater(std::vector<unsigned int> group);
 	int GetGroupNumber(std::vector<unsigned int> group);
+
+    string MOTIF_VARIATIONS_PATH;
+    CacheGraph fullGraph;
 
 	//Either 3 or 4
 	unsigned int level;
