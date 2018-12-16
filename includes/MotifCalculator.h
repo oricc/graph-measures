@@ -19,6 +19,7 @@
  */
 class MotifCalculator: public FeatureCalculator<vector<std::map<unsigned int,unsigned int>*>*> {
 public:
+	MotifCalculator(int level,bool directed);
 	MotifCalculator(int level,bool directed, string motif_path);
 	virtual vector<std::map<unsigned int,unsigned int>*>* Calculate();
 	virtual ~MotifCalculator();

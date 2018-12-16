@@ -60,3 +60,17 @@ def bfs_moments(graph, **kwargs):
     res = feat.bfs_moments(graph)
 
     return res
+
+
+@FeatureWrapper
+def motif(graph, **kwargs):
+    import src.accelerated_graph_features._features as feat
+
+    try:
+        level = kwargs['level']
+    except KeyError:
+        raise AttributeError('Level must be specified!')
+
+    res = feat.motif(graph, level)
+
+    return res
