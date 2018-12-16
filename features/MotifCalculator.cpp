@@ -6,6 +6,8 @@
  */
 
 #include "../includes/MotifCalculator.h"
+#include "../includes/MotifVariationConstants.h"
+
 
 void MotifCalculator::init() {
 	CacheGraph inverse(true);
@@ -21,7 +23,7 @@ void MotifCalculator::init() {
 
 MotifCalculator::MotifCalculator(int level, bool directed, string motif_path) :
 		directed(directed), nodeVariations(NULL), allMotifs(NULL), removalIndex(
-				NULL), sortedNodesByDegree(NULL), fullGraph(false) {
+		NULL), sortedNodesByDegree(NULL), fullGraph(false) {
 	MOTIF_VARIATIONS_PATH = motif_path;
 	//check level
 	if (level != 3 && level != 4)
@@ -46,19 +48,28 @@ void MotifCalculator::InitFeatureCounters() {
 void MotifCalculator::LoadMotifVariations(int level, bool directed) {
 
 	this->nodeVariations = new std::map<unsigned int, int>();
+//
+//	string suffix;
+//	if (directed)
+//		suffix = "_directed_cpp.txt";
+//	else
+//		suffix = "_undirected_cpp.txt";
+//
+//	string fileName = MOTIF_VARIATIONS_PATH + "/" + std::to_string(level)
+//			+ suffix;
+//	std::ifstream infile(fileName);
+	const char* motifVariations[4] = { undirected3, directed3, undirected4,
+			directed4 };
 
-	string suffix;
-	if (directed)
-		suffix = "_directed_cpp.txt";
-	else
-		suffix = "_undirected_cpp.txt";
-
-	string fileName = MOTIF_VARIATIONS_PATH + "/" + std::to_string(level)
-			+ suffix;
-	std::ifstream infile(fileName);
-	string a, b;
-	while (infile >> a >> b) {
+	int variationIndex = 2 * (level - 3) + (directed ? 1 : 0);
+	std::istringstream f(motifVariations[variationIndex]);
+	std::string line;
+	std::string a, b;
+	while (getline(f, line)) {
 		int x, y;
+		int n = line.find(" ");
+		a = line.substr(0,n);
+		b = line.substr(n);
 		try {
 			x = stoi(a);
 			y = stoi(b);
@@ -66,7 +77,8 @@ void MotifCalculator::LoadMotifVariations(int level, bool directed) {
 			y = -1;
 
 		}
-		cout << x << ":" << y << endl;
+//		cout<<line<<endl;
+//		cout << x << ":" << y << endl;
 
 		(*nodeVariations)[x] = y;
 	}
@@ -130,10 +142,10 @@ void MotifCalculator::Motif3Subtree(unsigned int root) {
 
 	// TODO problem with dual edges
 	for (int64 i = offsets[root]; i < offsets[root + 1]; i++) // loop first neighbors
-		if (this->removalIndex->at(neighbors[i]) > idx_root)// n1 not handled yet
+		if (this->removalIndex->at(neighbors[i]) > idx_root) // n1 not handled yet
 			visited_vertices[neighbors[i]] = visit_idx++;
 
-	for (int64 n1_idx = offsets[root]; n1_idx < offsets[root + 1]; n1_idx++) {// loop first neighbors
+	for (int64 n1_idx = offsets[root]; n1_idx < offsets[root + 1]; n1_idx++) { // loop first neighbors
 		unsigned int n1 = neighbors[n1_idx];
 		if (this->removalIndex->at(n1) < idx_root)		// n1 already handled
 			continue;
@@ -209,4 +221,3 @@ int MotifCalculator::GetGroupNumber(std::vector<unsigned int> group) {
 MotifCalculator::~MotifCalculator() {
 
 }
-
