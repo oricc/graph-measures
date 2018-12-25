@@ -43,7 +43,7 @@ vector<vector<unsigned int> *> *combinations(vector<unsigned int> &nbunch) {
 			new vector<vector<unsigned int> *>();
 	for (int i = 0; i < nbunch.size(); i++) {
 		for (int j = i + 1; j < nbunch.size(); j++) {
-			vector<unsigned int> *curr_perm = new vector<unsigned int> { i, j };
+			vector<unsigned int> *curr_perm = new vector<unsigned int> { nbunch[i], nbunch[j] };
 			all_perm->push_back(curr_perm);
 		}
 	}

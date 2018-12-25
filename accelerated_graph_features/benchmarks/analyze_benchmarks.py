@@ -3,7 +3,7 @@ import sys
 
 sys.path.append(os.path.abspath('..'))
 sys.path.append(os.path.abspath('../..'))
-
+sys.path.append(os.path.abspath('../../..'))
 import matplotlib.pyplot as plt
 import numpy as np
 from src.accelerated_graph_features.utils.data_reader import get_number_data
@@ -61,7 +61,7 @@ def plot_benchmark_comparison(feature_name):
 
 if __name__ == '__main__':
 
-    features = ['BFSMoments']
+    features = ['Motif3']
     # features = ['clustering', 'k_core', 'page_rank']
 
     for f in features:

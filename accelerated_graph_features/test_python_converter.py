@@ -19,18 +19,18 @@ def create_graph(i=1, GraphType=nx.Graph):
         G.add_edge(2, 5, weight=0.9)
         G.add_edge(0, 3, weight=0.3)
 
-    elif i==3:
+    elif i == 3:
         G.add_edge(0, 1)
         G.add_edge(0, 2)
         G.add_edge(0, 3)
         G.add_edge(2, 0)
         G.add_edge(3, 1)
         G.add_edge(3, 2)
-        G.add_edge(2,4)
-        G.add_edge(3,4)
-        G.add_edge(1,5)
-        G.add_edge(4,5)
-        G.add_edge(5,6)
+        G.add_edge(2, 4)
+        G.add_edge(3, 4)
+        G.add_edge(1, 5)
+        G.add_edge(4, 5)
+        G.add_edge(5, 6)
     return G
 
 

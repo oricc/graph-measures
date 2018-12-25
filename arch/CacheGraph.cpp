@@ -37,7 +37,7 @@ void CacheGraph::Assign(const std::vector<int64>& NodeOffsets,
 	std::memcpy(m_Graph, &Neighbours[0],
 			Neighbours.size() * sizeof(unsigned int));
 	/*	LOG(INFO) << m_NumberOfNodes << '\t' << m_Offsets[m_NumberOfNodes];
-	 std::cout << "Nodes: " << m_NumberOfNodes << " Edges:" << m_NumberOfEdges
+	 //std::cout << "Nodes: " << m_NumberOfNodes << " Edges:" << m_NumberOfEdges
 	 << std::endl;*/
 
 }
@@ -74,7 +74,7 @@ bool CacheGraph::SaveToFile(const std::string& FileName) const {
 	hFile = NULL;
 
 	//LOG(INFO) << m_NumberOfNodes << '\t' << m_Offsets[m_NumberOfNodes];
-//	std::cout << m_NumberOfNodes << '\t' << m_Offsets[m_NumberOfNodes];
+//	//std::cout << m_NumberOfNodes << '\t' << m_Offsets[m_NumberOfNodes];
 
 	return true;
 
@@ -92,7 +92,7 @@ bool CacheGraph::LoadFromFile(const std::string& FileName) {
 		hFile = std::fopen(FileName.c_str(), "rb");
 	} catch (std::exception& e) {
 		/*LOG(ERROR) << " Missing network file. Run CacheGraph::LoadFromFile - " << FileName; return false;*/
-//		std::cout << " Missing network file. Run CacheGraph::LoadFromFile - "
+//		//std::cout << " Missing network file. Run CacheGraph::LoadFromFile - "
 //				<< FileName;
 		return false;
 	}
@@ -259,7 +259,8 @@ void CacheGraph::CureateUndirectedGraph(const CacheGraph& InvertedGraph,
 //					sizeof(double) * RemainingElements);     // TODO M_WEIGHTS
 			temp_graph_pointer += RemainingElements;
 //			temp_weight_pointer += RemainingElements;        // TODO M_WEIGHTS
- 		} else if (p2 < InvertedGraph.m_Graph + InvertedGraph.m_Offsets[NodeID + 1]) { //or if we haven't read all the neighbors in the inverted graph
+		} else if (p2
+				< InvertedGraph.m_Graph + InvertedGraph.m_Offsets[NodeID + 1]) { //or if we haven't read all the neighbors in the inverted graph
 			int64 RemainingElements = InvertedGraph.m_Graph
 					+ InvertedGraph.m_Offsets[NodeID + 1] - p2;
 			std::memcpy(temp_graph_pointer, p2,
@@ -275,11 +276,11 @@ void CacheGraph::CureateUndirectedGraph(const CacheGraph& InvertedGraph,
 		UndirectedGraph.m_Offsets[NodeID + 1] = temp_graph_pointer - temp_Graph;
 	}
 
-	UndirectedGraph.m_NumberOfEdges = UndirectedGraph.m_Offsets[m_NumberOfNodes];
+	UndirectedGraph.m_NumberOfEdges =
+			UndirectedGraph.m_Offsets[m_NumberOfNodes];
 
 	// Copy neighbor list from temp
-	UndirectedGraph.m_Graph =
-			new unsigned int[UndirectedGraph.m_NumberOfEdges];
+	UndirectedGraph.m_Graph = new unsigned int[UndirectedGraph.m_NumberOfEdges];
 	std::memcpy(UndirectedGraph.m_Graph, temp_Graph,
 			UndirectedGraph.m_NumberOfEdges * sizeof(unsigned int));
 
@@ -381,8 +382,13 @@ bool CacheGraph::areNeighbors(const unsigned int p,
 
 	while (first <= last) {
 		middle = (first + last) / 2; //this finds the mid point
+		//std::cout << "Binary search: " << middle << std::endl;
+		//TODO: fix overflow problem
 		if (m_Graph[middle] == q) {
 			return true;
+		} else if (middle == 0) {
+			// and the element is not here
+			return false;
 		} else if (m_Graph[middle] > q) // if it's in the lower half
 				{
 			last = middle - 1;

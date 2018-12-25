@@ -30,6 +30,7 @@ py::list convertMapVectorToDictList(vector<std::map<unsigned int, unsigned int>*
 
 py::list MotifCalculatorWrapper(dict converted_dict,int level) {
 	bool directed = extract<bool>(converted_dict["directed"]);
+	std::cout << directed <<std::endl;
 	ConvertedGNXReciever reciever(converted_dict);
 	MotifCalculator calc(level,directed);
 	calc.setGraph(reciever.getCacheGraph());
