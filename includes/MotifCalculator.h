@@ -13,15 +13,16 @@
 #include <stdexcept>
 #include <string>
 #include <algorithm>
+#include <set>
 
 /**
  * The motif calc returns a list for each node counting the motifs in it.
  */
-class MotifCalculator: public FeatureCalculator<vector<std::map<unsigned int,unsigned int>*>*> {
+class MotifCalculator: public FeatureCalculator<vector<vector<unsigned int>*>*> {
 public:
 	MotifCalculator(int level,bool directed);
 	MotifCalculator(int level,bool directed, string motif_path);
-	virtual vector<std::map<unsigned int,unsigned int>*>* Calculate();
+	virtual vector<vector<unsigned int>*>* Calculate();
 	virtual ~MotifCalculator();
 
 private:
@@ -55,7 +56,7 @@ private:
 	std::vector<unsigned int>* sortedNodesByDegree;
 
 	//the results, node -> {motif-> motif_count}
-	vector<std::map<unsigned int,unsigned int>*>* features;
+	vector<vector<unsigned int>*>* features;
 
 
 };

@@ -20,4 +20,5 @@ vector<vector<unsigned int> *> *neighbors_combinations(
 vector<vector<unsigned int> *> *combinations(vector<unsigned int> &nbunch);
 int bool_vector_to_int(vector<bool> &edges);
 
+
 #endif /* INCLUDES_MOTIFUTILS_H_ */

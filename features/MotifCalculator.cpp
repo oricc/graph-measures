@@ -36,20 +36,23 @@ MotifCalculator::MotifCalculator(int level, bool directed, string motif_path) :
 	if (level != 3 && level != 4)
 		throw invalid_argument("Level must be 3 or 4");
 	this->level = level;
-	this->features = new std::vector<std::map<unsigned int, unsigned int>*>;
+	this->features = new std::vector<vector<unsigned int>*>;
 
 }
 
 void MotifCalculator::InitFeatureCounters() {
 	for (int node = 0; node < mGraph->GetNumberOfNodes(); node++) {
-		std::map<unsigned int, unsigned int>* motifCounter = new std::map<
-				unsigned int, unsigned int>;
-		for (auto motif : *(this->allMotifs))
+		vector<unsigned int>* motifCounter = new vector<unsigned int>;
+		std::set<unsigned int> s(this->allMotifs->begin(),
+				this->allMotifs->end());
+		for (auto motif : s)
 			if (motif != -1)
-				(*motifCounter)[motif] = 0;
+//				(*motifCounter)[motif] = 0;
+				motifCounter->push_back(0);
 
 		features->push_back(motifCounter);
 	}
+	delete this->allMotifs;
 }
 
 void MotifCalculator::LoadMotifVariations(int level, bool directed) {
@@ -124,7 +127,7 @@ void MotifCalculator::SetRemovalIndex() {
 	}
 }
 
-vector<std::map<unsigned int, unsigned int>*>* MotifCalculator::Calculate() {
+vector<vector<unsigned int>*>* MotifCalculator::Calculate() {
 
 	if (this->level == 3) {
 		//std::cout << "Start 3" << std::endl;
@@ -174,6 +177,7 @@ void MotifCalculator::Motif3Subtree(unsigned int root) {
 							std::vector<unsigned int> { root, n1, n2 }); // update motif counter [r,n1,n2]
 			} else {
 				visited_vertices[n2] = visit_idx++;
+
 				this->GroupUpdater(std::vector<unsigned int> { root, n1, n2 }); // update motif counter [r,n1,n2]
 			}	// end ELSE
 		}	// end LOOP_SECOND_NEIGHBORS
@@ -199,6 +203,9 @@ void MotifCalculator::Motif3Subtree(unsigned int root) {
 			//std::cout << "Mark2" << std::endl;
 			this->GroupUpdater(std::vector<unsigned int> { root, n1, n2 });	// update motif counter [r,n1,n2]
 	}	// end loop COMBINATIONS_NEIGHBORS_N1
+	for(auto p:*n1_comb){
+		delete p;
+	}
 	delete n1_comb;
 }
 
@@ -232,6 +239,11 @@ void MotifCalculator::Motif4Subtree(unsigned int root) {
 			continue;
 		this->GroupUpdater(std::vector<unsigned int> { root, n11, n12, n13 }); // update motif counter [r,n11,n12,n13]
 	}
+
+	for(auto p:*n1_3_comb){
+		delete p;
+	}
+	delete n1_3_comb;
 	// All other cases
 	for (int64 n1_idx = offsets[root]; n1_idx < offsets[root + 1]; n1_idx++) { // loop first neighbors
 		unsigned int n1 = neighbors[n1_idx];
@@ -281,6 +293,9 @@ void MotifCalculator::Motif4Subtree(unsigned int root) {
 			}
 		} // end loop SECOND NEIGHBOR COMBINATIONS
 
+		for(auto p:*n2_comb){
+			delete p;
+		}
 		delete n2_comb;
 
 		//The case of n1-n2-n3
@@ -341,6 +356,10 @@ int MotifCalculator::GetGroupNumber(std::vector<unsigned int> group) {
 		n2 = options->at(i)->at(1);
 		edges.push_back(this->mGraph->areNeighbors(n1, n2));
 	}
+
+	for(auto p:*options){
+		delete p;
+	}
 	delete options;
 	return bool_vector_to_int(edges);
 
@@ -349,9 +368,6 @@ int MotifCalculator::GetGroupNumber(std::vector<unsigned int> group) {
 MotifCalculator::~MotifCalculator() {
 	//map the group num to the iso motif
 	delete nodeVariations;
-
-	//list of base motifs
-	delete allMotifs;
 	//the index in which we remove the node from the graph. Basically, from this index on the node doesen't exist.
 	delete removalIndex;
 	//the nodes, sorted in descending order by the degree.

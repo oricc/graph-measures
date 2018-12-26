@@ -18,8 +18,8 @@ matching_python_functions = {
     # 'k_core': [k_core, nx.k_core],
     # 'page_rank': [node_page_rank, nx.pagerank]
     # 'BFSMoments': [bfs_moments, original_bfs_moments]
-    'Motif3': [lambda G,timer: motif(G, level=3,timer=timer), lambda G: compare_motifs(G, level=3)],
-    'Motif4': [lambda G,timer: motif(G, level=4,timer=timer), lambda G: compare_motifs(G, level=4)]
+    'Motif3': [lambda G,timer: motif(G, level=3,timer=timer), lambda G: compare_motifs(G, level=3)]
+    # 'Motif4': [lambda G,timer: motif(G, level=4,timer=timer), lambda G: compare_motifs(G, level=4)]
 }
 
 SEED = 123456

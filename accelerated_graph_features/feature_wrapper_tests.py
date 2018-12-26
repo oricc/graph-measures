@@ -26,7 +26,7 @@ def silence_stdout():
 
 
 def test_features():
-    g = create_graph(3, GraphType=nx.Graph)
+    g = create_graph(3, GraphType=nx.DiGraph)
     with silence_stdout():
         example_feature(g)
         clustering_coefficient(g)
@@ -35,9 +35,9 @@ def test_features():
         bfs_moments(g)
         m_res = motif(g, level=3)
     print(m_res)
-    for node, node_dict in enumerate(m_res):
+    for node, node_list in enumerate(m_res):
         print(node)
-        for k, v in node_dict.items():
+        for k, v in enumerate(node_list):
             if v != 0:
                 print('\t{}:{}'.format(k, v))
 
