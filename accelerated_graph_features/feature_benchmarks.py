@@ -18,8 +18,8 @@ matching_python_functions = {
     # 'k_core': [k_core, nx.k_core],
     # 'page_rank': [node_page_rank, nx.pagerank]
     # 'BFSMoments': [bfs_moments, original_bfs_moments]
-    'Motif3': [lambda G,timer: motif(G, level=3,timer=timer), lambda G: compare_motifs(G, level=3)]
-    # 'Motif4': [lambda G,timer: motif(G, level=4,timer=timer), lambda G: compare_motifs(G, level=4)]
+    # 'Motif3': [lambda G,timer: motif(G, level=3,timer=timer), lambda G: compare_motifs(G, level=3)]
+    'Motif4': [lambda G,timer: motif(G, level=4,timer=timer), lambda G: compare_motifs(G, level=4)]
 }
 
 SEED = 123456
@@ -80,12 +80,14 @@ def benchmark_feature_erdos_renyi(feature_name, python=False, p=0.8):
 
 def run_all_feature_tests_regular_graphs():
     for feature_name in matching_python_functions.keys():
+        print(feature_name)
         benchmark_feature_regular_graph(feature_name, python=False)
         benchmark_feature_regular_graph(feature_name, python=True)
 
 
 def run_all_feature_tests_erdos_renyi():
     for feature_name in matching_python_functions.keys():
+        print(feature_name)
         benchmark_feature_erdos_renyi(feature_name, python=False)
         benchmark_feature_erdos_renyi(feature_name, python=True)
 

@@ -23,9 +23,10 @@ def calculate_features_on_graph(file_name, feats):
     for k, func in feats.items():
         print(k)
         res = func(g)
-        with open(save_file_name.format(k), 'w+') as fp:
+        with open(save_file_name.format(k), 'w+b') as fp:
             pickle.dump(res, fp)
         del res
+
 
 if __name__ == '__main__':
     calculate_features_on_graph("n_1000_p_0.5_size_20", FEATURES)

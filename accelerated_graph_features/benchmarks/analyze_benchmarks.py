@@ -61,7 +61,7 @@ def plot_benchmark_comparison(feature_name):
 
 if __name__ == '__main__':
 
-    features = ['Motif3']
+    features = ['Motif3','Motif4']
     # features = ['clustering', 'k_core', 'page_rank']
 
     for f in features:
