@@ -29,4 +29,4 @@ def calculate_features_on_graph(file_name, feats):
 
 
 if __name__ == '__main__':
-    calculate_features_on_graph("n_1000_p_0.5_size_20", FEATURES)
+    calculate_features_on_graph("itay_n_1000_p_0.5_size_20_take_2", FEATURES)
