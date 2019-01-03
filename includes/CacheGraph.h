@@ -67,6 +67,9 @@ public:
 	const unsigned int GetNumberOfNodes() const {
 		return m_NumberOfNodes;
 	}
+	const unsigned int GetNumberOfEdges() const {
+		return m_NumberOfEdges;
+	}
 	const unsigned int* GetNeighborList() const {
 		return m_Graph;
 	}
