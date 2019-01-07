@@ -5,11 +5,10 @@
  *      Author: ori
  */
 
-#ifndef WRAPPERS_EXAMPLEWRAPPER_H_
-#define WRAPPERS_EXAMPLEWRAPPER_H_
+#ifndef WRAPPERS_GPU_MOTIF_WRAPPER_H_
+#define WRAPPERS_GPU_MOTIF_WRAPPER_H_
 
 #include "../wrappers/WrapperIncludes.h"
-#include "../includes/GPUMotifCalculator.h"
 #include "GPUMotifWrapper.h"
 
 
