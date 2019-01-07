@@ -171,7 +171,7 @@ void Motif3Kernel(GPUMotifCalculator *calc) {
 	int stride = blockDim.x * gridDim.x;
 	auto n = calc->numOfNodes;
 	for (int i = index; i < n; i += stride)
-		calc->Motif3Subtree(calc->deviceSortedNodesByDegree[i]);
+		calc->Motif3Subtree(calc->devicePointerSortedNodesByDegree[i]);
 }
 
 __global__
@@ -180,7 +180,7 @@ void Motif4Kernel(GPUMotifCalculator *calc) {
 	int stride = blockDim.x * gridDim.x;
 	auto n = calc->numOfNodes;
 	for (int i = index; i < n; i += stride)
-		calc->Motif4Subtree(calc->deviceSortedNodesByDegree[i]);
+		calc->Motif4Subtree(calc->devicePointerSortedNodesByDegree[i]);
 }
 
 vector<vector<unsigned int> *> *GPUMotifCalculator::Calculate() {
@@ -285,7 +285,7 @@ void GPUMotifCalculator::Motif3Subtree(unsigned int root) {
 
 __device__
 void GPUMotifCalculator::Motif4Subtree(unsigned int root) {
-		int idx_root = this->deviceRemovalIndex[root]; // root_idx is also our current iteration -
+		int idx_root = this->devicePointerRemovalIndex[root]; // root_idx is also our current iteration -
 		short* visited_vertices = (short*)malloc(this->numOfNodes); // every node_idx smaller than root_idx is already handled
 		for(int i=0;i<this->numOfNodes;i++) visited_vertices[i] = -1;
 		visited_vertices[root] = 0;
