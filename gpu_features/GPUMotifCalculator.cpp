@@ -7,6 +7,7 @@
 
 #include "../includes/GPUMotifCalculator.h"
 #include "../includes/MotifVariationConstants.h"
+#include <thrust/device_vector.h>
 
 void GPUMotifCalculator::init() {
 	CacheGraph inverse(true);
@@ -125,15 +126,18 @@ void GPUMotifCalculator::SetRemovalIndex() {
 }
 
 void GPUMotifCalculator::CopyAllToDevice() {
-	//TODO: fill!
 	// Motif Variations
-	this->deviceMotifVariations = *(this->nodeVariations);
+	thrust::device_vector<unsigned int> deviceMotifVariations; // @suppress("Type cannot be resolved")// @suppress("Symbol is not resolved")
+	thrust::device_vector<unsigned int> deviceRemovalIndex; // @suppress("Type cannot be resolved") // @suppress("Symbol is not resolved")
+	thrust::device_vector<unsigned int> deviceSortedNodesByDegree;// @suppress("Type cannot be resolved") // @suppress("Symbol is not resolved")
+
+	deviceMotifVariations = *(this->nodeVariations);
 	this->devicePointerMotifVariations = thrust::raw_pointer_cast(&deviceMotifVariations[0]);
 	// Removal index
-	this->deviceRemovalIndex = *(this->removalIndex);
+	deviceRemovalIndex = *(this->removalIndex);
 	this->devicePointerRemovalIndex = thrust::raw_pointer_cast(&deviceRemovalIndex[0]);
 	//Sorted nodes
-	this->deviceSortedNodesByDegree = *(this->sortedNodesByDegree);
+	deviceSortedNodesByDegree = *(this->sortedNodesByDegree);
 	this->devicePointerSortedNodesByDegree = thrust::raw_pointer_cast(&deviceSortedNodesByDegree[0]);
 
 

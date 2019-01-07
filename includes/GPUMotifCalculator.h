@@ -15,9 +15,8 @@
 #include <string>
 #include <algorithm>
 #include <set>
-#include <thrust/device_vector.h>
-#include <thrust/binary_search.h>
-#include <thrust/functional.h>
+
+
 
 
 /**
@@ -75,9 +74,6 @@ private:
 
 
 	// DEVICE VARIABLES
-	thrust::device_vector<unsigned int> deviceMotifVariations; // @suppress("Type cannot be resolved")// @suppress("Symbol is not resolved")
-	thrust::device_vector<unsigned int> deviceRemovalIndex; // @suppress("Type cannot be resolved") // @suppress("Symbol is not resolved")
-	thrust::device_vector<unsigned int> deviceSortedNodesByDegree;// @suppress("Type cannot be resolved") // @suppress("Symbol is not resolved")
 
 	//Pointers to the device vectors declared above - no need to delete as the device_vectors live on the stack
 	unsigned int* devicePointerMotifVariations;
