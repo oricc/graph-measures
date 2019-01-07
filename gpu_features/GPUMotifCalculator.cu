@@ -43,7 +43,7 @@ GPUMotifCalculator::GPUMotifCalculator(int level, bool directed) :
 void GPUMotifCalculator::InitFeatureCounters() {
 	for (int node = 0; node < mGraph->GetNumberOfNodes(); node++) {
 		vector<unsigned int> *motifCounter = new vector<unsigned int>;
-		std::set<unsigned int> s(this->allMotifs->begin(),
+		std::set<int> s(this->allMotifs->begin(),
 				this->allMotifs->end());
 		for (auto motif : s)
 			if (motif != -1)
@@ -133,7 +133,7 @@ void GPUMotifCalculator::CopyAllToDevice() {
 	// Feature matrix
 	unsigned int size = this->mGraph->GetNumberOfNodes()
 			* this->nodeVariations->size() * sizeof(unsigned int);
-	cudaMallocManaged(this->deviceFeatures, size);
+	cudaMallocManaged(&(this->deviceFeatures), size);
 
 	// Original graph
 	cudaMallocManaged(&deviceOriginalGraphOffsets,
