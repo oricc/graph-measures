@@ -71,6 +71,8 @@ private:
 
 	unsigned int numOfMotifs;
 	unsigned int numOfNodes;
+	unsigned int numOfEdges;
+
 
 	// DEVICE VARIABLES
 	thrust::device_vector<unsigned int> deviceMotifVariations; // @suppress("Type cannot be resolved")// @suppress("Symbol is not resolved")

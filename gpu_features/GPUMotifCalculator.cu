@@ -220,190 +220,193 @@ return this->features;
 
 __device__
 void GPUMotifCalculator::Motif3Subtree(unsigned int root) {
-	// Instead of yield call GroupUpdater function
-	// Don't forget to check each time that the nodes are in the graph (check removal index).
-int idx_root = this->devicePointerRemovalIndex[root];// root_idx is also our current iteration -
-bool visited_vertices[this->numOfNodes]; // every node_idx smaller than root_idx is already handled
-for(int i=0;i<this->numOfNodes;i++) visited_vertices[i] = false;
-visited_vertices[root] = true;
-
-const unsigned int *neighbors = this->deviceFullGraphNeighbors; // all neighbors - ancestors and descendants
-const int64 *offsets = this->deviceFullGraphOffsets;
-
- // TODO problem with dual edges
- //std::cout << "Mark" << std::endl;
-for (int64 i = offsets[root]; i < offsets[root + 1]; i++) // loop first neighbors
-if (this->devicePointerRemovalIndex[neighbors[i]] > idx_root) // n1 not handled yet
-	visited_vertices[neighbors[i]] = true;
- //std::cout << "Mark" << std::endl;
-for (int64 n1_idx = offsets[root]; n1_idx < offsets[root + 1]; n1_idx++) { // loop first neighbors
-unsigned int n1 = neighbors[n1_idx];
-if (this->devicePointerRemovalIndex[n1] <= idx_root) // n1 already handled
-	continue;
-for (int64 n2_idx = offsets[n1]; n2_idx < offsets[n1 + 1]; n2_idx++) { // loop second neighbors
-	unsigned int n2 = neighbors[n2_idx];
-	if (this->devicePointerRemovalIndex[n2] <= idx_root) // n2 already handled
+		// Instead of yield call GroupUpdater function
+		// Don't forget to check each time that the nodes are in the graph (check removal index).
+	int idx_root = this->devicePointerRemovalIndex[root];// root_idx is also our current iteration -
+	bool* visited_vertices = (bool*)malloc(this->numOfNodes); // every node_idx smaller than root_idx is already handled
+	for(int i=0;i<this->numOfNodes;i++) visited_vertices[i] = false;
+	visited_vertices[root] = true;
+	
+	const unsigned int *neighbors = this->deviceFullGraphNeighbors; // all neighbors - ancestors and descendants
+	const int64 *offsets = this->deviceFullGraphOffsets;
+	
+	 // TODO problem with dual edges
+	 //std::cout << "Mark" << std::endl;
+	for (int64 i = offsets[root]; i < offsets[root + 1]; i++) // loop first neighbors
+	if (this->devicePointerRemovalIndex[neighbors[i]] > idx_root) // n1 not handled yet
+		visited_vertices[neighbors[i]] = true;
+	 //std::cout << "Mark" << std::endl;
+	for (int64 n1_idx = offsets[root]; n1_idx < offsets[root + 1]; n1_idx++) { // loop first neighbors
+	unsigned int n1 = neighbors[n1_idx];
+	if (this->devicePointerRemovalIndex[n1] <= idx_root) // n1 already handled
 		continue;
-	if (visited_vertices[n2]) {					// check if n2 was visited &&
-		if (n1 < n2) {		// n2 is after n1 (stops counting the motif twice)
-			unsigned int arr[] = { root, n1, n2 };
-			this->GroupUpdater(arr, 3); // update motif counter [r,n1,n2]
-		}
-	} else {
-		visited_vertices[n2] = true;
-		unsigned int arr[] = { root, n1, n2 };
-		this->GroupUpdater(arr, 3); // update motif counter [r,n1,n2]
-	}										   // end ELSE
-}											   // end LOOP_SECOND_NEIGHBORS
-
-} // end LOOP_FIRST_NEIGHBORS
-  //std::cout << "Mark" << std::endl;
-  // vector<vector<unsigned int> *> *n1_comb = neighbors_combinations(neighbors,
-  // 	offsets[root], offsets[root + 1]);
-for (int64 i = offsets[root]; i < offsets[root + 1]; i++) {
-	for (int64 j = i + 1; j < offsets[root + 1]; j++) {
-		unsigned int n1 = neighbors[i];
-		unsigned int n2 = neighbors[j];
-		//std::cout << "\t" << n1 << "," << n2 << std::endl;
-		if (this->devicePointerRemovalIndex[n1] <= idx_root
-				|| this->devicePointerRemovalIndex[n2] <= idx_root) // motif already handled
+	for (int64 n2_idx = offsets[n1]; n2_idx < offsets[n1 + 1]; n2_idx++) { // loop second neighbors
+		unsigned int n2 = neighbors[n2_idx];
+		if (this->devicePointerRemovalIndex[n2] <= idx_root) // n2 already handled
 			continue;
-		//std::cout << "Mark1" << std::endl;
-		//std::cout << (visited_vertices[n1] < visited_vertices[n2]) << std::endl;
-		//std::cout << mGraph->areNeighbors(n1, n2) << std::endl;
-		//std::cout << mGraph->areNeighbors(n2, n1) << std::endl;
-		if ((n1 < n2)
-				&& !(this->AreNeighbors(n1, n2) || this->AreNeighbors(n2, n1))) { // check n1, n2 not neighbors
-			//std::cout << "Mark2" << std::endl;
+		if (visited_vertices[n2]) {					// check if n2 was visited &&
+			if (n1 < n2) {		// n2 is after n1 (stops counting the motif twice)
+				unsigned int arr[] = { root, n1, n2 };
+				this->GroupUpdater(arr, 3); // update motif counter [r,n1,n2]
+			}
+		} else {
+			visited_vertices[n2] = true;
 			unsigned int arr[] = { root, n1, n2 };
 			this->GroupUpdater(arr, 3); // update motif counter [r,n1,n2]
+		}										   // end ELSE
+	}											   // end LOOP_SECOND_NEIGHBORS
+	
+	} // end LOOP_FIRST_NEIGHBORS
+	  //std::cout << "Mark" << std::endl;
+	  // vector<vector<unsigned int> *> *n1_comb = neighbors_combinations(neighbors,
+	  // 	offsets[root], offsets[root + 1]);
+	for (int64 i = offsets[root]; i < offsets[root + 1]; i++) {
+		for (int64 j = i + 1; j < offsets[root + 1]; j++) {
+			unsigned int n1 = neighbors[i];
+			unsigned int n2 = neighbors[j];
+			//std::cout << "\t" << n1 << "," << n2 << std::endl;
+			if (this->devicePointerRemovalIndex[n1] <= idx_root
+					|| this->devicePointerRemovalIndex[n2] <= idx_root) // motif already handled
+				continue;
+			//std::cout << "Mark1" << std::endl;
+			//std::cout << (visited_vertices[n1] < visited_vertices[n2]) << std::endl;
+			//std::cout << mGraph->areNeighbors(n1, n2) << std::endl;
+			//std::cout << mGraph->areNeighbors(n2, n1) << std::endl;
+			if ((n1 < n2)
+					&& !(this->AreNeighbors(n1, n2) || this->AreNeighbors(n2, n1))) { // check n1, n2 not neighbors
+				//std::cout << "Mark2" << std::endl;
+				unsigned int arr[] = { root, n1, n2 };
+				this->GroupUpdater(arr, 3); // update motif counter [r,n1,n2]
+			}
 		}
-	}
 	} // end loop COMBINATIONS_NEIGHBORS_N1
+	free(visited_vertices);
 }
 
 __device__
 void GPUMotifCalculator::Motif4Subtree(unsigned int root) {
-int idx_root = this->deviceRemovalIndex[root]; // root_idx is also our current iteration -
-short visited_vertices[this->numOfNodes]; // every node_idx smaller than root_idx is already handled
-for(int i=0;i<this->numOfNodes;i++) visited_vertices[i] = -1;
-visited_vertices[root] = 0;
-
-const unsigned int *neighbors = this->deviceFullGraphNeighbors; // all neighbors - ancestors and descendants
-const int64 *offsets = this->deviceFullGraphOffsets;
-
- // TODO problem with dual edges
-for (int64 i = offsets[root]; i < offsets[root + 1]; i++) // loop first neighbors
-if (this->devicePointerRemovalIndex[neighbors[i]] > idx_root) // n1 not handled yet
-	visited_vertices[neighbors[i]] = 1;
-
-/*
- *    for n1, n2, n3 in combinations(neighbors_first_deg, 3):
- yield [root, n1, n2, n3]
- */
- // vector<vector<unsigned int> *> *n1_3_comb = neighbors_combinations(
- // 	neighbors, offsets[root], offsets[root + 1], 3);
- // for (auto it = n1_3_comb->begin(); it != n1_3_comb->end(); ++it)
- // {
-int64 end = offsets[root + 1];
-for (int64 i = offsets[root]; i < end; i++) {
-for (int64 j = i + 1; j < end; j++) {
-	if (j == end - 1) //if j is the last element, we can't add an element and therefore it's not a 3-combination
-		continue;
-	for (int64 k = j + 1; k < end; k++) {
-		unsigned int n11 = neighbors[i];
-		unsigned int n12 = neighbors[j];
-		unsigned int n13 = neighbors[k];
-		if (this->devicePointerRemovalIndex[n11] <= idx_root
-				|| this->devicePointerRemovalIndex[n12] <= idx_root
-				|| this->devicePointerRemovalIndex[n13] <= idx_root) // motif already handled
-			continue;
-		unsigned int arr[] = { root, n11, n12, n13 };
-		this->GroupUpdater(arr, 4); // update motif counter [r,n11,n12,n13]
-	}
-}
-}
-
- // All other cases
-for (int64 n1_idx = offsets[root]; n1_idx < offsets[root + 1]; n1_idx++) { // loop first neighbors
-unsigned int n1 = neighbors[n1_idx];
-if (this->devicePointerRemovalIndex[n1] <= idx_root) // n1 already handled
-	continue;
-//Mark second neighbors
-for (int64 n2_idx = offsets[n1]; n2_idx < offsets[n1 + 1]; n2_idx++) { // loop second neighbors
-	unsigned int n2 = neighbors[n2_idx];
-	if (this->devicePointerRemovalIndex[n2] <= idx_root) // n2 already handled
-		continue;
-	if (visited_vertices[n2] == -1) { // check if n2 was *not* visited
-		visited_vertices[n2] = 2;
-
-	} //end if
-}	 //end loop SECOND NEIGHBORS
-
-// The case of root-n1-n2-n11
-for (int64 n2_idx = offsets[n1]; n2_idx < offsets[n1 + 1]; n2_idx++) { // loop second neighbors (again)
-	unsigned int n2 = neighbors[n2_idx];
-	if (this->devicePointerRemovalIndex[n2] <= idx_root) // n2 already handled
-		continue;
-	for (int64 n11_idx = offsets[root]; n11_idx < offsets[root + 1];
-			n11_idx++) { // loop first neighbors
-		unsigned int n11 = neighbors[n11_idx];
-		if (this->devicePointerRemovalIndex[n11] <= idx_root) // n2 already handled
-			continue;
-		if (visited_vertices[n2] == 2 && n11 != n1) {
-			unsigned int arr[] = { root, n1, n11, n2 };
-			this->GroupUpdater(arr, 4); // update motif counter [r,n1,n11,n2]
-		}												// end if
-	}										// end loop INNER FIRST NEIGHBORS
-}											// end loop SECOND NEIGHBORS AGAIN
-
-// The case of root-n1-n21-n22
-//2-combinations on second neighbors
-// vector<vector<unsigned int> *> *n2_comb = neighbors_combinations(
-// 	neighbors, offsets[n1], offsets[n1 + 1]);
-// for (auto it = n2_comb->begin(); it != n2_comb->end(); ++it)
-// {
-end = offsets[n1 + 1];
-for (int64 i = offsets[n1]; i < end; i++) {
-	for (int64 j = i + 1; j < end; j++) {
-
-		unsigned int n21 = neighbors[i];
-		unsigned int n22 = neighbors[j];
-		if (this->devicePointerRemovalIndex[n21] <= idx_root
-				|| this->devicePointerRemovalIndex[n22] <= idx_root) // motif already handled
-			continue;
-		if (2 == visited_vertices[n21] && visited_vertices[n22] == 2) {
-			unsigned int arr[] = { root, n1, n21, n22 };
-			this->GroupUpdater(arr, 4); // update motif counter [r,n1,n21,n22]
+		int idx_root = this->deviceRemovalIndex[root]; // root_idx is also our current iteration -
+		short* visited_vertices = (short*)malloc(this->numOfNodes); // every node_idx smaller than root_idx is already handled
+		for(int i=0;i<this->numOfNodes;i++) visited_vertices[i] = -1;
+		visited_vertices[root] = 0;
+		
+		const unsigned int *neighbors = this->deviceFullGraphNeighbors; // all neighbors - ancestors and descendants
+		const int64 *offsets = this->deviceFullGraphOffsets;
+		
+		 // TODO problem with dual edges
+		for (int64 i = offsets[root]; i < offsets[root + 1]; i++) // loop first neighbors
+		if (this->devicePointerRemovalIndex[neighbors[i]] > idx_root) // n1 not handled yet
+			visited_vertices[neighbors[i]] = 1;
+		
+		/*
+		 *    for n1, n2, n3 in combinations(neighbors_first_deg, 3):
+		 yield [root, n1, n2, n3]
+		 */
+		 // vector<vector<unsigned int> *> *n1_3_comb = neighbors_combinations(
+		 // 	neighbors, offsets[root], offsets[root + 1], 3);
+		 // for (auto it = n1_3_comb->begin(); it != n1_3_comb->end(); ++it)
+		 // {
+		int64 end = offsets[root + 1];
+		for (int64 i = offsets[root]; i < end; i++) {
+		for (int64 j = i + 1; j < end; j++) {
+			if (j == end - 1) //if j is the last element, we can't add an element and therefore it's not a 3-combination
+				continue;
+			for (int64 k = j + 1; k < end; k++) {
+				unsigned int n11 = neighbors[i];
+				unsigned int n12 = neighbors[j];
+				unsigned int n13 = neighbors[k];
+				if (this->devicePointerRemovalIndex[n11] <= idx_root
+						|| this->devicePointerRemovalIndex[n12] <= idx_root
+						|| this->devicePointerRemovalIndex[n13] <= idx_root) // motif already handled
+					continue;
+				unsigned int arr[] = { root, n11, n12, n13 };
+				this->GroupUpdater(arr, 4); // update motif counter [r,n11,n12,n13]
+			}
 		}
-	}
-} // end loop SECOND NEIGHBOR COMBINATIONS
-
-//The case of n1-n2-n3
-for (int64 n2_idx = offsets[n1]; n2_idx < offsets[n1 + 1]; n2_idx++) { // loop second neighbors (third time's the charm)
-	unsigned int n2 = neighbors[n2_idx];
-	if (this->devicePointerRemovalIndex[n2] <= idx_root) // n2 already handled
-		continue;
-	for (int64 n3_idx = offsets[n2]; n3_idx < offsets[n2 + 1]; n3_idx++) { // loop third neighbors
-		unsigned int n3 = neighbors[n3_idx];
-		if (this->devicePointerRemovalIndex[n3] <= idx_root) // n2 already handled
+		}
+		
+		 // All other cases
+		for (int64 n1_idx = offsets[root]; n1_idx < offsets[root + 1]; n1_idx++) { // loop first neighbors
+		unsigned int n1 = neighbors[n1_idx];
+		if (this->devicePointerRemovalIndex[n1] <= idx_root) // n1 already handled
 			continue;
-		if (visited_vertices[n3] == -1) { // check if n3 was *not* visited
-			visited_vertices[n3] = 3;
-			if (visited_vertices[n2] == 2) { // check if n2 is a visited second neighbor
-				unsigned int arr[] = { root, n1, n2, n3 };
-				this->GroupUpdater(arr, 4); // update motif counter [r,n1,n2,n3]
-			}					// end check if n2 is a visited second neighbor
-		}									// end check if n3 was not visited
+		//Mark second neighbors
+		for (int64 n2_idx = offsets[n1]; n2_idx < offsets[n1 + 1]; n2_idx++) { // loop second neighbors
+			unsigned int n2 = neighbors[n2_idx];
+			if (this->devicePointerRemovalIndex[n2] <= idx_root) // n2 already handled
+				continue;
+			if (visited_vertices[n2] == -1) { // check if n2 was *not* visited
+				visited_vertices[n2] = 2;
+		
+			} //end if
+		}	 //end loop SECOND NEIGHBORS
+		
+		// The case of root-n1-n2-n11
+		for (int64 n2_idx = offsets[n1]; n2_idx < offsets[n1 + 1]; n2_idx++) { // loop second neighbors (again)
+			unsigned int n2 = neighbors[n2_idx];
+			if (this->devicePointerRemovalIndex[n2] <= idx_root) // n2 already handled
+				continue;
+			for (int64 n11_idx = offsets[root]; n11_idx < offsets[root + 1];
+					n11_idx++) { // loop first neighbors
+				unsigned int n11 = neighbors[n11_idx];
+				if (this->devicePointerRemovalIndex[n11] <= idx_root) // n2 already handled
+					continue;
+				if (visited_vertices[n2] == 2 && n11 != n1) {
+					unsigned int arr[] = { root, n1, n11, n2 };
+					this->GroupUpdater(arr, 4); // update motif counter [r,n1,n11,n2]
+				}												// end if
+			}										// end loop INNER FIRST NEIGHBORS
+		}											// end loop SECOND NEIGHBORS AGAIN
+		
+		// The case of root-n1-n21-n22
+		//2-combinations on second neighbors
+		// vector<vector<unsigned int> *> *n2_comb = neighbors_combinations(
+		// 	neighbors, offsets[n1], offsets[n1 + 1]);
+		// for (auto it = n2_comb->begin(); it != n2_comb->end(); ++it)
+		// {
+		end = offsets[n1 + 1];
+		for (int64 i = offsets[n1]; i < end; i++) {
+			for (int64 j = i + 1; j < end; j++) {
+		
+				unsigned int n21 = neighbors[i];
+				unsigned int n22 = neighbors[j];
+				if (this->devicePointerRemovalIndex[n21] <= idx_root
+						|| this->devicePointerRemovalIndex[n22] <= idx_root) // motif already handled
+					continue;
+				if (2 == visited_vertices[n21] && visited_vertices[n22] == 2) {
+					unsigned int arr[] = { root, n1, n21, n22 };
+					this->GroupUpdater(arr, 4); // update motif counter [r,n1,n21,n22]
+				}
+			}
+		} // end loop SECOND NEIGHBOR COMBINATIONS
+		
+		//The case of n1-n2-n3
+		for (int64 n2_idx = offsets[n1]; n2_idx < offsets[n1 + 1]; n2_idx++) { // loop second neighbors (third time's the charm)
+			unsigned int n2 = neighbors[n2_idx];
+			if (this->devicePointerRemovalIndex[n2] <= idx_root) // n2 already handled
+				continue;
+			for (int64 n3_idx = offsets[n2]; n3_idx < offsets[n2 + 1]; n3_idx++) { // loop third neighbors
+				unsigned int n3 = neighbors[n3_idx];
+				if (this->devicePointerRemovalIndex[n3] <= idx_root) // n2 already handled
+					continue;
+				if (visited_vertices[n3] == -1) { // check if n3 was *not* visited
+					visited_vertices[n3] = 3;
+					if (visited_vertices[n2] == 2) { // check if n2 is a visited second neighbor
+						unsigned int arr[] = { root, n1, n2, n3 };
+						this->GroupUpdater(arr, 4); // update motif counter [r,n1,n2,n3]
+					}					// end check if n2 is a visited second neighbor
+				}									// end check if n3 was not visited
+		
+				else if (visited_vertices[n3] == 3 && visited_vertices[n2] == 2) {
+					unsigned int arr[] = { root, n1, n2, n3 };
+					this->GroupUpdater(arr, 4); // update motif counter [r,n1,n2,n3]
+				}											   // end if
+			}												 // end loop THIRD NEIGHBORS
+		}							// end loop SECOND NEIGHBORS THIRD TIME'S THE CHARM
+		
+		} // end loop FIRST NEIGHBORS
+		free(visited_vertices);
 
-		else if (visited_vertices[n3] == 3 && visited_vertices[n2] == 2) {
-			unsigned int arr[] = { root, n1, n2, n3 };
-			this->GroupUpdater(arr, 4); // update motif counter [r,n1,n2,n3]
-		}											   // end if
-	}												 // end loop THIRD NEIGHBORS
-}							// end loop SECOND NEIGHBORS THIRD TIME'S THE CHARM
-
-} // end loop FIRST NEIGHBORS
 }
 
 __device__
