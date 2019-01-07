@@ -175,7 +175,7 @@ vector<vector<unsigned int> *> *GPUMotifCalculator::Calculate() {
 
 	// for (auto node : *(this->sortedNodesByDegree))
 	// 	Motif4Subtree(node);
-`Motif4Kernel<<<numBlocks, blockSize>>>(this);
+	Motif4Kernel<<<numBlocks, blockSize>>>(this);
 }
 	//std::cout << "Done All" << std::endl;
 
