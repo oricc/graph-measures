@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <boost/python.hpp>
 
+
+// Regular features
 #include "wrappers/WrapperIncludes.h"
 #include "wrappers/ExampleWrapper.h"
 #include "wrappers/KCoreWrapper.h"
@@ -15,6 +17,10 @@
 #include "wrappers/BFSMomentsWrapper.h"
 #include "wrappers/ClusteringCoefficientWrapper.h"
 #include "wrappers/MotifWrapper.h"
+
+// GPU features
+#include "gpu_wrappers/GPUMotifWrapper.h"
+
 // ... other imports ...
 
 /*
@@ -29,11 +35,14 @@ BOOST_PYTHON_MODULE(_features)
 
 	def("test",test_export);
 // ... other boost def wrappers ...
+
+	// Regular features
 	BoostDefExampleCalculator();
 	BoostDefKCore();
 	BoostDefNodePageRank();
 	BoostDefClusteringCoefficient();
 	BoostDefBFSMoments();
 	BoostDefMotif();
+	BoostDefGPUMotifCalculator();
 }
 

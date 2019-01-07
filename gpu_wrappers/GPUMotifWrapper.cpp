@@ -1,34 +1,34 @@
 /*
- * MotifWrapper.cpp
+ * ExampleWrapper.cpp
  *
- *  Created on: Dec 2, 2018
+ *  Created on: Nov 11, 2018
  *      Author: ori
  */
 
-#include "MotifWrapper.h"
+#include "GPUMotifWrapper.h"
 
-void BoostDefMotif() {
-	def("motif",MotifCalculatorWrapper);
+void BoostDefGPUMotifCalculator() {
+	def("motif_gpu", GPUMotifCalculatorWrapper);
 }
 
-py::list convertVectorOfVectorsTo2DList(vector<vector<unsigned int>*>* vec){
+py::list convertVectorOfVectorsTo2DList(vector<vector<unsigned int>*>* vec) {
 	py::list mainList;
-	for(auto l: *vec){
+	for (auto l : *vec) {
 		mainList.append(vectorToPythonList<unsigned int>(*l));
 	}
 	return mainList;
 
 }
 
-py::list MotifCalculatorWrapper(dict converted_dict,int level) {
+py::list GPUMotifCalculatorWrapper(dict converted_dict,int level) {
 	bool directed = extract<bool>(converted_dict["directed"]);
-//	std::cout << directed <<std::endl;
+	//	std::cout << directed <<std::endl;
 	ConvertedGNXReciever reciever(converted_dict);
-	MotifCalculator calc(level,directed);
+	GPUMotifCalculator calc(level, directed);
 	calc.setGraph(reciever.getCacheGraph());
 	vector<vector<unsigned int>*>* res = calc.Calculate();
 	py::list motif_counters = convertVectorOfVectorsTo2DList(res);
-	for(auto p:*res){
+	for (auto p : *res) {
 		delete p;
 	}
 	delete res;
