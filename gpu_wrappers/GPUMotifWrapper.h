@@ -9,8 +9,7 @@
 #define WRAPPERS_GPU_MOTIF_WRAPPER_H_
 
 #include "../wrappers/WrapperIncludes.h"
-#include "GPUMotifWrapper.h"
-
+#include "../includes/GPUMotifCalculator.h"
 
 void BoostDefGPUMotifCalculator();
 float GPUMotifCalculatorWrapper(dict converted_graph);
