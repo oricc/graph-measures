@@ -64,10 +64,10 @@ public:
 	static std::string GetFileNameFromFolder(const std::string& DirectroyName,
 			const std::string& BaseFileName);
 
-	const unsigned int GetNumberOfNodes() const {
+	unsigned int GetNumberOfNodes() const {
 		return m_NumberOfNodes;
 	}
-	const unsigned int GetNumberOfEdges() const {
+	unsigned int GetNumberOfEdges() const {
 		return m_NumberOfEdges;
 	}
 	const unsigned int* GetNeighborList() const {

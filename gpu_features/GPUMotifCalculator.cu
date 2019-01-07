@@ -132,7 +132,7 @@ void GPUMotifCalculator::CopyAllToDevice() {
 	// Feature matrix
 	unsigned int size = this->mGraph->GetNumberOfNodes()
 			* this->nodeVariations->size() * sizeof(unsigned int);
-	cudaMallocManged(this->deviceFeatures, size);
+	cudaMallocManaged(this->deviceFeatures, size);
 
 	// Original graph
 	cudaMallocManged(&deviceOriginalGraphOffsets,
@@ -309,7 +309,7 @@ void GPUMotifCalculator::Motif4Subtree(unsigned int root) {
 					|| this->deviceRemovalIndex[n12] <= idx_root
 					|| this->deviceRemovalIndex[n13] <= idx_root) // motif already handled
 				continue;
-			unsigned int arr[] =  { root, n11, n12.n13 };
+			unsigned int arr[] =  { root, n11, n12,n13 };
 			this->GroupUpdater( arr, 4); // update motif counter [r,n11,n12,n13]
 		}
 	}
