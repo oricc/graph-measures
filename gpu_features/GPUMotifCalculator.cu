@@ -68,10 +68,10 @@ void GPUMotifCalculator::LoadMotifVariations(int level, bool directed) {
 	//	std::ifstream infile(fileName);
 	const char* motifVariations[4] = { undirected3, directed3, undirected4,
 			directed4 };
-	const int numOfMotifs[4] = { 8, 64, 64, 4096 };
+	const int numOfMotifsOptions[4] = { 8, 64, 64, 4096 };
 
 	int variationIndex = 2 * (level - 3) + (directed ? 1 : 0);
-	this->numOfMotifs = numOfMotifs[variationIndex];
+	this->numOfMotifs = numOfMotifsOptions[variationIndex];
 	this->nodeVariations = new std::vector<unsigned int>(numOfMotifs);
 	std::istringstream f(motifVariations[variationIndex]);
 	std::string line;
@@ -156,6 +156,25 @@ void GPUMotifCalculator::CopyAllToDevice() {
 
 }
 
+// Kernel and friend functions
+__global__
+void Motif3Kernel(GPUMotifCalculator *calc) {
+	int index = blockIdx.x * blockDim.x + threadIdx.x;
+	int stride = blockDim.x * gridDim.x;
+	auto n = calc->mGraph->GetNumberOfNodes();
+	for (int i = index; i < n; i += stride)
+	calc->Motif3Subtree(calc->sortedNodesByDegree->at(i));
+}
+
+__global__
+void Motif4Kernel(GPUMotifCalculator *calc) {
+	int index = blockIdx.x * blockDim.x + threadIdx.x;
+	int stride = blockDim.x * gridDim.x;
+	auto n = calc->mGraph->GetNumberOfNodes();
+	for (int i = index; i < n; i += stride)
+	calc->Motif4Subtree(calc->sortedNodesByDegree->at(i));
+}
+
 vector<vector<unsigned int> *> *GPUMotifCalculator::Calculate() {
 
 	int blockSize = 256;
@@ -191,23 +210,9 @@ this->features->push_back(current);
 return this->features;
 }
 
-// Kernel and friend functions
-void Motif3Kernel(GPUMotifCalculator *calc) {
-int index = blockIdx.x * blockDim.x + threadIdx.x;
-int stride = blockDim.x * gridDim.x;
-auto n = calc->mGraph->GetNumberOfNodes();
-for (int i = index; i < n; i += stride)
-calc->Motif3Subtree(calc->sortedNodesByDegree->at(i));
-}
 
-void Motif4Kernel(GPUMotifCalculator *calc) {
-int index = blockIdx.x * blockDim.x + threadIdx.x;
-int stride = blockDim.x * gridDim.x;
-auto n = calc->mGraph->GetNumberOfNodes();
-for (int i = index; i < n; i += stride)
-calc->Motif4Subtree(calc->sortedNodesByDegree->at(i));
-}
 
+__device__
 void GPUMotifCalculator::Motif3Subtree(unsigned int root) {
 	// Instead of yield call GroupUpdater function
 	// Don't forget to check each time that the nodes are in the graph (check removal index).
@@ -234,11 +239,12 @@ for (int64 n2_idx = offsets[n1]; n2_idx < offsets[n1 + 1]; n2_idx++) { // loop s
 		continue;
 	if (visited_vertices[n2]) {					// check if n2 was visited &&
 		if (n1 < n2)		// n2 is after n1 (stops counting the motif twice)
-			this->GroupUpdater( { root, n1, n2 }, 3); // update motif counter [r,n1,n2]
+			unsigned int arr[] =  { root, n1, n2 };
+			this->GroupUpdater(arr, 3); // update motif counter [r,n1,n2]
 	} else {
 		visited_vertices[n2] = true;
-
-		this->GroupUpdater( { root, n1, n2 }, 3); // update motif counter [r,n1,n2]
+		unsigned int arr[] =  { root, n1, n2 };
+		this->GroupUpdater( arr, 3); // update motif counter [r,n1,n2]
 	}										   // end ELSE
 }											   // end LOOP_SECOND_NEIGHBORS
 
@@ -261,15 +267,17 @@ for (int64 j = i + 1; j < offsets[root + 1]; j++) {
 	if ((n1 < n2)
 			&& !(this->AreNeighbors(n1, n2) || this->AreNeighbors(n2, n1))) // check n1, n2 not neighbors
 		//std::cout << "Mark2" << std::endl;
-		this->GroupUpdater( { root, n1, n2 }, 3); // update motif counter [r,n1,n2]
+		unsigned int arr[] =  { root, n1, n2 };
+		this->GroupUpdater( arr, 3); // update motif counter [r,n1,n2]
 }
 } // end loop COMBINATIONS_NEIGHBORS_N1
 }
 
+__device__
 void GPUMotifCalculator::Motif4Subtree(unsigned int root) {
 	int idx_root = this->deviceRemovalIndex[root]; // root_idx is also our current iteration -
 	thrust::device_vector<short> visited_vertices(this->mGraph->GetNumberOfNodes()); // every node_idx smaller than root_idx is already handled
-	thrust::fill(thrust::device, visited_vertices.begin(), visited_vertices.end(), -1);
+	thrust::fill(visited_vertices.begin(), visited_vertices.end(), -1);
 	visited_vertices[root] = 0;
 
 	const unsigned int *neighbors = this->deviceFullGraphNeighbors; // all neighbors - ancestors and descendants
@@ -301,7 +309,8 @@ void GPUMotifCalculator::Motif4Subtree(unsigned int root) {
 					|| this->deviceRemovalIndex[n12] <= idx_root
 					|| this->deviceRemovalIndex[n13] <= idx_root) // motif already handled
 				continue;
-			this->GroupUpdater( { root, n11, n12, n13 }, 4); // update motif counter [r,n11,n12,n13]
+			unsigned int arr[] =  { root, n11, n12.n13 };
+			this->GroupUpdater( arr, 4); // update motif counter [r,n11,n12,n13]
 		}
 	}
 	}
@@ -333,7 +342,8 @@ void GPUMotifCalculator::Motif4Subtree(unsigned int root) {
 			if (this->deviceRemovalIndex[n11] <= idx_root) // n2 already handled
 				continue;
 			if (visited_vertices[n2] == 2 && n11 != n1) {
-				this->GroupUpdater( { root, n1, n11, n2 }, 4); // update motif counter [r,n1,n11,n2]
+				unsigned int arr[] = { root, n1, n11, n2 };
+				this->GroupUpdater(arr , 4); // update motif counter [r,n1,n11,n2]
 			}												// end if
 		}										// end loop INNER FIRST NEIGHBORS
 	}											// end loop SECOND NEIGHBORS AGAIN
@@ -354,7 +364,8 @@ void GPUMotifCalculator::Motif4Subtree(unsigned int root) {
 					|| this->deviceRemovalIndex[n22] <= idx_root) // motif already handled
 				continue;
 			if (2 == visited_vertices[n21] && visited_vertices[n22] == 2) {
-				this->GroupUpdater( { root, n1, n21, n22 }, 4); // update motif counter [r,n1,n21,n22]
+				unsigned int arr[] =  { root, n1, n21, n22 };
+				this->GroupUpdater(arr , 4); // update motif counter [r,n1,n21,n22]
 			}
 		}
 	} // end loop SECOND NEIGHBOR COMBINATIONS
@@ -371,12 +382,14 @@ void GPUMotifCalculator::Motif4Subtree(unsigned int root) {
 			if (visited_vertices[n3] == -1) { // check if n3 was *not* visited
 				visited_vertices[n3] = 3;
 				if (visited_vertices[n2] == 2) { // check if n2 is a visited second neighbor
-					this->GroupUpdater( { root, n1, n2, n3 }, 4); // update motif counter [r,n1,n2,n3]
+					unsigned int arr[] =  { root, n1, n2, n3 };
+					this->GroupUpdater( arr, 4); // update motif counter [r,n1,n2,n3]
 				}					// end check if n2 is a visited second neighbor
 			}									// end check if n3 was not visited
 
 			else if (visited_vertices[n3] == 3 && visited_vertices[n2] == 2) {
-				this->GroupUpdater( { root, n1, n2, n3 }, 4); // update motif counter [r,n1,n2,n3]
+				unsigned int arr[] =  { root, n1, n2, n3 };
+				this->GroupUpdater( arr , 4); // update motif counter [r,n1,n2,n3]
 			}											   // end if
 		}												 // end loop THIRD NEIGHBORS
 	}							// end loop SECOND NEIGHBORS THIRD TIME'S THE CHARM
@@ -384,6 +397,7 @@ void GPUMotifCalculator::Motif4Subtree(unsigned int root) {
 	} // end loop FIRST NEIGHBORS
 }
 
+__device__
 bool GPUMotifCalculator::AreNeighbors(unsigned int p, unsigned int q) {
  // int64* deviceOriginalGraphOffsets;
  // unsigned int* deviceOriginalGraphNeighbors;
@@ -401,6 +415,7 @@ values.begin(), values.end(), output.begin(), thrust::less<unsigned int>()); // 
 return output[0];
 }
 
+__device__
 void GPUMotifCalculator::GroupUpdater(unsigned int group[], int size) {
  // TODO: count overall number of motifs in graph (maybe different class)?
 int groupNumber = GetGroupNumber(group, size);
@@ -411,6 +426,7 @@ for (int i = 0; i < size; i++)
 // where M is the number of motifs
 }
 
+__device__
 int GPUMotifCalculator::GetGroupNumber(unsigned int group[], int size) {
 int sum = 0;
 int power = 1;
