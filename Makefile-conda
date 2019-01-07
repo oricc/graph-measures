@@ -2,8 +2,9 @@
  
 PYTHON_VERSION = 3.7m
 PYTHON_VERSION_SHORT = 37
-PYTHON_LIB = $(CONDA_PREFIX)/lib/python3.7/config-3.7m-x86_64-linux-gnu/
-PYTHON_INCLUDE = $(CONDA_PREFIX)/include/python$(PYTHON_VERSION)
+PYTHON_INCLUDE =/home/coheno/anaconda3/include/python$(PYTHON_VERSION)
+PYTHON_LIB = /home/coheno/anaconda3/lib/python3.7/config-3.7m-x86_64-linux-gnu-lpython$(PYTHON_VERSION)
+
  
 # location of the Boost Python include files and library
  
@@ -28,7 +29,7 @@ UTILS_SRC_FILES := $(wildcard $(UTILS_SRC_DIR)/*.cpp)
 UTILS_OBJ_FILES := $(patsubst $(UTILS_SRC_DIR)/%.cpp,$(UTILS_OBJ_DIR)/%.o,$(UTILS_SRC_FILES))
 
 
-CFLAGS = -fPIC -c -Wno-deprecated-declarations
+CFLAGS = -fPIC -c -Wno-deprecated-declarations -std=c++11
 # compile mesh classes
 TARGET = LibExportMain
 FEATURE = ExampleFeatureCalculator
@@ -40,9 +41,16 @@ CACHE_GRAPH = CacheGraph
 CONVERTER = ConvertedGNXReciever
 FEATURE_TEMPLATE=FeatureCalculator
 
-
+#.PHONY:all clean
 accelerated_graph_features/$(OUTPUT_NAME).so: $(TARGET).o $(WRAPPER_OBJ_FILES) $(UTILS_OBJ_FILES) $(FEATURE_OBJ_FILES) $(CACHE_GRAPH).o $(FEATURE_TEMPLATE).o
 	g++ -shared -Wl,--export-dynamic $^ -L$(PYTHON_LIB) -lpython$(PYTHON_VERSION) -L$(BOOST_LIB) -lboost_python$(PYTHON_VERSION_SHORT)  -o $@
+
+
+#all:
+	# Create object directories (if they don't exist)
+#	for dir in $(FEATURE_OBJ_DIR) $(WRAPPER_OBJ_DIR) $(UTILS_OBJ_DIR); do\
+#		if ! [ -d dir]; then mkdir dir; fi\
+#	done\
 
 ################  Changes for each feature #######################
 $(FEATURE_OBJ_DIR)/%.o: $(FEATURE_SRC_DIR)/%.cpp $(INCLUDES_DIR)/%.h
@@ -61,6 +69,8 @@ $(WRAPPER_OBJ_DIR)/%.o: $(WRAPPER_SRC_DIR)/%.cpp $(WRAPPER_SRC_DIR)/%.h
 
 ############### From here, always the same #######################
 $(TARGET).o: $(TARGET).cpp
+	mkdir obj
+	mkdir $(FEATURE_OBJ_DIR) $(WRAPPER_OBJ_DIR) $(UTILS_OBJ_DIR)
 	g++  $^  $(CFLAGS) -I$(PYTHON_LIB) -I$(PYTHON_INCLUDE) -I$(BOOST_INC)
 	
 $(CACHE_GRAPH).o: arch/$(CACHE_GRAPH).cpp
