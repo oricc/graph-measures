@@ -12,7 +12,8 @@ void GPUMotifCalculator::init() {
 	CacheGraph inverse(true);
 	mGraph->InverseGraph(inverse);
 	mGraph->CureateUndirectedGraph(inverse, fullGraph);
-
+	this->numOfNodes = this->mGraph->GetNumberOfNodes();
+	this->numOfEdges = this->mGraph->GetNumberOfEdges();
 	//std::cout << "Load variations" << std::endl;
 	this->LoadMotifVariations(level, directed);
 	//std::cout << "All motifs" << std::endl;
@@ -41,7 +42,7 @@ GPUMotifCalculator::GPUMotifCalculator(int level, bool directed) :
 }
 
 void GPUMotifCalculator::InitFeatureCounters() {
-	for (int node = 0; node < mGraph->GetNumberOfNodes(); node++) {
+	for (int node = 0; node < numOfNodes; node++) {
 		vector<unsigned int> *motifCounter = new vector<unsigned int>;
 		std::set<int> s(this->allMotifs->begin(),
 				this->allMotifs->end());
@@ -114,10 +115,10 @@ void GPUMotifCalculator::SetSortedNodes() {
  */
 void GPUMotifCalculator::SetRemovalIndex() {
 	this->removalIndex = new std::vector<unsigned int>();
-	for (int i = 0; i < mGraph->GetNumberOfNodes(); i++) {
+	for (int i = 0; i < numOfNodes; i++) {
 		removalIndex->push_back(0);
 	}
-	for (unsigned int index = 0; index < mGraph->GetNumberOfNodes(); index++) {
+	for (unsigned int index = 0; index < numOfNodes; index++) {
 		auto node = sortedNodesByDegree->at(index);
 		removalIndex->at(node) = index;
 	}
@@ -126,24 +127,30 @@ void GPUMotifCalculator::SetRemovalIndex() {
 void GPUMotifCalculator::CopyAllToDevice() {
 	//TODO: fill!
 	// Motif Variations
-	this->deviceMotifVariations = *this->nodeVariations;
+	this->deviceMotifVariations = *(this->nodeVariations);
+	this->devicePointerMotifVariations = thrust::raw_pointer_cast(&deviceMotifVariations[0]);
 	// Removal index
-	this->deviceRemovalIndex = *this->removalIndex;
+	this->deviceRemovalIndex = *(this->removalIndex);
+	this->devicePointerRemovalIndex = thrust::raw_pointer_cast(&deviceRemovalIndex[0]);
+	//Sorted nodes
+	this->deviceSortedNodesByDegree = *(this->sortedNodesByDegree);
+	this->devicePointerSortedNodesByDegree = thrust::raw_pointer_cast(&deviceSortedNodesByDegree[0]);
+
 
 	// Feature matrix
-	unsigned int size = this->mGraph->GetNumberOfNodes()
+	unsigned int size = this->numOfNodes
 			* this->nodeVariations->size() * sizeof(unsigned int);
 	cudaMallocManaged(&(this->deviceFeatures), size);
 
 	// Original graph
 	cudaMallocManaged(&deviceOriginalGraphOffsets,
-			(this->mGraph->GetNumberOfNodes() + 1) * sizeof(int64));
+			(this->numOfNodes + 1) * sizeof(int64));
 	cudaMallocManaged(&deviceOriginalGraphNeighbors,
-			(this->mGraph->GetNumberOfEdges()) * sizeof(unsigned int));
+			(this->numOfEdges) * sizeof(unsigned int));
 	std::memcpy(deviceOriginalGraphOffsets, this->mGraph->GetOffsetList(),
-			(this->mGraph->GetNumberOfNodes() + 1) * sizeof(int64));
+			(this->numOfNodes + 1) * sizeof(int64));
 	std::memcpy(deviceOriginalGraphNeighbors, this->mGraph->GetNeighborList(),
-			(this->mGraph->GetNumberOfEdges()) * sizeof(unsigned int));
+			(this->numOfEdges) * sizeof(unsigned int));
 
 	// Full graph
 	cudaMallocManaged(&deviceFullGraphOffsets,
@@ -162,24 +169,24 @@ __global__
 void Motif3Kernel(GPUMotifCalculator *calc) {
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
 	int stride = blockDim.x * gridDim.x;
-	auto n = calc->mGraph->GetNumberOfNodes();
+	auto n = calc->numOfNodes;
 	for (int i = index; i < n; i += stride)
-		calc->Motif3Subtree(calc->sortedNodesByDegree->at(i));
+		calc->Motif3Subtree(calc->deviceSortedNodesByDegree[i]);
 }
 
 __global__
 void Motif4Kernel(GPUMotifCalculator *calc) {
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
 	int stride = blockDim.x * gridDim.x;
-	auto n = calc->mGraph->GetNumberOfNodes();
+	auto n = calc->numOfNodes;
 	for (int i = index; i < n; i += stride)
-		calc->Motif4Subtree(calc->sortedNodesByDegree->at(i));
+		calc->Motif4Subtree(calc->deviceSortedNodesByDegree[i]);
 }
 
 vector<vector<unsigned int> *> *GPUMotifCalculator::Calculate() {
 
 	int blockSize = 256;
-	int numBlocks = (this->mGraph->GetNumberOfNodes() + blockSize - 1)
+	int numBlocks = (this->numOfNodes + blockSize - 1)
 			/ blockSize;
 
 	if (this->level == 3) {
@@ -195,12 +202,12 @@ vector<vector<unsigned int> *> *GPUMotifCalculator::Calculate() {
 
 	// for (auto node : *(this->sortedNodesByDegree))
 	// 	Motif4Subtree(node);
-Motif4Kernel<<<numBlocks, blockSize>>>(this);
+	Motif4Kernel<<<numBlocks, blockSize>>>(this);
 }
 	//std::cout << "Done All" << std::endl;
 
 //TODO: convert the device features to the vector format
-for (int node = 0; node < this->mGraph->GetNumberOfNodes(); node++) {
+for (int node = 0; node < this->numOfNodes; node++) {
 vector<unsigned int>* current = new vector<unsigned int>();
 for (int motif = 0; motif < this->numOfMotifs; motif++) {
 	current->push_back(this->deviceFeatures[motif + this->numOfMotifs * node]);
@@ -215,8 +222,9 @@ __device__
 void GPUMotifCalculator::Motif3Subtree(unsigned int root) {
 	// Instead of yield call GroupUpdater function
 	// Don't forget to check each time that the nodes are in the graph (check removal index).
-int idx_root = this->deviceRemovalIndex[root];// root_idx is also our current iteration -
-thrust::device_vector<bool> visited_vertices(this->mGraph->GetNumberOfNodes()); // every node_idx smaller than root_idx is already handled
+int idx_root = this->devicePointerRemovalIndex[root];// root_idx is also our current iteration -
+bool visited_vertices[this->numOfNodes]; // every node_idx smaller than root_idx is already handled
+for(int i=0;i<this->numOfNodes;i++) visited_vertices[i] = false;
 visited_vertices[root] = true;
 
 const unsigned int *neighbors = this->deviceFullGraphNeighbors; // all neighbors - ancestors and descendants
@@ -225,16 +233,16 @@ const int64 *offsets = this->deviceFullGraphOffsets;
  // TODO problem with dual edges
  //std::cout << "Mark" << std::endl;
 for (int64 i = offsets[root]; i < offsets[root + 1]; i++) // loop first neighbors
-if (this->deviceRemovalIndex[neighbors[i]] > idx_root) // n1 not handled yet
+if (this->devicePointerRemovalIndex[neighbors[i]] > idx_root) // n1 not handled yet
 	visited_vertices[neighbors[i]] = true;
  //std::cout << "Mark" << std::endl;
 for (int64 n1_idx = offsets[root]; n1_idx < offsets[root + 1]; n1_idx++) { // loop first neighbors
 unsigned int n1 = neighbors[n1_idx];
-if (this->deviceRemovalIndex[n1] <= idx_root) // n1 already handled
+if (this->devicePointerRemovalIndex[n1] <= idx_root) // n1 already handled
 	continue;
 for (int64 n2_idx = offsets[n1]; n2_idx < offsets[n1 + 1]; n2_idx++) { // loop second neighbors
 	unsigned int n2 = neighbors[n2_idx];
-	if (this->deviceRemovalIndex[n2] <= idx_root) // n2 already handled
+	if (this->devicePointerRemovalIndex[n2] <= idx_root) // n2 already handled
 		continue;
 	if (visited_vertices[n2]) {					// check if n2 was visited &&
 		if (n1 < n2) {		// n2 is after n1 (stops counting the motif twice)
@@ -257,8 +265,8 @@ for (int64 i = offsets[root]; i < offsets[root + 1]; i++) {
 		unsigned int n1 = neighbors[i];
 		unsigned int n2 = neighbors[j];
 		//std::cout << "\t" << n1 << "," << n2 << std::endl;
-		if (this->deviceRemovalIndex[n1] <= idx_root
-				|| this->deviceRemovalIndex[n2] <= idx_root) // motif already handled
+		if (this->devicePointerRemovalIndex[n1] <= idx_root
+				|| this->devicePointerRemovalIndex[n2] <= idx_root) // motif already handled
 			continue;
 		//std::cout << "Mark1" << std::endl;
 		//std::cout << (visited_vertices[n1] < visited_vertices[n2]) << std::endl;
@@ -277,8 +285,8 @@ for (int64 i = offsets[root]; i < offsets[root + 1]; i++) {
 __device__
 void GPUMotifCalculator::Motif4Subtree(unsigned int root) {
 int idx_root = this->deviceRemovalIndex[root]; // root_idx is also our current iteration -
-thrust::device_vector<short> visited_vertices(this->mGraph->GetNumberOfNodes()); // every node_idx smaller than root_idx is already handled
-thrust::fill(visited_vertices.begin(), visited_vertices.end(), -1);
+short visited_vertices[this->numOfNodes]; // every node_idx smaller than root_idx is already handled
+for(int i=0;i<this->numOfNodes;i++) visited_vertices[i] = -1;
 visited_vertices[root] = 0;
 
 const unsigned int *neighbors = this->deviceFullGraphNeighbors; // all neighbors - ancestors and descendants
@@ -286,7 +294,7 @@ const int64 *offsets = this->deviceFullGraphOffsets;
 
  // TODO problem with dual edges
 for (int64 i = offsets[root]; i < offsets[root + 1]; i++) // loop first neighbors
-if (this->deviceRemovalIndex[neighbors[i]] > idx_root) // n1 not handled yet
+if (this->devicePointerRemovalIndex[neighbors[i]] > idx_root) // n1 not handled yet
 	visited_vertices[neighbors[i]] = 1;
 
 /*
@@ -306,9 +314,9 @@ for (int64 j = i + 1; j < end; j++) {
 		unsigned int n11 = neighbors[i];
 		unsigned int n12 = neighbors[j];
 		unsigned int n13 = neighbors[k];
-		if (this->deviceRemovalIndex[n11] <= idx_root
-				|| this->deviceRemovalIndex[n12] <= idx_root
-				|| this->deviceRemovalIndex[n13] <= idx_root) // motif already handled
+		if (this->devicePointerRemovalIndex[n11] <= idx_root
+				|| this->devicePointerRemovalIndex[n12] <= idx_root
+				|| this->devicePointerRemovalIndex[n13] <= idx_root) // motif already handled
 			continue;
 		unsigned int arr[] = { root, n11, n12, n13 };
 		this->GroupUpdater(arr, 4); // update motif counter [r,n11,n12,n13]
@@ -319,12 +327,12 @@ for (int64 j = i + 1; j < end; j++) {
  // All other cases
 for (int64 n1_idx = offsets[root]; n1_idx < offsets[root + 1]; n1_idx++) { // loop first neighbors
 unsigned int n1 = neighbors[n1_idx];
-if (this->deviceRemovalIndex[n1] <= idx_root) // n1 already handled
+if (this->devicePointerRemovalIndex[n1] <= idx_root) // n1 already handled
 	continue;
 //Mark second neighbors
 for (int64 n2_idx = offsets[n1]; n2_idx < offsets[n1 + 1]; n2_idx++) { // loop second neighbors
 	unsigned int n2 = neighbors[n2_idx];
-	if (this->deviceRemovalIndex[n2] <= idx_root) // n2 already handled
+	if (this->devicePointerRemovalIndex[n2] <= idx_root) // n2 already handled
 		continue;
 	if (visited_vertices[n2] == -1) { // check if n2 was *not* visited
 		visited_vertices[n2] = 2;
@@ -335,12 +343,12 @@ for (int64 n2_idx = offsets[n1]; n2_idx < offsets[n1 + 1]; n2_idx++) { // loop s
 // The case of root-n1-n2-n11
 for (int64 n2_idx = offsets[n1]; n2_idx < offsets[n1 + 1]; n2_idx++) { // loop second neighbors (again)
 	unsigned int n2 = neighbors[n2_idx];
-	if (this->deviceRemovalIndex[n2] <= idx_root) // n2 already handled
+	if (this->devicePointerRemovalIndex[n2] <= idx_root) // n2 already handled
 		continue;
 	for (int64 n11_idx = offsets[root]; n11_idx < offsets[root + 1];
 			n11_idx++) { // loop first neighbors
 		unsigned int n11 = neighbors[n11_idx];
-		if (this->deviceRemovalIndex[n11] <= idx_root) // n2 already handled
+		if (this->devicePointerRemovalIndex[n11] <= idx_root) // n2 already handled
 			continue;
 		if (visited_vertices[n2] == 2 && n11 != n1) {
 			unsigned int arr[] = { root, n1, n11, n2 };
@@ -361,8 +369,8 @@ for (int64 i = offsets[n1]; i < end; i++) {
 
 		unsigned int n21 = neighbors[i];
 		unsigned int n22 = neighbors[j];
-		if (this->deviceRemovalIndex[n21] <= idx_root
-				|| this->deviceRemovalIndex[n22] <= idx_root) // motif already handled
+		if (this->devicePointerRemovalIndex[n21] <= idx_root
+				|| this->devicePointerRemovalIndex[n22] <= idx_root) // motif already handled
 			continue;
 		if (2 == visited_vertices[n21] && visited_vertices[n22] == 2) {
 			unsigned int arr[] = { root, n1, n21, n22 };
@@ -374,11 +382,11 @@ for (int64 i = offsets[n1]; i < end; i++) {
 //The case of n1-n2-n3
 for (int64 n2_idx = offsets[n1]; n2_idx < offsets[n1 + 1]; n2_idx++) { // loop second neighbors (third time's the charm)
 	unsigned int n2 = neighbors[n2_idx];
-	if (this->deviceRemovalIndex[n2] <= idx_root) // n2 already handled
+	if (this->devicePointerRemovalIndex[n2] <= idx_root) // n2 already handled
 		continue;
 	for (int64 n3_idx = offsets[n2]; n3_idx < offsets[n2 + 1]; n3_idx++) { // loop third neighbors
 		unsigned int n3 = neighbors[n3_idx];
-		if (this->deviceRemovalIndex[n3] <= idx_root) // n2 already handled
+		if (this->devicePointerRemovalIndex[n3] <= idx_root) // n2 already handled
 			continue;
 		if (visited_vertices[n3] == -1) { // check if n3 was *not* visited
 			visited_vertices[n3] = 3;
@@ -400,64 +408,74 @@ for (int64 n2_idx = offsets[n1]; n2_idx < offsets[n1 + 1]; n2_idx++) { // loop s
 
 __device__
 bool GPUMotifCalculator::AreNeighbors(unsigned int p, unsigned int q) {
- // int64* deviceOriginalGraphOffsets;
- // unsigned int* deviceOriginalGraphNeighbors;
-thrust::device_ptr<unsigned int> neighbor_ptr( // @suppress("Type cannot be resolved") // @suppress("Symbol is not resolved")
-	this->deviceOriginalGraphNeighbors);
-int64 begin_offset = deviceOriginalGraphOffsets[p];
-int64 end_offset = deviceOriginalGraphOffsets[p + 1];
+	 // int64* deviceOriginalGraphOffsets;
+	 // unsigned int* deviceOriginalGraphNeighbors;
+	unsigned int first = deviceOriginalGraphOffsets[p],  //first array element
+				last = deviceOriginalGraphOffsets[p + 1] - 1,     //last array element
+				middle;                       //mid point of search
 
-thrust::device_vector<unsigned int> values(1); // @suppress("Type cannot be resolved") // @suppress("Symbol is not resolved")
-values[0] = q;
-thrust::device_vector<bool> output(1); // @suppress("Type cannot be resolved") // @suppress("Symbol is not resolved")
-thrust::binary_search(neighbor_ptr + begin_offset, neighbor_ptr + end_offset, // @suppress("Function cannot be resolved")
-values.begin(), values.end(), output.begin(), thrust::less<unsigned int>()); // @suppress("Function cannot be resolved")
+		while (first <= last) {
+			middle = (first + last) / 2; //this finds the mid point
+			//std::cout << "Binary search: " << middle << std::endl;
+			//TODO: fix overflow problem
+			if (deviceOriginalGraphNeighbors[middle] == q) {
+				return true;
+			} else if (middle == 0) {
+				// and the element is not here
+				return false;
+			} else if (deviceOriginalGraphNeighbors[middle] > q) // if it's in the lower half
+					{
+				last = middle - 1;
+			} else {
+				first = middle + 1;      //if it's in the upper half
+			}
+		}
+		return false;  // not found
 
-return output[0];
 }
 
 __device__
 void GPUMotifCalculator::GroupUpdater(unsigned int group[], int size) {
- // TODO: count overall number of motifs in graph (maybe different class)?
-int groupNumber = GetGroupNumber(group, size);
-int motifNumber = (this->deviceMotifVariations)[groupNumber];
-if (motifNumber != -1)
-for (int i = 0; i < size; i++)
-	atomicAdd(deviceFeatures + (motifNumber + this->numOfMotifs * group[i]), 1); //atomic add + access as 1D array : features[motif + M*node] // @suppress("Function cannot be resolved")
-// where M is the number of motifs
+	 // TODO: count overall number of motifs in graph (maybe different class)?
+	int groupNumber = GetGroupNumber(group, size);
+	int motifNumber = (this->devicePointerMotifVariations)[groupNumber];
+	if (motifNumber != -1)
+	for (int i = 0; i < size; i++)
+		atomicAdd(deviceFeatures + (motifNumber + this->numOfMotifs * group[i]), 1); //atomic add + access as 1D array : features[motif + M*node] // @suppress("Function cannot be resolved")
+	// where M is the number of motifs
 }
 
 __device__
 int GPUMotifCalculator::GetGroupNumber(unsigned int group[], int size) {
-int sum = 0;
-int power = 1;
-bool hasEdge;
-if (directed) {
-// Use permutations
-for (int i = 0; i < size; i++) {
-	for (int j = 0; j < size; j++) {
-		if (i != j) {
+	int sum = 0;
+	int power = 1;
+	bool hasEdge;
+	if (directed) {
+	// Use permutations
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < size; j++) {
+			if (i != j) {
+				hasEdge = this->AreNeighbors(group[i], group[j]);
+				if (hasEdge)
+					sum += power;
+				power *= 2;
+			}
+		}
+	}
+	} else {
+	// Use combinations
+	for (int i = 0; i < size; i++) {
+		for (int j = i + 1; j < size; j++) {
+	
 			hasEdge = this->AreNeighbors(group[i], group[j]);
 			if (hasEdge)
 				sum += power;
 			power *= 2;
 		}
 	}
-}
-} else {
-// Use combinations
-for (int i = 0; i < size; i++) {
-	for (int j = i + 1; j < size; j++) {
-
-		hasEdge = this->AreNeighbors(group[i], group[j]);
-		if (hasEdge)
-			sum += power;
-		power *= 2;
+	
 	}
-}
-
-}
-return sum;
+	return sum;
 }
 
 GPUMotifCalculator::~GPUMotifCalculator() {

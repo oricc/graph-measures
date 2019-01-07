@@ -70,10 +70,19 @@ private:
 	vector<vector<unsigned int>*>* features;
 
 	unsigned int numOfMotifs;
+	unsigned int numOfNodes;
 
 	// DEVICE VARIABLES
 	thrust::device_vector<unsigned int> deviceMotifVariations; // @suppress("Type cannot be resolved")// @suppress("Symbol is not resolved")
 	thrust::device_vector<unsigned int> deviceRemovalIndex; // @suppress("Type cannot be resolved") // @suppress("Symbol is not resolved")
+	thrust::device_vector<unsigned int> deviceSortedNodesByDegree;// @suppress("Type cannot be resolved") // @suppress("Symbol is not resolved")
+
+	//Pointers to the device vectors declared above - no need to delete as the device_vectors live on the stack
+	unsigned int* devicePointerMotifVariations;
+	unsigned int* devicePointerRemovalIndex;
+	unsigned int* devicePointerSortedNodesByDegree;
+
+
 
 	// For the original graph
 	int64* deviceOriginalGraphOffsets;
