@@ -11,14 +11,6 @@ void BoostDefGPUMotifCalculator() {
 	def("motif_gpu", GPUMotifCalculatorWrapper);
 }
 
-py::list convertVectorOfVectorsTo2DList(vector<vector<unsigned int>*>* vec) {
-	py::list mainList;
-	for (auto l : *vec) {
-		mainList.append(vectorToPythonList<unsigned int>(*l));
-	}
-	return mainList;
-
-}
 
 py::list GPUMotifCalculatorWrapper(dict converted_dict,int level) {
 	bool directed = extract<bool>(converted_dict["directed"]);
