@@ -126,19 +126,29 @@ void GPUMotifCalculator::SetRemovalIndex() {
 }
 
 void GPUMotifCalculator::CopyAllToDevice() {
-	// Motif Variations
-	thrust::device_vector<unsigned int> deviceMotifVariations; // @suppress("Type cannot be resolved")// @suppress("Symbol is not resolved")
-	thrust::device_vector<unsigned int> deviceRemovalIndex; // @suppress("Type cannot be resolved") // @suppress("Symbol is not resolved")
-	thrust::device_vector<unsigned int> deviceSortedNodesByDegree;// @suppress("Type cannot be resolved") // @suppress("Symbol is not resolved")
+//	thrust::device_vector<unsigned int> deviceMotifVariations; // @suppress("Type cannot be resolved")// @suppress("Symbol is not resolved")
+//	thrust::device_vector<unsigned int> deviceRemovalIndex; // @suppress("Type cannot be resolved") // @suppress("Symbol is not resolved")
+//	thrust::device_vector<unsigned int> deviceSortedNodesByDegree;// @suppress("Type cannot be resolved") // @suppress("Symbol is not resolved")
 
-	deviceMotifVariations = *(this->nodeVariations);
-	this->devicePointerMotifVariations = thrust::raw_pointer_cast(&deviceMotifVariations[0]);
+	/*
+	 * 1) Allocate unified memory
+	 * 2) Copy vectors to the memory
+	 * 3) delete the memory in d'tor
+	 */
+
+//	deviceMotifVariations = *(this->nodeVariations);
+//	this->devicePointerMotifVariations = thrust::raw_pointer_cast(&deviceMotifVariations[0]);
+	cudaMallocManaged(&(this->devicePointerMotifVariations), nodeVariations.size() * sizeof(unsigned int));
+	std::memcpy(this->devicePointerMotifVariations,this->nodeVariations.data(),nodeVariations.size() * sizeof(unsigned int));
 	// Removal index
-	deviceRemovalIndex = *(this->removalIndex);
-	this->devicePointerRemovalIndex = thrust::raw_pointer_cast(&deviceRemovalIndex[0]);
+//	deviceRemovalIndex = *(this->removalIndex);
+	cudaMallocManaged(&(this->devicePointerRemovalIndex), removalIndex.size() * sizeof(unsigned int));
+	std::memcpy(this->devicePointerRemovalIndex,this->removalIndex.data(),removalIndex.size() * sizeof(unsigned int));
 	//Sorted nodes
-	deviceSortedNodesByDegree = *(this->sortedNodesByDegree);
-	this->devicePointerSortedNodesByDegree = thrust::raw_pointer_cast(&deviceSortedNodesByDegree[0]);
+//	deviceSortedNodesByDegree = *(this->sortedNodesByDegree);
+//	this->devicePointerSortedNodesByDegree = thrust::raw_pointer_cast(&deviceSortedNodesByDegree[0]);
+	cudaMallocManaged(&(this->devicePointerSortedNodesByDegree), sortedNodesByDegree.size() * sizeof(unsigned int));
+	std::memcpy(this->devicePointerSortedNodesByDegree,this->sortedNodesByDegree.data(),sortedNodesByDegree.size() * sizeof(unsigned int));
 
 
 	// Feature matrix
@@ -493,6 +503,11 @@ delete removalIndex;
 //the nodes, sorted in descending order by the degree.
 delete sortedNodesByDegree;
 
+// Memory resources
+
+cudaFree(devicePointerMotifVariations);
+cudaFree(devicePointerRemovalIndex);
+cudaFree(devicePointerSortedNodesByDegree);
  // For the original graph
 cudaFree (deviceOriginalGraphOffsets); // @suppress("Function cannot be resolved")
 cudaFree (deviceOriginalGraphNeighbors); // @suppress("Function cannot be resolved")
