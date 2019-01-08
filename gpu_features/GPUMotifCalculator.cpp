@@ -149,10 +149,16 @@ void GPUMotifCalculator::CopyAllToDevice() {
 //	this->devicePointerMotifVariations = thrust::raw_pointer_cast(&deviceMotifVariations[0]);
 	int i = 0;
 	std::cout << "Checker: " << i++ << std::endl;
-	cudaMallocManaged(&(this->devicePointerMotifVariations),
-			nodeVariations->size() * sizeof(unsigned int));
+	gpuErrchk(cudaMallocManaged(&(this->devicePointerMotifVariations),
+			nodeVariations->size() * sizeof(unsigned int)));
+	std::cout << "between"<<std::endl;
+	
+	std::cout << this->nodeVariations->data()[0] <<std::endl;
+	
+	std::cout << this->nodeVariations->size() <<std::endl;
+
 	std::memcpy(this->devicePointerMotifVariations,
-			this->nodeVariations->data(),
+			&((*(this->nodeVariations))[0]),
 			nodeVariations->size() * sizeof(unsigned int));
 	// Removal index
 //	deviceRemovalIndex = *(this->removalIndex);
