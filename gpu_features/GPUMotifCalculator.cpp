@@ -8,6 +8,17 @@
 #include "../includes/GPUMotifCalculator.h"
 #include "../includes/MotifVariationConstants.h"
 
+#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
+inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true)
+{
+   if (code != cudaSuccess)
+   {
+      fprintf(stderr,"GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
+      if (abort) exit(code);
+   }
+}
+
+
 void GPUMotifCalculator::init() {
 	CacheGraph inverse(true);
 	mGraph->InverseGraph(inverse);
@@ -137,43 +148,57 @@ void GPUMotifCalculator::CopyAllToDevice() {
 
 //	deviceMotifVariations = *(this->nodeVariations);
 //	this->devicePointerMotifVariations = thrust::raw_pointer_cast(&deviceMotifVariations[0]);
+	int checker = 0;
+	std::cout << "Checker: " << i++ <<std::endl;
 	cudaMallocManaged(&(this->devicePointerMotifVariations), nodeVariations->size() * sizeof(unsigned int));
 	std::memcpy(this->devicePointerMotifVariations,this->nodeVariations->data(),nodeVariations->size() * sizeof(unsigned int));
 	// Removal index
 //	deviceRemovalIndex = *(this->removalIndex);
+	std::cout << "Checker: " << i++ <<std::endl;
 	cudaMallocManaged(&(this->devicePointerRemovalIndex), removalIndex->size() * sizeof(unsigned int));
 	std::memcpy(this->devicePointerRemovalIndex,this->removalIndex->data(),removalIndex->size() * sizeof(unsigned int));
 	//Sorted nodes
 //	deviceSortedNodesByDegree = *(this->sortedNodesByDegree);
 //	this->devicePointerSortedNodesByDegree = thrust::raw_pointer_cast(&deviceSortedNodesByDegree[0]);
+	std::cout << "Checker: " << i++ <<std::endl;
 	cudaMallocManaged(&(this->devicePointerSortedNodesByDegree), sortedNodesByDegree->size() * sizeof(unsigned int));
 	std::memcpy(this->devicePointerSortedNodesByDegree,this->sortedNodesByDegree->data(),sortedNodesByDegree->size() * sizeof(unsigned int));
 
 
 	// Feature matrix
+	std::cout << "Checker: " << i++ <<std::endl;
 	unsigned int size = this->numOfNodes
 			* this->nodeVariations->size() * sizeof(unsigned int);
 	cudaMallocManaged(&(this->deviceFeatures), size);
 
 	// Original graph
+	std::cout << "Checker: " << i++ <<std::endl;
 	cudaMallocManaged(&deviceOriginalGraphOffsets,
 			(this->numOfNodes + 1) * sizeof(int64));
+	std::cout << "Checker: " << i++ <<std::endl;
 	cudaMallocManaged(&deviceOriginalGraphNeighbors,
 			(this->numOfEdges) * sizeof(unsigned int));
+	std::cout << "Checker: " << i++ <<std::endl;
 	std::memcpy(deviceOriginalGraphOffsets, this->mGraph->GetOffsetList(),
 			(this->numOfNodes + 1) * sizeof(int64));
+	std::cout << "Checker: " << i++ <<std::endl;
 	std::memcpy(deviceOriginalGraphNeighbors, this->mGraph->GetNeighborList(),
 			(this->numOfEdges) * sizeof(unsigned int));
 
 	// Full graph
+	std::cout << "Checker: " << i++ <<std::endl;
 	cudaMallocManaged(&deviceFullGraphOffsets,
 			(this->fullGraph.GetNumberOfNodes() + 1) * sizeof(int64));
+	std::cout << "Checker: " << i++ <<std::endl;
 	cudaMallocManaged(&deviceFullGraphNeighbors,
 			(this->fullGraph.GetNumberOfEdges()) * sizeof(unsigned int));
+	std::cout << "Checker: " << i++ <<std::endl;
 	std::memcpy(deviceOriginalGraphOffsets, this->fullGraph.GetOffsetList(),
 			(this->fullGraph.GetNumberOfNodes() + 1) * sizeof(int64));
+	std::cout << "Checker: " << i++ <<std::endl;
 	std::memcpy(deviceOriginalGraphNeighbors, this->fullGraph.GetNeighborList(),
 			(this->fullGraph.GetNumberOfEdges()) * sizeof(unsigned int));
+	std::cout << "Checker: " << i++ <<std::endl;
 
 }
 
@@ -218,7 +243,8 @@ vector<vector<unsigned int> *> *GPUMotifCalculator::Calculate() {
 	Motif4Kernel<<<numBlocks, blockSize>>>(this);
 }
 	//std::cout << "Done All" << std::endl;
-
+gpuErrchk( cudaPeekAtLastError() );
+gpuErrchk( cudaDeviceSynchronize() );
 //TODO: convert the device features to the vector format
 for (int node = 0; node < this->numOfNodes; node++) {
 vector<unsigned int>* current = new vector<unsigned int>();
