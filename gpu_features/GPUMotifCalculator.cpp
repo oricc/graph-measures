@@ -147,7 +147,7 @@ void GPUMotifCalculator::CopyAllToDevice() {
 
 //	deviceMotifVariations = *(this->nodeVariations);
 //	this->devicePointerMotifVariations = thrust::raw_pointer_cast(&deviceMotifVariations[0]);
-	int checker = 0;
+	int i = 0;
 	std::cout << "Checker: " << i++ << std::endl;
 	cudaMallocManaged(&(this->devicePointerMotifVariations),
 			nodeVariations->size() * sizeof(unsigned int));
