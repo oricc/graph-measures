@@ -71,6 +71,9 @@ def motif(graph, **kwargs):
     except KeyError:
         raise AttributeError('Level must be specified!')
 
-    res = feat.motif(graph, level)
-
+    gpu = kwargs.get('gpu',False)
+    if not gpu:
+        res = feat.motif(graph, level)
+    else:
+        res = feat.motif_gpu(graph,level)
     return res
