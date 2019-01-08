@@ -163,8 +163,8 @@ void GPUMotifCalculator::CopyAllToDevice() {
 	// Removal index
 //	deviceRemovalIndex = *(this->removalIndex);
 	std::cout << "Checker: " << i++ << std::endl;
-	cudaMallocManaged(&(this->devicePointerRemovalIndex),
-			removalIndex->size() * sizeof(unsigned int));
+	gpuErrchk(cudaMallocManaged(&(this->devicePointerRemovalIndex),
+			removalIndex->size() * sizeof(unsigned int)));
 	std::memcpy(this->devicePointerRemovalIndex, this->removalIndex->data(),
 			removalIndex->size() * sizeof(unsigned int));
 	//Sorted nodes
