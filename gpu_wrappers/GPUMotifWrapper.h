@@ -12,7 +12,7 @@
 #include "../includes/GPUMotifCalculator.h"
 
 void BoostDefGPUMotifCalculator();
-float GPUMotifCalculatorWrapper(dict converted_graph);
+py::list GPUMotifCalculatorWrapper(dict converted_graph,int level);
 
 
 #endif /* WRAPPERS_EXAMPLEWRAPPER_H_ */

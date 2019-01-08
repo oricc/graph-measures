@@ -43,8 +43,8 @@ UTILS_OBJ_FILES := $(patsubst $(UTILS_SRC_DIR)/%.cpp,$(UTILS_OBJ_DIR)/%.o,$(UTIL
 INCLUDES_DIR = includes
 
 
-CFLAGS = -fPIC -c -Wno-deprecated-declarations -std=c++11
-NVFLAGS = -x cu -dc
+CFLAGS = -fPIC -c -std=c++11
+NVFLAGS = -x cu -dc -Xcompiler 
 # compile mesh classes
 TARGET = LibExportMain
 FEATURE = ExampleFeatureCalculator
@@ -58,8 +58,8 @@ FEATURE_TEMPLATE=FeatureCalculator
 
 .PHONY:clean preScript
 accelerated_graph_features/$(OUTPUT_NAME).so: $(TARGET).o $(WRAPPER_OBJ_FILES) $(UTILS_OBJ_FILES) $(FEATURE_OBJ_FILES) $(GPU_FEATURE_OBJ_FILES) $(GPU_WRAPPER_OBJ_FILES) $(CACHE_GRAPH).o $(FEATURE_TEMPLATE).o
-	$(NVCC) -arch=sm_35 -dlink $(GPU_FEATURE_OBJ_FILES) $(GPU_WRAPPER_OBJ_FILES) -o gpuCode.o
-	g++ -shared -Wl,--export-dynamic $^ gpuCode.o -L$(PYTHON_LIB) -lpython$(PYTHON_VERSION) -L$(BOOST_LIB) -lboost_python$(PYTHON_VERSION_SHORT) -L$(NVLIB) -lcudart -o $@
+	$(NVCC) -arch=sm_35 -dlink -Xcompiler -fPIC -std=c++11 $(TARGET).o $(GPU_FEATURE_OBJ_FILES) $(GPU_WRAPPER_OBJ_FILES) -o obj/gpuCode.o
+	g++ -shared -Wl,--export-dynamic $^ obj/gpuCode.o -L$(PYTHON_LIB) -lpython$(PYTHON_VERSION) -L$(BOOST_LIB) -lboost_python$(PYTHON_VERSION_SHORT) -L$(NVLIB) -lcudart -o $@
 
 
 ################  Changes for each feature #######################
@@ -70,10 +70,10 @@ $(WRAPPER_OBJ_DIR)/%.o: $(WRAPPER_SRC_DIR)/%.cpp $(WRAPPER_SRC_DIR)/%.h
 	g++ $(CFLAGS) -I$(PYTHON_LIB) -I$(PYTHON_INCLUDE) -I$(BOOST_INC) -o $@ $<
 
 $(GPU_FEATURE_OBJ_DIR)/%.o: $(GPU_FEATURE_SRC_DIR)/%.cpp $(INCLUDES_DIR)/%.h
-	$(NVCC) $(NVFLAGS) -Xcompiler  $(CFLAGS) -o $@ $<
+	$(NVCC) $(NVFLAGS) $(CFLAGS) -o $@ $<
 
 $(GPU_WRAPPER_OBJ_DIR)/%.o: $(GPU_WRAPPER_SRC_DIR)/%.cpp $(GPU_WRAPPER_SRC_DIR)/%.h
-	$(NVCC) $(NVFLAGS) -Xcompiler $(CFLAGS) -I$(PYTHON_LIB) -I$(PYTHON_INCLUDE) -I$(BOOST_INC) -o $@ $<
+	$(NVCC) $(NVFLAGS) $(CFLAGS) -I$(PYTHON_LIB) -I$(PYTHON_INCLUDE) -I$(BOOST_INC) -o $@ $<
 
 
 
@@ -86,11 +86,11 @@ $(GPU_WRAPPER_OBJ_DIR)/%.o: $(GPU_WRAPPER_SRC_DIR)/%.cpp $(GPU_WRAPPER_SRC_DIR)/
 ############### From here, always the same #######################
 preScript:
 	mkdir -p obj
-	mkdir -p $(FEATURE_OBJ_DIR) $(WRAPPER_OBJ_DIR) $(UTILS_OBJ_DIR) $(GPU_WRAPPER_SRC_DIR)
+	mkdir -p $(FEATURE_OBJ_DIR) $(WRAPPER_OBJ_DIR) $(UTILS_OBJ_DIR) $(GPU_FEATURE_OBJ_DIR) $(GPU_WRAPPER_OBJ_DIR)
 
 $(TARGET).o:$(TARGET).cpp preScript 
-	g++  $<  $(CFLAGS) -I$(PYTHON_LIB) -I$(PYTHON_INCLUDE) -I$(BOOST_INC)
-	
+	$(NVCC) $(NVFLAGS) $(CFLAGS) -I$(PYTHON_LIB) -I$(PYTHON_INCLUDE) -I$(BOOST_INC) $< -o $@ 	
+
 $(CACHE_GRAPH).o: arch/$(CACHE_GRAPH).cpp
 	g++ $(CFLAGS) $^
 
