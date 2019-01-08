@@ -171,8 +171,8 @@ void GPUMotifCalculator::CopyAllToDevice() {
 //	deviceSortedNodesByDegree = *(this->sortedNodesByDegree);
 //	this->devicePointerSortedNodesByDegree = thrust::raw_pointer_cast(&deviceSortedNodesByDegree[0]);
 	std::cout << "Checker: " << i++ << std::endl;
-	cudaMallocManaged(&(this->devicePointerSortedNodesByDegree),
-			sortedNodesByDegree->size() * sizeof(unsigned int));
+	gpuErrchk(cudaMallocManaged(&(this->devicePointerSortedNodesByDegree),
+			sortedNodesByDegree->size() * sizeof(unsigned int)));
 	std::memcpy(this->devicePointerSortedNodesByDegree,
 			this->sortedNodesByDegree->data(),
 			sortedNodesByDegree->size() * sizeof(unsigned int));
@@ -184,15 +184,15 @@ void GPUMotifCalculator::CopyAllToDevice() {
 	unsigned int size = this->numOfNodes * this->nodeVariations->size()
 			* sizeof(unsigned int);
 	std::cout << "between" << std::endl;
-	cudaMallocManaged(&(this->deviceFeatures), size);
+	gpuErrchk(cudaMallocManaged(&(this->deviceFeatures), size));
 
 	// Original graph
 	std::cout << "Checker: " << i++ << std::endl;
-	cudaMallocManaged(&deviceOriginalGraphOffsets,
-			(this->numOfNodes + 1) * sizeof(int64));
+	gpuErrchk(cudaMallocManaged(&deviceOriginalGraphOffsets,
+			(this->numOfNodes + 1) * sizeof(int64)));
 	std::cout << "Checker: " << i++ << std::endl;
-	cudaMallocManaged(&deviceOriginalGraphNeighbors,
-			(this->numOfEdges) * sizeof(unsigned int));
+	gpuErrchk(cudaMallocManaged(&deviceOriginalGraphNeighbors,
+			(this->numOfEdges) * sizeof(unsigned int)));
 	std::cout << "Checker: " << i++ << std::endl;
 	std::memcpy(deviceOriginalGraphOffsets, this->mGraph->GetOffsetList(),
 			(this->numOfNodes + 1) * sizeof(int64));
@@ -202,11 +202,11 @@ void GPUMotifCalculator::CopyAllToDevice() {
 
 	// Full graph
 	std::cout << "Checker: " << i++ << std::endl;
-	cudaMallocManaged(&deviceFullGraphOffsets,
-			(this->fullGraph.GetNumberOfNodes() + 1) * sizeof(int64));
+	gpuErrchk(cudaMallocManaged(&deviceFullGraphOffsets,
+			(this->fullGraph.GetNumberOfNodes() + 1) * sizeof(int64)));
 	std::cout << "Checker: " << i++ << std::endl;
-	cudaMallocManaged(&deviceFullGraphNeighbors,
-			(this->fullGraph.GetNumberOfEdges()) * sizeof(unsigned int));
+	gpuErrchk(cudaMallocManaged(&deviceFullGraphNeighbors,
+			(this->fullGraph.GetNumberOfEdges()) * sizeof(unsigned int)));
 	std::cout << "Checker: " << i++ << std::endl;
 	std::memcpy(deviceOriginalGraphOffsets, this->fullGraph.GetOffsetList(),
 			(this->fullGraph.GetNumberOfNodes() + 1) * sizeof(int64));
