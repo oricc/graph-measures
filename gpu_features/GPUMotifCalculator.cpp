@@ -7,7 +7,6 @@
 
 #include "../includes/GPUMotifCalculator.h"
 #include "../includes/MotifVariationConstants.h"
-#include <thrust/device_vector.h>
 
 void GPUMotifCalculator::init() {
 	CacheGraph inverse(true);
@@ -15,20 +14,20 @@ void GPUMotifCalculator::init() {
 	mGraph->CureateUndirectedGraph(inverse, fullGraph);
 	this->numOfNodes = this->mGraph->GetNumberOfNodes();
 	this->numOfEdges = this->mGraph->GetNumberOfEdges();
-	//std::cout << "Load variations" << std::endl;
+	std::cout << "Load variations" << std::endl;
 	this->LoadMotifVariations(level, directed);
-	//std::cout << "All motifs" << std::endl;
+	std::cout << "All motifs" << std::endl;
 	this->SetAllMotifs();
-	//std::cout << "Sorted Nodes" << std::endl;
+	std::cout << "Sorted Nodes" << std::endl;
 	this->SetSortedNodes();
-	//std::cout << "Removal Index" << std::endl;
+	std::cout << "Removal Index" << std::endl;
 	this->SetRemovalIndex();
-	//std::cout << "Feature counters" << std::endl;
+	std::cout << "Feature counters" << std::endl;
 	this->InitFeatureCounters();
-
+	std::cout << "Copy to GPU" <<std::endl;
 	this->CopyAllToDevice();
-	//std::cout << "Done" << std::endl;
-	//std::cout << this->removalIndex->size() << std::endl;
+	std::cout << "Done" << std::endl;
+	std::cout << this->removalIndex->size() << std::endl;
 }
 
 GPUMotifCalculator::GPUMotifCalculator(int level, bool directed) :

@@ -15,6 +15,8 @@
 #include <string>
 #include <algorithm>
 #include <set>
+#include <iostream>
+#include <stdio.h>
 
 
 
