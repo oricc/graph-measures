@@ -138,17 +138,17 @@ void GPUMotifCalculator::CopyAllToDevice() {
 
 //	deviceMotifVariations = *(this->nodeVariations);
 //	this->devicePointerMotifVariations = thrust::raw_pointer_cast(&deviceMotifVariations[0]);
-	cudaMallocManaged(&(this->devicePointerMotifVariations), nodeVariations.size() * sizeof(unsigned int));
-	std::memcpy(this->devicePointerMotifVariations,this->nodeVariations.data(),nodeVariations.size() * sizeof(unsigned int));
+	cudaMallocManaged(&(this->devicePointerMotifVariations), nodeVariations->size() * sizeof(unsigned int));
+	std::memcpy(this->devicePointerMotifVariations,this->nodeVariations->data(),nodeVariations->size() * sizeof(unsigned int));
 	// Removal index
 //	deviceRemovalIndex = *(this->removalIndex);
-	cudaMallocManaged(&(this->devicePointerRemovalIndex), removalIndex.size() * sizeof(unsigned int));
-	std::memcpy(this->devicePointerRemovalIndex,this->removalIndex.data(),removalIndex.size() * sizeof(unsigned int));
+	cudaMallocManaged(&(this->devicePointerRemovalIndex), removalIndex->size() * sizeof(unsigned int));
+	std::memcpy(this->devicePointerRemovalIndex,this->removalIndex->data(),removalIndex->size() * sizeof(unsigned int));
 	//Sorted nodes
 //	deviceSortedNodesByDegree = *(this->sortedNodesByDegree);
 //	this->devicePointerSortedNodesByDegree = thrust::raw_pointer_cast(&deviceSortedNodesByDegree[0]);
-	cudaMallocManaged(&(this->devicePointerSortedNodesByDegree), sortedNodesByDegree.size() * sizeof(unsigned int));
-	std::memcpy(this->devicePointerSortedNodesByDegree,this->sortedNodesByDegree.data(),sortedNodesByDegree.size() * sizeof(unsigned int));
+	cudaMallocManaged(&(this->devicePointerSortedNodesByDegree), sortedNodesByDegree->size() * sizeof(unsigned int));
+	std::memcpy(this->devicePointerSortedNodesByDegree,this->sortedNodesByDegree->data(),sortedNodesByDegree->size() * sizeof(unsigned int));
 
 
 	// Feature matrix
