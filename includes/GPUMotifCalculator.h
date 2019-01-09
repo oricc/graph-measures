@@ -33,8 +33,7 @@ public:
 
 
 private:
-	__device__ void Motif3Subtree(unsigned int node);
-	__device__ void Motif4Subtree(unsigned int node);
+
 
 	void InitFeatureCounters();
 	void LoadMotifVariations(int level,bool directed);
@@ -94,6 +93,10 @@ private:
 
 __global__ void Motif3Kernel(GPUMotifCalculator* calc);
 __global__ void Motif4Kernel(GPUMotifCalculator* calc);
+
+__device__ void Motif3Subtree(unsigned int node);
+__device__ void Motif4Subtree(unsigned int node);
+
 __device__ void GroupUpdater(unsigned int group[], int size);
 __device__ int GetGroupNumber(unsigned int group[], int size);
 __device__ bool AreNeighbors(unsigned int p, unsigned int q);
