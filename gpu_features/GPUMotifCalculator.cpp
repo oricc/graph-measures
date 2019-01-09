@@ -89,6 +89,7 @@ void GPUMotifCalculator::InitFeatureCounters() {
 	for (int node = 0; node < numOfNodes; node++) {
 		vector<unsigned int> *motifCounter = new vector<unsigned int>;
 		std::set<int> s(this->allMotifs->begin(), this->allMotifs->end());
+		this->numOfMotifs = s.size()-1;
 		for (auto motif : s)
 			if (motif != -1)
 				//				(*motifCounter)[motif] = 0;
@@ -116,8 +117,7 @@ void GPUMotifCalculator::LoadMotifVariations(int level, bool directed) {
 	const int numOfMotifsOptions[4] = { 8, 64, 64, 4096 };
 
 	int variationIndex = 2 * (level - 3) + (directed ? 1 : 0);
-	this->numOfMotifs = numOfMotifsOptions[variationIndex];
-	this->nodeVariations = new std::vector<unsigned int>(numOfMotifs);
+	this->nodeVariations = new std::vector<unsigned int>(numOfMotifsOptions[variationIndex]);
 	std::istringstream f(motifVariations[variationIndex]);
 	std::string line;
 	std::string a, b;
@@ -323,15 +323,13 @@ vector<vector<unsigned int> *> *GPUMotifCalculator::Calculate() {
 	gpuErrchk(cudaDeviceSynchronize());
 	//TODO: convert the device features to the vector format
 	for (int node = 0; node < this->numOfNodes; node++) {
-		vector<unsigned int>* current = new vector<unsigned int>();
 		for (int motif = 0; motif < this->numOfMotifs; motif++) {
-			current->push_back(globalDeviceFeatures[motif + this->numOfMotifs * node]);
+			this->features->at(node)->at(motif) = globalDeviceFeatures[motif + this->numOfMotifs * node];
 			std::cout << globalDeviceFeatures[motif + this->numOfMotifs * node]<<"\t";
 		}
-		this->features->push_back(current);
 		std::cout <<std::endl;
 	}
-
+	std::cout << "Num of nodes: " << this->numOfNodes << " features len: " << this->features->size()<<std::endl;
 	return this->features;
 }
 
