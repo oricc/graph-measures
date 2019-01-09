@@ -19,10 +19,38 @@ matching_python_functions = {
     # 'page_rank': [node_page_rank, nx.pagerank]
     # 'BFSMoments': [bfs_moments, original_bfs_moments]
     # 'Motif3': [lambda G,timer: motif(G, level=3,timer=timer), lambda G: compare_motifs(G, level=3)]
-    'Motif4': [lambda G,timer: motif(G, level=4,timer=timer), lambda G: compare_motifs(G, level=4)]
+    # 'Motif4': [lambda G,timer: motif(G, level=4,timer=timer), lambda G: compare_motifs(G, level=4)]
+	'Motif3_GPU': {'cpp':lambda G,timer: motif(G, level=3,timer=timer),'gpu':lambda G,timer: motif(G, level=3,timer=timer,gpu=True)},
+	'Motif4_GPU': {'cpp':lambda G,timer: motif(G, level=4,timer=timer),'gpu':lambda G,timer: motif(G, level=4,timer=timer,gpu=True)},
 }
 
 SEED = 123456
+
+def benchmark_gpu_feature_regular_graph(feature_name, type='cpp', d=20):
+    assert type in ['cpp','python','gpu']
+	nodes = [50, 100, 500, 1000, 2000, 5000, 10000,100000]
+    if type is 'python':
+        titles = ['Feature calculation time']
+    else:
+        titles = ['Conversion Time', 'Feature calculation time']
+	
+	feature_type = type
+    timer = FeatureTimer(feature_name + '_{}_benchmark'.format(feature_type),
+                         titles=titles)
+
+    for n in nodes:
+        G = nx.random_regular_graph(d, n,seed=SEED)
+        run_id = '{}_nodes_and_{}_edges'.format(n, G.size())
+        print(run_id)
+        timer.start(run_id)
+        if type is 'python':
+            matching_python_functions[feature_name][type](G)
+        else:
+            matching_python_functions[feature_name][type](G, timer=timer)
+
+        if python:
+            timer.stop()
+
 
 
 def benchmark_feature_regular_graph(feature_name, python=False, d=20):
@@ -77,7 +105,13 @@ def benchmark_feature_erdos_renyi(feature_name, python=False, p=0.8):
         if python:
             timer.stop()
 
+def run_all_feature_with_gpu_tests_erdos_renyi():
+	for feature_name in matching_python_functions.keys():
+		print(feature_name)
+		benchmark_gpu_feature_regular_graph(feature_name,type='cpp')
+		benchmark_gpu_feature_regular_graph(feature_name,type='gpu')
 
+			
 def run_all_feature_tests_regular_graphs():
     for feature_name in matching_python_functions.keys():
         print(feature_name)
@@ -93,4 +127,4 @@ def run_all_feature_tests_erdos_renyi():
 
 
 if __name__ == '__main__':
-    run_all_feature_tests_regular_graphs()
+    run_all_feature_with_gpu_tests_erdos_renyi()
