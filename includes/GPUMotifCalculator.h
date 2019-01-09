@@ -30,11 +30,7 @@ public:
 	virtual vector<vector<unsigned int>*>* Calculate();
 	virtual ~GPUMotifCalculator();
 
-	__global__ friend void Motif3Kernel(GPUMotifCalculator* calc);
-	__global__ friend void Motif4Kernel(GPUMotifCalculator* calc);
-	__device__ friend void GroupUpdater(unsigned int group[], int size);
-	__device__ friend int GetGroupNumber(unsigned int group[], int size);
-	__device__ friend bool AreNeighbors(unsigned int p, unsigned int q);
+
 
 private:
 	__device__ void Motif3Subtree(unsigned int node);
@@ -96,6 +92,11 @@ private:
 	unsigned int* deviceFeatures;
 };
 
+__global__ void Motif3Kernel(GPUMotifCalculator* calc);
+__global__ void Motif4Kernel(GPUMotifCalculator* calc);
+__device__ void GroupUpdater(unsigned int group[], int size);
+__device__ int GetGroupNumber(unsigned int group[], int size);
+__device__ bool AreNeighbors(unsigned int p, unsigned int q);
 
 
 
