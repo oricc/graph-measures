@@ -181,21 +181,21 @@ void GPUMotifCalculator::CopyAllToDevice() {
 	//	deviceMotifVariations = *(this->nodeVariations);
 	//	this->devicePointerMotifVariations = thrust::raw_pointer_cast(&deviceMotifVariations[0]);
 	int i = 0;
-	std::cout << "Checker: " << i++ << std::endl;
+//	std::cout << "Checker: " << i++ << std::endl;
 	gpuErrchk(cudaMallocManaged(&(this->devicePointerMotifVariations),
 				nodeVariations->size() * sizeof(unsigned int)));
-	std::cout << "between"<<std::endl;
+//	std::cout << "between"<<std::endl;
 
-	std::cout << this->nodeVariations->data()[0] <<std::endl;
+//	std::cout << this->nodeVariations->data()[0] <<std::endl;
 
-	std::cout << this->nodeVariations->size() <<std::endl;
+//	std::cout << this->nodeVariations->size() <<std::endl;
 
 	std::memcpy(this->devicePointerMotifVariations,
 			&((*(this->nodeVariations))[0]),
 			nodeVariations->size() * sizeof(unsigned int));
 	// Removal index
 	//	deviceRemovalIndex = *(this->removalIndex);
-	std::cout << "Checker: " << i++ << std::endl;
+//	std::cout << "Checker: " << i++ << std::endl;
 	gpuErrchk(cudaMallocManaged(&(this->devicePointerRemovalIndex),
 				removalIndex->size() * sizeof(unsigned int)));
 	std::memcpy(this->devicePointerRemovalIndex, this->removalIndex->data(),
@@ -203,7 +203,7 @@ void GPUMotifCalculator::CopyAllToDevice() {
 	//Sorted nodes
 	//	deviceSortedNodesByDegree = *(this->sortedNodesByDegree);
 	//	this->devicePointerSortedNodesByDegree = thrust::raw_pointer_cast(&deviceSortedNodesByDegree[0]);
-	std::cout << "Checker: " << i++ << std::endl;
+//	std::cout << "Checker: " << i++ << std::endl;
 	gpuErrchk(cudaMallocManaged(&(this->devicePointerSortedNodesByDegree),
 				sortedNodesByDegree->size() * sizeof(unsigned int)));
 	std::memcpy(this->devicePointerSortedNodesByDegree,
@@ -211,7 +211,7 @@ void GPUMotifCalculator::CopyAllToDevice() {
 			sortedNodesByDegree->size() * sizeof(unsigned int));
 
 	// Feature matrix
-	std::cout << "Checker: " << i++ << std::endl;
+//	std::cout << "Checker: " << i++ << std::endl;
 	std::cout << this->numOfNodes <<std::endl;
 	std::cout <<this -> nodeVariations <<std::endl;
 	unsigned int size = this->numOfNodes * this->nodeVariations->size()
@@ -220,59 +220,37 @@ void GPUMotifCalculator::CopyAllToDevice() {
 	gpuErrchk(cudaMallocManaged(&(this->deviceFeatures), size));
 
 	// Original graph
-	std::cout << "Checker: " << i++ << std::endl;
+//	std::cout << "Checker: " << i++ << std::endl;
 	gpuErrchk(cudaMallocManaged(&deviceOriginalGraphOffsets,
 				(this->numOfNodes + 1) * sizeof(int64)));
-	std::cout << "Checker: " << i++ << std::endl;
+//	std::cout << "Checker: " << i++ << std::endl;
 	gpuErrchk(cudaMallocManaged(&deviceOriginalGraphNeighbors,
 				(this->numOfEdges) * sizeof(unsigned int)));
-	std::cout << "Checker: " << i++ << std::endl;
+//	std::cout << "Checker: " << i++ << std::endl;
 	std::memcpy(deviceOriginalGraphOffsets, this->mGraph->GetOffsetList(),
 			(this->numOfNodes + 1) * sizeof(int64));
-	std::cout << "Checker: " << i++ << std::endl;
+//	std::cout << "Checker: " << i++ << std::endl;
 	std::memcpy(deviceOriginalGraphNeighbors, this->mGraph->GetNeighborList(),
 			(this->numOfEdges) * sizeof(unsigned int));
 
 	// Full graph
-	std::cout << "Checker: " << i++ << std::endl;
+//	std::cout << "Checker: " << i++ << std::endl;
 	gpuErrchk(cudaMallocManaged(&deviceFullGraphOffsets,
 				(this->fullGraph.GetNumberOfNodes() + 1) * sizeof(int64)));
-	std::cout << "Checker: " << i++ << std::endl;
+//	std::cout << "Checker: " << i++ << std::endl;
 	gpuErrchk(cudaMallocManaged(&deviceFullGraphNeighbors,
 				(this->fullGraph.GetNumberOfEdges()) * sizeof(unsigned int)));
-	std::cout << "Checker: " << i++ << std::endl;
+//	std::cout << "Checker: " << i++ << std::endl;
 	std::memcpy(deviceOriginalGraphOffsets, this->fullGraph.GetOffsetList(),
 			(this->fullGraph.GetNumberOfNodes() + 1) * sizeof(int64));
-	std::cout << "Checker: " << i++ << std::endl;
+//	std::cout << "Checker: " << i++ << std::endl;
 	std::memcpy(deviceOriginalGraphNeighbors, this->fullGraph.GetNeighborList(),
 			(this->fullGraph.GetNumberOfEdges()) * sizeof(unsigned int));
-	std::cout << "Checker: " << i++ << std::endl;
+//	std::cout << "Checker: " << i++ << std::endl;
 
 
 	//Assign to global variables
 
-
-	/*
-	 __managed__ unsigned int globalNumOfNodes;
-	__managed__ unsigned int globalNumOfMotifs;
-	__managed__ unsigned int globalNumOfEdges;
-	__managed__ bool globalDirected;
-
-	 __managed__ unsigned int* globalDevicePointerMotifVariations;
-	__managed__ unsigned int* globalDevicePointerRemovalIndex;
-	__managed__ unsigned int* globalDevicePointerSortedNodesByDegree;
-
-	// For the original graph
-	__managed__ int64* globalDeviceOriginalGraphOffsets;
-	__managed__ unsigned int* globalDeviceOriginalGraphNeighbors;
-
-	// For the full graph
-	__managed__ int64* globalDeviceFullGraphOffsets;
-	__managed__ unsigned int* globalDeviceFullGraphNeighbors;
-
-	// Feature array
-	__managed__ unsigned int* globalDeviceFeatures;
-	 */
 	globalNumOfNodes = this->numOfNodes;
 	globalNumOfMotifs = this->numOfMotifs;
 	globalNumOfEdges = this->numOfEdges;
@@ -348,8 +326,10 @@ vector<vector<unsigned int> *> *GPUMotifCalculator::Calculate() {
 		vector<unsigned int>* current = new vector<unsigned int>();
 		for (int motif = 0; motif < this->numOfMotifs; motif++) {
 			current->push_back(globalDeviceFeatures[motif + this->numOfMotifs * node]);
+			std::cout << globalDeviceFeatures[motif + this->numOfMotifs * node]<<"\t";
 		}
 		this->features->push_back(current);
+		std::cout <<std::endl;
 	}
 
 	return this->features;
@@ -360,14 +340,14 @@ void Motif3Subtree(unsigned int root) {
 	// Instead of yield call GroupUpdater function
 	// Don't forget to check each time that the nodes are in the graph (check removal index).
 	int checker = 0;
-	printf("Motif 3 checker: %i\t",checker++);
+	printf("Motif 3 checker: %i\n",checker++);
 	int idx_root =globalDevicePointerRemovalIndex[root];// root_idx is also our current iteration -
 	bool* visited_vertices = (bool*) malloc(globalNumOfNodes); // every node_idx smaller than root_idx is already handled
 	for (int i = 0; i < globalNumOfNodes; i++)
 		visited_vertices[i] = false;
 	visited_vertices[root] = true;
 
-	printf("%i\t",checker++);
+//	printf("%i\t",checker++);
 	const unsigned int *neighbors =globalDeviceFullGraphNeighbors; // all neighbors - ancestors and descendants
 	const int64 *offsets =globalDeviceFullGraphOffsets;
 
@@ -377,7 +357,7 @@ void Motif3Subtree(unsigned int root) {
 		if (globalDevicePointerRemovalIndex[neighbors[i]] > idx_root) // n1 not handled yet
 			visited_vertices[neighbors[i]] = true;
 	//std::cout << "Mark" << std::endl;
-	printf("%i\t",checker++);
+	printf("Motif 3 checker: %i\n",checker++);
 	for (int64 n1_idx = offsets[root]; n1_idx < offsets[root + 1]; n1_idx++) { // loop first neighbors
 		unsigned int n1 = neighbors[n1_idx];
 		if (globalDevicePointerRemovalIndex[n1] <= idx_root) // n1 already handled
@@ -402,7 +382,7 @@ void Motif3Subtree(unsigned int root) {
 	//std::cout << "Mark" << std::endl;
 	// vector<vector<unsigned int> *> *n1_comb = neighbors_combinations(neighbors,
 	// 	offsets[root], offsets[root + 1]);
-	printf("%i\t",checker++);
+	printf("Motif 3 checker: %i\n",checker++);
 	for (int64 i = offsets[root]; i < offsets[root + 1]; i++) {
 		for (int64 j = i + 1; j < offsets[root + 1]; j++) {
 			unsigned int n1 = neighbors[i];
