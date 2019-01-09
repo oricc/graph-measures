@@ -23,8 +23,8 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort =
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////   Global managed variables   ////////////////////////////////////////////////
 __managed__ unsigned int globalNumOfNodes;
-__managed__ unsigned int numOfMotifs;
-__managed__ unsigned int numOfEdges;
+__managed__ unsigned int globalNumOfMotifs;
+__managed__ unsigned int globalNumOfEdges;
 
 
 // DEVICE VARIABLES
@@ -263,7 +263,7 @@ void Motif3Kernel(GPUMotifCalculator *calc) {
 	auto n = globalNumOfNodes;
 	printf("There are %u nodes ",n);
 	printf("in motif 3 kernel\n");
-	GPUMotifCalulator::AreNeighbors(0,1);
+	GPUMotifCalculator::AreNeighbors(0,1);
 	for (int i = index; i < n; i += stride){		
 		printf("In motif 3 kernel, i=%i\n",i);
 		calc->Motif3Subtree(calc->devicePointerSortedNodesByDegree[i]);
@@ -550,7 +550,7 @@ void GPUMotifCalculator::Motif4Subtree(unsigned int root) {
 			int motifNumber = (globalDevicePointerMotifVariations)[groupNumber];
 			if (motifNumber != -1)
 				for (int i = 0; i < size; i++)
-					atomicAdd(deviceFeatures + (motifNumber + globalNumOfMotifs * group[i]), 1); //atomic add + access as 1D array : features[motif + M*node] // @suppress("Function cannot be resolved")
+					atomicAdd(globalDeviceFeatures + (motifNumber + globalNumOfMotifs * group[i]), 1); //atomic add + access as 1D array : features[motif + M*node] // @suppress("Function cannot be resolved")
 			// where M is the number of motifs
 		}
 
