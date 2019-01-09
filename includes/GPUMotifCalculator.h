@@ -72,7 +72,7 @@ private:
 
 	unsigned int numOfMotifs;
 	unsigned int numOfNodes;
-	unsigned int numOfEdges;
+	static unsigned int numOfEdges;
 
 
 	// DEVICE VARIABLES
