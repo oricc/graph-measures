@@ -44,7 +44,7 @@ __managed__ int64* globalDeviceFullGraphOffsets;
 __managed__ unsigned int* globalDeviceFullGraphNeighbors;
 
 // Feature array
-__managed__ unsigned int* globalDevice;
+__managed__ unsigned int* globalDeviceFeatures;
 
 
 /////////////////////////////   END Global managed variables   /////////////////////////////////////////////
