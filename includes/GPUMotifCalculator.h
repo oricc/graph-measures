@@ -32,6 +32,9 @@ public:
 
 	__global__ friend void Motif3Kernel(GPUMotifCalculator* calc);
 	__global__ friend void Motif4Kernel(GPUMotifCalculator* calc);
+	__device__ friend void GroupUpdater(unsigned int group[], int size);
+	__device__ friend int GetGroupNumber(unsigned int group[], int size);
+	__device__ friend bool AreNeighbors(unsigned int p, unsigned int q);
 
 private:
 	__device__ void Motif3Subtree(unsigned int node);
@@ -44,9 +47,7 @@ private:
 	void SetRemovalIndex();
 	void CopyAllToDevice(); // Copy all the relevent data to the device.
 	virtual void init();
-	__device__ static void GroupUpdater(unsigned int group[], int size);
-	__device__ static int GetGroupNumber(unsigned int group[], int size);
-	__device__ static bool AreNeighbors(unsigned int p, unsigned int q);
+
 
     CacheGraph fullGraph;
 

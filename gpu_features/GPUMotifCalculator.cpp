@@ -517,7 +517,7 @@ void GPUMotifCalculator::Motif4Subtree(unsigned int root) {
 	}
 
 	__device__
-		bool GPUMotifCalculator::AreNeighbors(unsigned int p, unsigned int q) {
+		bool AreNeighbors(unsigned int p, unsigned int q) {
 			// int64* deviceOriginalGraphOffsets;
 			// unsigned int* deviceOriginalGraphNeighbors;
 			unsigned int first = globalDeviceOriginalGraphOffsets[p],  //first array element
@@ -545,7 +545,7 @@ void GPUMotifCalculator::Motif4Subtree(unsigned int root) {
 		}
 
 	__device__
-		void GPUMotifCalculator::GroupUpdater(unsigned int group[], int size) {
+		void GroupUpdater(unsigned int group[], int size) {
 			// TODO: count overall number of motifs in graph (maybe different class)?
 			int groupNumber = GetGroupNumber(group, size);
 			int motifNumber = (globalDevicePointerMotifVariations)[groupNumber];
@@ -556,7 +556,7 @@ void GPUMotifCalculator::Motif4Subtree(unsigned int root) {
 		}
 
 	__device__
-		int GPUMotifCalculator::GetGroupNumber(unsigned int group[], int size) {
+		int GetGroupNumber(unsigned int group[], int size) {
 			int sum = 0;
 			int power = 1;
 			bool hasEdge;
