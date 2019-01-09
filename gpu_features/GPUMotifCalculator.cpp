@@ -230,8 +230,10 @@ void Motif3Kernel(GPUMotifCalculator *calc) {
 	int stride = blockDim.x * gridDim.x;
 	printf("In motif 3 kernel\n");
 	auto n = globalNumOfNodes;
-	printf("There are %u nodes",n);
-	printf("In motif 3 kernel\n");
+	printf("There are %u nodes ",n);
+	printf("in motif 3 kernel\n");
+	GPUMotifCalulator::AreNeighbors(0,1);
+	printf("(static) There are %u edges\n",GPUMotifCalculator::numOfEdges);
 	for (int i = index; i < n; i += stride){		
 		printf("In motif 3 kernel, i=%i\n",i);
 		calc->Motif3Subtree(calc->devicePointerSortedNodesByDegree[i]);

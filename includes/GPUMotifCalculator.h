@@ -44,9 +44,9 @@ private:
 	void SetRemovalIndex();
 	void CopyAllToDevice(); // Copy all the relevent data to the device.
 	virtual void init();
-	__device__ void GroupUpdater(unsigned int group[], int size);
-	__device__ int GetGroupNumber(unsigned int group[], int size);
-	__device__ bool AreNeighbors(unsigned int p, unsigned int q);
+	__device__ static void GroupUpdater(unsigned int group[], int size);
+	__device__ static int GetGroupNumber(unsigned int group[], int size);
+	__device__ static bool AreNeighbors(unsigned int p, unsigned int q);
 
     CacheGraph fullGraph;
 
