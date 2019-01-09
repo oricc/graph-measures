@@ -44,7 +44,7 @@ __managed__ int64* globalDeviceFullGraphOffsets;
 __managed__ unsigned int* globalDeviceFullGraphNeighbors;
 
 // Feature array
-__managed__ unsigned int* globalDeviceFeatures;
+__managed__ unsigned int* globalDevice;
 
 
 /////////////////////////////   END Global managed variables   /////////////////////////////////////////////
@@ -180,7 +180,7 @@ void GPUMotifCalculator::CopyAllToDevice() {
 
 	//	deviceMotifVariations = *(this->nodeVariations);
 	//	this->devicePointerMotifVariations = thrust::raw_pointer_cast(&deviceMotifVariations[0]);
-	int i = 0;
+//	int i = 0;
 	//	std::cout << "Checker: " << i++ << std::endl;
 	gpuErrchk(cudaMallocManaged(&(this->devicePointerMotifVariations),
 				nodeVariations->size() * sizeof(unsigned int)));
@@ -212,11 +212,11 @@ void GPUMotifCalculator::CopyAllToDevice() {
 
 	// Feature matrix
 	//	std::cout << "Checker: " << i++ << std::endl;
-	std::cout << this->numOfNodes <<std::endl;
-	std::cout <<this -> nodeVariations <<std::endl;
+//	std::cout << this->numOfNodes <<std::endl;
+//	std::cout <<this -> nodeVariations <<std::endl;
 	unsigned int size = this->numOfNodes * this->nodeVariations->size()
 		* sizeof(unsigned int);
-	std::cout << "between" << std::endl;
+//	std::cout << "between" << std::endl;
 	gpuErrchk(cudaMallocManaged(&(this->deviceFeatures), size));
 
 	// Original graph
@@ -298,6 +298,36 @@ vector<vector<unsigned int> *> *GPUMotifCalculator::Calculate() {
 
 	int blockSize = 256;
 	int numBlocks = (this->numOfNodes + blockSize - 1) / blockSize;
+
+	//Prefetch all relevant memory
+	/*
+	 globalDevicePointerMotifVariations = this->devicePointerMotifVariations;
+	globalDevicePointerRemovalIndex = this->devicePointerRemovalIndex;
+	globalDevicePointerSortedNodesByDegree = this -> devicePointerSortedNodesByDegree;
+
+	globalDeviceOriginalGraphOffsets = this->deviceOriginalGraphOffsets;
+	globalDeviceOriginalGraphNeighbors = this -> deviceOriginalGraphNeighbors;
+	globalDeviceFullGraphOffsets = this->deviceFullGraphOffsets;
+	globalDeviceFullGraphNeighbors = this->deviceFullGraphNeighbors;
+	globalDeviceFeatures = this->deviceFeatures;
+	 */
+
+	int device = -1;
+	cudaGetDevice(&device);
+
+	int offsetSize = this->numOfNodes + 1;
+	int neighborSize = this->numOfEdges;
+
+
+	cudaMemPrefetchAsync(globalDevicePointerMotifVariations, nodeVariations->size()*sizeof(unsigned int), device, NULL);
+	cudaMemPrefetchAsync(globalDevicePointerRemovalIndex, this->numOfNodes*sizeof(unsigned int), device, NULL);
+	cudaMemPrefetchAsync(globalDevicePointerSortedNodesByDegree, this->numOfNodes*sizeof(unsigned int), device, NULL);
+	cudaMemPrefetchAsync(globalDeviceOriginalGraphOffsets, offsetSize*sizeof(int64), device, NULL);
+	cudaMemPrefetchAsync(globalDeviceOriginalGraphNeighbors, neighborSize*sizeof(unsigned int), device, NULL);
+	cudaMemPrefetchAsync(globalDeviceFullGraphOffsets, offsetSize*sizeof(int64), device, NULL);
+	cudaMemPrefetchAsync(globalDeviceFullGraphNeighbors, neighborSize*sizeof(unsigned int), device, NULL);
+	cudaMemPrefetchAsync(globalDeviceFeatures, (this->numOfNodes * this->nodeVariations->size())*sizeof(unsigned int), device, NULL);
+
 
 	if (this->level == 3) {
 		//std::cout << "Start 3" << std::endl;
