@@ -267,16 +267,16 @@ void Motif3Kernel(GPUMotifCalculator *calc) {
 	AreNeighbors(0,1);
 	for (int i = index; i < n; i += stride){		
 		printf("In motif 3 kernel, i=%i\n",i);
-		calc->Motif3Subtree(calc->devicePointerSortedNodesByDegree[i]);
+		Motif3Subtree(globalDevicePointerSortedNodesByDegree[i]);
 	}
 }
 __global__
 void Motif4Kernel(GPUMotifCalculator *calc) {
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
 	int stride = blockDim.x * gridDim.x;
-	auto n = calc->numOfNodes;
+	auto n = globalNumOfNodes;
 	for (int i = index; i < n; i += stride)
-		calc->Motif4Subtree(calc->devicePointerSortedNodesByDegree[i]);
+		Motif4Subtree(globalDevicePointerSortedNodesByDegree[i]);
 }
 
 vector<vector<unsigned int> *> *GPUMotifCalculator::Calculate() {
@@ -319,11 +319,11 @@ vector<vector<unsigned int> *> *GPUMotifCalculator::Calculate() {
 }
 
 __device__
-void GPUMotifCalculator::Motif3Subtree(unsigned int root) {
+void Motif3Subtree(unsigned int root) {
 	// Instead of yield call GroupUpdater function
 	// Don't forget to check each time that the nodes are in the graph (check removal index).
 	int checker = 0;
-	printf("%i\t",checker++);
+	printf("Motif 3 checker: %i\t",checker++);
 	int idx_root = this->devicePointerRemovalIndex[root];// root_idx is also our current iteration -
 	bool* visited_vertices = (bool*) malloc(this->numOfNodes); // every node_idx smaller than root_idx is already handled
 	for (int i = 0; i < this->numOfNodes; i++)
@@ -390,7 +390,7 @@ void GPUMotifCalculator::Motif3Subtree(unsigned int root) {
 }
 
 __device__
-void GPUMotifCalculator::Motif4Subtree(unsigned int root) {
+void Motif4Subtree(unsigned int root) {
 	int idx_root = this->devicePointerRemovalIndex[root]; // root_idx is also our current iteration -
 	short* visited_vertices = (short*) malloc(this->numOfNodes); // every node_idx smaller than root_idx is already handled
 	for (int i = 0; i < this->numOfNodes; i++)
