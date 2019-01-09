@@ -26,8 +26,8 @@ def silence_stdout():
 
 
 def test_features():
-    g = create_graph(3, GraphType=nx.Graph)
-    motif_level = 3
+    g = create_graph(3, GraphType=nx.DiGraph)
+    motif_level = 4
     with silence_stdout():
         example_feature(g)
         clustering_coefficient(g)
