@@ -40,7 +40,7 @@ def test_features():
         for k, v in enumerate(node_list):
             if v != 0:
                 print('\t{}:{}'.format(k, v))
-    print(motif(g,level=4,gpu=True))
+    print(motif(g,level=3,gpu=True))
 
 if __name__ == '__main__':
     test_features()
