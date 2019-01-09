@@ -72,12 +72,11 @@ private:
 
 	unsigned int numOfMotifs;
 	unsigned int numOfNodes;
-	static unsigned int numOfEdges;
+	unsigned int numOfEdges;
 
 
 	// DEVICE VARIABLES
 
-	//Pointers to the device vectors declared above - no need to delete as the device_vectors live on the stack
 	unsigned int* devicePointerMotifVariations;
 	unsigned int* devicePointerRemovalIndex;
 	unsigned int* devicePointerSortedNodesByDegree;

@@ -19,7 +19,38 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort =
 	}
 }
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////   Global managed variables   ////////////////////////////////////////////////
 __managed__ unsigned int globalNumOfNodes;
+__managed__ unsigned int numOfMotifs;
+__managed__ unsigned int numOfEdges;
+
+
+// DEVICE VARIABLES
+
+//Pointers to the device vectors declared above - no need to delete as the device_vectors live on the stack
+__managed__ unsigned int* globalDevicePointerMotifVariations;
+__managed__ unsigned int* globalDevicePointerRemovalIndex;
+__managed__ unsigned int* globalDevicePointerSortedNodesByDegree;
+
+// For the original graph
+__managed__ int64* globalDeviceOriginalGraphOffsets;
+__managed__ unsigned int* globalDeviceOriginalGraphNeighbors;
+
+// For the full graph
+__managed__ int64* globalDeviceFullGraphOffsets;
+__managed__ unsigned int* globalDeviceFullGraphNeighbors;
+
+// Feature array
+__managed__ unsigned int* globalDeviceFeatures;
+
+
+/////////////////////////////   END Global managed variables   /////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 void GPUMotifCalculator::init() {
 	CacheGraph inverse(true);
 	mGraph->InverseGraph(inverse);
@@ -233,7 +264,6 @@ void Motif3Kernel(GPUMotifCalculator *calc) {
 	printf("There are %u nodes ",n);
 	printf("in motif 3 kernel\n");
 	GPUMotifCalulator::AreNeighbors(0,1);
-	printf("(static) There are %u edges\n",GPUMotifCalculator::numOfEdges);
 	for (int i = index; i < n; i += stride){		
 		printf("In motif 3 kernel, i=%i\n",i);
 		calc->Motif3Subtree(calc->devicePointerSortedNodesByDegree[i]);
@@ -489,20 +519,20 @@ void GPUMotifCalculator::Motif4Subtree(unsigned int root) {
 		bool GPUMotifCalculator::AreNeighbors(unsigned int p, unsigned int q) {
 			// int64* deviceOriginalGraphOffsets;
 			// unsigned int* deviceOriginalGraphNeighbors;
-			unsigned int first = deviceOriginalGraphOffsets[p],  //first array element
-				     last = deviceOriginalGraphOffsets[p + 1] - 1,     //last array element
+			unsigned int first = globalDeviceOriginalGraphOffsets[p],  //first array element
+				     last = globalDeviceOriginalGraphOffsets[p + 1] - 1,     //last array element
 				     middle;                       //mid point of search
 
 			while (first <= last) {
 				middle = (first + last) / 2; //this finds the mid point
 				//std::cout << "Binary search: " << middle << std::endl;
 				//TODO: fix overflow problem
-				if (deviceOriginalGraphNeighbors[middle] == q) {
+				if (globalDeviceOriginalGraphNeighbors[middle] == q) {
 					return true;
 				} else if (middle == 0) {
 					// and the element is not here
 					return false;
-				} else if (deviceOriginalGraphNeighbors[middle] > q) // if it's in the lower half
+				} else if (globalDeviceOriginalGraphNeighbors[middle] > q) // if it's in the lower half
 				{
 					last = middle - 1;
 				} else {
@@ -517,10 +547,10 @@ void GPUMotifCalculator::Motif4Subtree(unsigned int root) {
 		void GPUMotifCalculator::GroupUpdater(unsigned int group[], int size) {
 			// TODO: count overall number of motifs in graph (maybe different class)?
 			int groupNumber = GetGroupNumber(group, size);
-			int motifNumber = (this->devicePointerMotifVariations)[groupNumber];
+			int motifNumber = (globalDevicePointerMotifVariations)[groupNumber];
 			if (motifNumber != -1)
 				for (int i = 0; i < size; i++)
-					atomicAdd(deviceFeatures + (motifNumber + this->numOfMotifs * group[i]), 1); //atomic add + access as 1D array : features[motif + M*node] // @suppress("Function cannot be resolved")
+					atomicAdd(deviceFeatures + (motifNumber + globalNumOfMotifs * group[i]), 1); //atomic add + access as 1D array : features[motif + M*node] // @suppress("Function cannot be resolved")
 			// where M is the number of motifs
 		}
 
@@ -534,7 +564,7 @@ void GPUMotifCalculator::Motif4Subtree(unsigned int root) {
 				for (int i = 0; i < size; i++) {
 					for (int j = 0; j < size; j++) {
 						if (i != j) {
-							hasEdge = this->AreNeighbors(group[i], group[j]);
+							hasEdge = AreNeighbors(group[i], group[j]);
 							if (hasEdge)
 								sum += power;
 							power *= 2;
@@ -546,7 +576,7 @@ void GPUMotifCalculator::Motif4Subtree(unsigned int root) {
 				for (int i = 0; i < size; i++) {
 					for (int j = i + 1; j < size; j++) {
 
-						hasEdge = this->AreNeighbors(group[i], group[j]);
+						hasEdge = AreNeighbors(group[i], group[j]);
 						if (hasEdge)
 							sum += power;
 						power *= 2;
