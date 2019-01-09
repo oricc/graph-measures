@@ -250,7 +250,44 @@ void GPUMotifCalculator::CopyAllToDevice() {
 
 
 	//Assign to global variables
+
+
+	/*
+	 __managed__ unsigned int globalNumOfNodes;
+	__managed__ unsigned int globalNumOfMotifs;
+	__managed__ unsigned int globalNumOfEdges;
+	__managed__ bool globalDirected;
+
+	 __managed__ unsigned int* globalDevicePointerMotifVariations;
+	__managed__ unsigned int* globalDevicePointerRemovalIndex;
+	__managed__ unsigned int* globalDevicePointerSortedNodesByDegree;
+
+	// For the original graph
+	__managed__ int64* globalDeviceOriginalGraphOffsets;
+	__managed__ unsigned int* globalDeviceOriginalGraphNeighbors;
+
+	// For the full graph
+	__managed__ int64* globalDeviceFullGraphOffsets;
+	__managed__ unsigned int* globalDeviceFullGraphNeighbors;
+
+	// Feature array
+	__managed__ unsigned int* globalDeviceFeatures;
+	 */
 	globalNumOfNodes = this->numOfNodes;
+	globalNumOfMotifs = this->numOfMotifs;
+	globalNumOfEdges = this->numOfEdges;
+	globalDirected = this->directed;
+
+
+	globalDevicePointerMotifVariations = this->devicePointerMotifVariations;
+	globalDevicePointerRemovalIndex = this->devicePointerRemovalIndex;
+	globalDevicePointerSortedNodesByDegree = this -> devicePointerSortedNodesByDegree;
+
+	globalDeviceOriginalGraphOffsets = this->deviceOriginalGraphOffsets;
+	globalDeviceOriginalGraphNeighbors = this -> deviceOriginalGraphNeighbors;
+	globalDeviceFullGraphOffsets = this->deviceFullGraphOffsets;
+	globalDeviceFullGraphNeighbors = this->deviceFullGraphNeighbors;
+	globalDeviceFeatures = this->deviceFeatures;
 
 }
 
