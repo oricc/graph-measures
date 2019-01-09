@@ -19,6 +19,7 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort =
 	}
 }
 
+__managed__ unsigned int globalNumOfNodes;
 void GPUMotifCalculator::init() {
 	CacheGraph inverse(true);
 	mGraph->InverseGraph(inverse);
@@ -215,6 +216,10 @@ void GPUMotifCalculator::CopyAllToDevice() {
 			(this->fullGraph.GetNumberOfEdges()) * sizeof(unsigned int));
 	std::cout << "Checker: " << i++ << std::endl;
 
+
+	//Assign to global variables
+	globalNumOfNodes = this->numOfNodes;
+
 }
 
 // Kernel and friend functions
@@ -224,7 +229,8 @@ void Motif3Kernel(GPUMotifCalculator *calc) {
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
 	int stride = blockDim.x * gridDim.x;
 	printf("In motif 3 kernel\n");
-	auto n = calc->numOfNodes;
+	auto n = globalNumOfNodes;
+	printf("There are %u nodes",n);
 	printf("In motif 3 kernel\n");
 	for (int i = index; i < n; i += stride){		
 		printf("In motif 3 kernel, i=%i\n",i);

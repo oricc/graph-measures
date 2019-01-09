@@ -96,4 +96,7 @@ private:
 	unsigned int* deviceFeatures;
 };
 
+
+
+
 #endif /* FEATURES_MOTIFCALCULATOR_H_ */

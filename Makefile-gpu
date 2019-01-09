@@ -44,7 +44,7 @@ INCLUDES_DIR = includes
 
 
 CFLAGS = -fPIC -c -std=c++11
-NVFLAGS = -x cu -dc -Xcompiler 
+NVFLAGS = -x cu -arch=sm_35 -dc -Xcompiler 
 # compile mesh classes
 TARGET = LibExportMain
 FEATURE = ExampleFeatureCalculator
