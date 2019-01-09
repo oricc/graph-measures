@@ -26,6 +26,7 @@ __managed__ unsigned int globalNumOfNodes;
 __managed__ unsigned int globalNumOfMotifs;
 __managed__ unsigned int globalNumOfEdges;
 
+__managed__ bool globalDirected;
 
 // DEVICE VARIABLES
 
@@ -559,7 +560,7 @@ void GPUMotifCalculator::Motif4Subtree(unsigned int root) {
 			int sum = 0;
 			int power = 1;
 			bool hasEdge;
-			if (directed) {
+			if (globalDirected) {
 				// Use permutations
 				for (int i = 0; i < size; i++) {
 					for (int j = 0; j < size; j++) {
