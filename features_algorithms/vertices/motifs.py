@@ -154,13 +154,13 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
                                 print('An interesting group:', group)
 
                         yield group
-        for n1 in neighbors_first_deg:
-            if DEBUG:
-                if root is 41:
-                    print('n1', n1)
-            neighbors_sec_deg = set(nx.all_neighbors(self._gnx, n1))
-            # neighbors_sec_deg, visited_neighbors, len_b = tee(neighbors_sec_deg, 3)
-            neighbors_sec_deg = visited_neighbors = list(neighbors_sec_deg)
+        # for n1 in neighbors_first_deg:
+        #     if DEBUG:
+        #         if root is 41:
+        #             print('n1', n1)
+        #     neighbors_sec_deg = set(nx.all_neighbors(self._gnx, n1))
+        #     # neighbors_sec_deg, visited_neighbors, len_b = tee(neighbors_sec_deg, 3)
+        #     neighbors_sec_deg = visited_neighbors = list(neighbors_sec_deg)
 
             for comb in combinations(neighbors_sec_deg, 2):
                 if DEBUG:
@@ -216,7 +216,6 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         # and then iterate only over the corresponding graph
         motif_func = self._get_motif3_sub_tree if self._level == 3 else self._get_motif4_sub_tree
         sorted_nodes = self._order_by_degree()
-        print('Sorted Nodes:', sorted_nodes)
         for node in sorted_nodes:
             for group in motif_func(node):
                 group_num = self._get_group_number(group)
