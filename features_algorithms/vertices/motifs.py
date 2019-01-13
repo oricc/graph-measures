@@ -6,6 +6,7 @@ from itertools import permutations, combinations
 import networkx as nx
 import numpy as np
 from bitstring import BitArray
+from collections import Counter
 
 try:
     from graph_measures.features_infra.feature_calculators import NodeFeatureCalculator, FeatureMeta
@@ -16,6 +17,8 @@ CUR_PATH = os.path.realpath(__file__)
 BASE_PATH = os.path.dirname(os.path.dirname(CUR_PATH))
 VERBOSE = False
 DEBUG = False
+SAVE_COUNTED_MOTIFS = False
+
 interesting_groups = [
     sorted([21, 36, 13, 43]),
     sorted([21, 14, 45, 35]),
@@ -35,6 +38,9 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         self._print_name += "_%d" % (self._level,)
         self._gnx = self._gnx.copy()
         self._load_variations()
+
+        self._counted_motifs = set()  # Only used if SAVE_COUNTED_MOTIFS is set
+        self._double_counter = Counter()
 
     def is_relevant(self):
         return True
@@ -148,19 +154,22 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
             for n2 in neighbors_sec_deg:
                 for n11 in neighbors_first_deg:
                     if visited_vertices[n2] == 2 and n1 != n11:
-                        group = [root, n1, n11, n2]
-                        if DEBUG:
-                            if sorted(group) in interesting_groups:
-                                print('An interesting group:', group)
+                        edge_exists = (self._gnx.has_edge(n2, n11) or self._gnx.has_edge(n11, n2))
+                        if (not edge_exists) or (edge_exists and n1 < n11):
 
-                        yield group
-        # for n1 in neighbors_first_deg:
-        #     if DEBUG:
-        #         if root is 41:
-        #             print('n1', n1)
-        #     neighbors_sec_deg = set(nx.all_neighbors(self._gnx, n1))
-        #     # neighbors_sec_deg, visited_neighbors, len_b = tee(neighbors_sec_deg, 3)
-        #     neighbors_sec_deg = visited_neighbors = list(neighbors_sec_deg)
+                            group = [root, n1, n11, n2]
+                            if DEBUG:
+                                if sorted(group) in interesting_groups:
+                                    print('An interesting group:', group)
+
+                            yield group
+            # for n1 in neighbors_first_deg:
+            #     if DEBUG:
+            #         if root is 41:
+            #             print('n1', n1)
+            #     neighbors_sec_deg = set(nx.all_neighbors(self._gnx, n1))
+            #     # neighbors_sec_deg, visited_neighbors, len_b = tee(neighbors_sec_deg, 3)
+            #     neighbors_sec_deg = visited_neighbors = list(neighbors_sec_deg)
 
             for comb in combinations(neighbors_sec_deg, 2):
                 if DEBUG:
@@ -240,9 +249,28 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
                 if sorted(group) in interesting_groups:
                     print('An interesting group:', group, motif_num)
 
+            if SAVE_COUNTED_MOTIFS:
+                h = hash(frozenset(group))
+                # h = frozenset(group)
+                if h in self._counted_motifs:
+                    print("\033[91m Group {} already counted \033[00m".format(group))
+                    self._double_counter[frozenset(group)] += 1
+                else:
+                    self._counted_motifs.add(h)
+
             self._update_nodes_group(group, motif_num)
             if (i + 1) % 1000 == 0 and VERBOSE:
                 self._logger.debug("Groups: %d" % i)
+
+        # print('Max num of duplicates:', max(self._double_counter.values()))
+        # print('Number of motifs counted twice:', len(self._double_counter))
+        #
+        # motif_sum = 0
+        # for counter in self._features.values():
+        #     for v in counter.values():
+        #         motif_sum += v
+        #
+        # print('Total num of motifs:', motif_sum)
 
     def _get_feature(self, element):
         all_motifs = self._all_motifs.difference(set([None]))
