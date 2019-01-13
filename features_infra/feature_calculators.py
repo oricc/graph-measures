@@ -7,8 +7,10 @@ import networkx as nx
 import numpy as np
 # from scipy.stats import zscore
 
-from loggers import EmptyLogger
-
+try:
+    from graph_measures.loggers import EmptyLogger
+except ModuleNotFoundError as e:
+    from loggers import EmptyLogger
 
 # Old zscore code.. should use scipy.stats.zscore
 def z_scoring(matrix):

@@ -7,11 +7,22 @@ import networkx as nx
 import numpy as np
 from bitstring import BitArray
 
-from features_infra.feature_calculators import NodeFeatureCalculator, FeatureMeta
+try:
+    from graph_measures.features_infra.feature_calculators import NodeFeatureCalculator, FeatureMeta
+except ModuleNotFoundError as e:
+    from features_infra.feature_calculators import NodeFeatureCalculator, FeatureMeta
 
 CUR_PATH = os.path.realpath(__file__)
 BASE_PATH = os.path.dirname(os.path.dirname(CUR_PATH))
 VERBOSE = False
+DEBUG = False
+interesting_groups = [
+    sorted([21, 36, 13, 43]),
+    sorted([21, 14, 45, 35]),
+    sorted([21, 14, 48, 41]),
+    sorted([21, 14, 48, 44]),
+    sorted([21, 12, 18, 41])
+]
 
 
 class MotifsNodeCalculator(NodeFeatureCalculator):
@@ -117,9 +128,17 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         for n1 in visited_neighbors:
             visited_vertices[n1] = 1
         for n1, n2, n3 in combinations(neighbors_first_deg, 3):
-            yield [root, n1, n2, n3]
+            group = [root, n1, n2, n3]
+            if DEBUG:
+                if sorted(group) in interesting_groups:
+                    print('An interesting group:', group)
+
+            yield group
 
         for n1 in neighbors_first_deg:
+            if DEBUG:
+                if root is 41:
+                    print('n1', n1)
             neighbors_sec_deg = set(nx.all_neighbors(self._gnx, n1))
             # neighbors_sec_deg, visited_neighbors, len_b = tee(neighbors_sec_deg, 3)
             neighbors_sec_deg = visited_neighbors = list(neighbors_sec_deg)
@@ -129,21 +148,63 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
             for n2 in neighbors_sec_deg:
                 for n11 in neighbors_first_deg:
                     if visited_vertices[n2] == 2 and n1 != n11:
-                        yield [root, n1, n11, n2]
+                        group = [root, n1, n11, n2]
+                        if DEBUG:
+                            if sorted(group) in interesting_groups:
+                                print('An interesting group:', group)
+
+                        yield group
+        for n1 in neighbors_first_deg:
+            if DEBUG:
+                if root is 41:
+                    print('n1', n1)
+            neighbors_sec_deg = set(nx.all_neighbors(self._gnx, n1))
+            # neighbors_sec_deg, visited_neighbors, len_b = tee(neighbors_sec_deg, 3)
+            neighbors_sec_deg = visited_neighbors = list(neighbors_sec_deg)
 
             for comb in combinations(neighbors_sec_deg, 2):
+                if DEBUG:
+                    if root is 41:
+                        hi = 1
                 if 2 == visited_vertices[comb[0]] and visited_vertices[comb[1]] == 2:
-                    yield [root, n1, comb[0], comb[1]]
+                    group = [root, n1, comb[0], comb[1]]
+                    if DEBUG:
+                        if root is 41:
+                            print('A 41 group:', group)
+                        if sorted(group) in interesting_groups:
+                            print('An interesting group:', group)
 
+                    yield group
+
+        for n1 in neighbors_first_deg:
+            if DEBUG:
+                if root is 41:
+                    print('n1', n1)
+            neighbors_sec_deg = set(nx.all_neighbors(self._gnx, n1))
+            # neighbors_sec_deg, visited_neighbors, len_b = tee(neighbors_sec_deg, 3)
+            neighbors_sec_deg = visited_neighbors = list(neighbors_sec_deg)
             for n2 in neighbors_sec_deg:
                 for n3 in set(nx.all_neighbors(self._gnx, n2)):
                     if n3 not in visited_vertices:
+                        if DEBUG:
+                            if root is 41:
+                                hi = 2
                         visited_vertices[n3] = 3
                         if visited_vertices[n2] == 2:
-                            yield [root, n1, n2, n3]
+                            group = [root, n1, n2, n3]
+                            if DEBUG:
+                                if sorted(group) in interesting_groups:
+                                    print('An interesting group:', group)
+
+                            yield group
                     else:
                         if visited_vertices[n3] == 3 and visited_vertices[n2] == 2:
-                            yield [root, n1, n2, n3]
+                            group = [root, n1, n2, n3]
+                            if DEBUG:
+                                if sorted(group) in interesting_groups:
+                                    print('An interesting group:', group)
+
+                            yield group
 
     def _order_by_degree(self, gnx=None):
         if gnx is None:
@@ -154,7 +215,9 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         # consider first calculating the nth neighborhood of a node
         # and then iterate only over the corresponding graph
         motif_func = self._get_motif3_sub_tree if self._level == 3 else self._get_motif4_sub_tree
-        for node in self._order_by_degree():
+        sorted_nodes = self._order_by_degree()
+        print('Sorted Nodes:', sorted_nodes)
+        for node in sorted_nodes:
             for group in motif_func(node):
                 group_num = self._get_group_number(group)
                 motif_num = self._node_variations[group_num]
@@ -171,6 +234,13 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         motif_counter = {motif_number: 0 for motif_number in self._all_motifs}
         self._features = {node: motif_counter.copy() for node in self._gnx}
         for i, (group, group_num, motif_num) in enumerate(self._calculate_motif()):
+            if DEBUG:
+                if 21 in group and motif_num is 47:
+                    print('A 21/47 group:', group, motif_num)
+                    pass
+                if sorted(group) in interesting_groups:
+                    print('An interesting group:', group, motif_num)
+
             self._update_nodes_group(group, motif_num)
             if (i + 1) % 1000 == 0 and VERBOSE:
                 self._logger.debug("Groups: %d" % i)
@@ -244,7 +314,6 @@ if __name__ == "__main__":
     # Previous version contained a bug while counting twice sub-groups with double edges
     # test_specific_feature(nth_edges_motif(3), is_max_connected=True)
     test_specific_feature(nth_edges_motif(4), is_max_connected=True)
-
 
     # def _calculate_motif_dictionaries(self):
     #     motifs_edges_dict = {}
