@@ -203,7 +203,7 @@ void MotifCalculator::Motif3Subtree(unsigned int root) {
 			//std::cout << "Mark2" << std::endl;
 			this->GroupUpdater(std::vector<unsigned int> { root, n1, n2 });	// update motif counter [r,n1,n2]
 	}	// end loop COMBINATIONS_NEIGHBORS_N1
-	for(auto p:*n1_comb){
+	for (auto p : *n1_comb) {
 		delete p;
 	}
 	delete n1_comb;
@@ -240,7 +240,7 @@ void MotifCalculator::Motif4Subtree(unsigned int root) {
 		this->GroupUpdater(std::vector<unsigned int> { root, n11, n12, n13 }); // update motif counter [r,n11,n12,n13]
 	}
 
-	for(auto p:*n1_3_comb){
+	for (auto p : *n1_3_comb) {
 		delete p;
 	}
 	delete n1_3_comb;
@@ -271,9 +271,13 @@ void MotifCalculator::Motif4Subtree(unsigned int root) {
 				if (this->removalIndex->at(n11) <= idx_root) // n2 already handled
 					continue;
 				if (visited_vertices[n2] == 2 && n11 != n1) { //TODO: verify
-					this->GroupUpdater(std::vector<unsigned int> { root, n1,
-							n11, n2 }); // update motif counter [r,n1,n11,n2]
-				} // end if
+					bool edgeExists = mGraph->areNeighbors(n2, n11)
+							|| mGraph->areNeighbors(n11, n2);
+					if (!edgeExists || (edgeExists && n1 < n11)) {
+						this->GroupUpdater(std::vector<unsigned int> { root, n1,
+								n11, n2 }); // update motif counter [r,n1,n11,n2]
+					} // end if
+				}
 			} // end loop INNER FIRST NEIGHBORS
 		} // end loop SECOND NEIGHBORS AGAIN
 
@@ -293,12 +297,14 @@ void MotifCalculator::Motif4Subtree(unsigned int root) {
 			}
 		} // end loop SECOND NEIGHBOR COMBINATIONS
 
-		for(auto p:*n2_comb){
+		for (auto p : *n2_comb) {
 			delete p;
 		}
 		delete n2_comb;
-
-		//The case of n1-n2-n3
+	}
+	//The case of n1-n2-n3
+	for (int64 n1_idx = offsets[root]; n1_idx < offsets[root + 1]; n1_idx++) { // loop first neighbors
+		unsigned int n1 = neighbors[n1_idx];
 		for (int64 n2_idx = offsets[n1]; n2_idx < offsets[n1 + 1]; n2_idx++) { // loop second neighbors (third time's the charm)
 			unsigned int n2 = neighbors[n2_idx];
 			if (this->removalIndex->at(n2) <= idx_root)	// n2 already handled
@@ -357,7 +363,7 @@ int MotifCalculator::GetGroupNumber(std::vector<unsigned int> group) {
 		edges.push_back(this->mGraph->areNeighbors(n1, n2));
 	}
 
-	for(auto p:*options){
+	for (auto p : *options) {
 		delete p;
 	}
 	delete options;

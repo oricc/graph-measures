@@ -10,7 +10,7 @@
 		1) The graph is not weighted. For weighted graphs consider using single_source_dijkstra.
 		2) There are no loop in the graph
 	Input:
-		g - a constant pointer to the GraphSnapsot to perfom the calculation for
+		g - a constant pointer to the GraphSnapsot to perform the calculation for
 		src - the integer ID of the origin node.
 	Output:
 		A vector that contains the distances of all the nodes from the origin.
