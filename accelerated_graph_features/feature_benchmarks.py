@@ -10,7 +10,7 @@ from src.accelerated_graph_features.feature_wrappers import clustering_coefficie
     motif
 from src.accelerated_graph_features.graph_timer import FeatureTimer
 from src.accelerated_graph_features.original_features_check import original_bfs_moments
-from Git.graph_measures.cpp_comparison import compare_motifs
+# from Git.graph_measures.cpp_comparison import compare_motifs
 import networkx as nx
 
 matching_python_functions = {
@@ -28,13 +28,13 @@ SEED = 123456
 
 def benchmark_gpu_feature_regular_graph(feature_name, type='cpp', d=20):
     assert type in ['cpp','python','gpu']
-	nodes = [50, 100, 500, 1000, 2000, 5000, 10000,100000]
+    nodes = [50, 100, 500, 1000, 2000, 5000, 10000,100000]
     if type is 'python':
         titles = ['Feature calculation time']
     else:
         titles = ['Conversion Time', 'Feature calculation time']
 	
-	feature_type = type
+    feature_type = type
     timer = FeatureTimer(feature_name + '_{}_benchmark'.format(feature_type),
                          titles=titles)
 
@@ -48,7 +48,7 @@ def benchmark_gpu_feature_regular_graph(feature_name, type='cpp', d=20):
         else:
             matching_python_functions[feature_name][type](G, timer=timer)
 
-        if python:
+        if type is 'python':
             timer.stop()
 
 
@@ -105,7 +105,7 @@ def benchmark_feature_erdos_renyi(feature_name, python=False, p=0.8):
         if python:
             timer.stop()
 
-def run_all_feature_with_gpu_tests_erdos_renyi():
+def run_all_feature_with_gpu_tests_regular_graphs():
 	for feature_name in matching_python_functions.keys():
 		print(feature_name)
 		benchmark_gpu_feature_regular_graph(feature_name,type='cpp')
@@ -127,4 +127,4 @@ def run_all_feature_tests_erdos_renyi():
 
 
 if __name__ == '__main__':
-    run_all_feature_with_gpu_tests_erdos_renyi()
+    run_all_feature_with_gpu_tests_regular_graphs()

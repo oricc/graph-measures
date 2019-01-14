@@ -26,7 +26,7 @@ def silence_stdout():
 
 
 def test_features():
-    g = create_graph(3, GraphType=nx.DiGraph)
+    g = create_graph(2, GraphType=nx.DiGraph)
     motif_level = 4
     with silence_stdout():
         example_feature(g)
@@ -35,7 +35,7 @@ def test_features():
         node_page_rank(g)
         bfs_moments(g)
         m_res = motif(g, level=motif_level)
-    print(m_res)
+    #print(m_res)
     for node, node_list in enumerate(m_res):
         print(node)
         for k, v in enumerate(node_list):
@@ -43,8 +43,11 @@ def test_features():
                 print('\t{}:{}'.format(k, v))
     gpu_motif = motif(g,level=motif_level,gpu=True)
     print(len(gpu_motif),'X',len(gpu_motif[0]))
-    print(gpu_motif)
+    # print(gpu_motif)
     print(gpu_motif == m_res)
+    G = nx.random_regular_graph(20, 2000,seed=123456)
+    motif(G,level=3,gpu=True)
+
 
 if __name__ == '__main__':
     test_features()

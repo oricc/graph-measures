@@ -181,7 +181,10 @@ void GPUMotifCalculator::CopyAllToDevice() {
 	//	deviceMotifVariations = *(this->nodeVariations);
 	//	this->devicePointerMotifVariations = thrust::raw_pointer_cast(&deviceMotifVariations[0]);
 //	int i = 0;
-	//	std::cout << "Checker: " << i++ << std::endl;
+//	std::cout << "Checker: " << i++ << std::endl;
+
+
+	gpuErrchk(cudaDeviceSetLimit(cudaLimitMallocHeapSize,numOfNodes*numOfNodes*sizeof(int)));
 	gpuErrchk(cudaMallocManaged(&(this->devicePointerMotifVariations),
 				nodeVariations->size() * sizeof(unsigned int)));
 	//	std::cout << "between"<<std::endl;
@@ -311,6 +314,7 @@ vector<vector<unsigned int> *> *GPUMotifCalculator::Calculate() {
 	globalDeviceFullGraphNeighbors = this->deviceFullGraphNeighbors;
 	globalDeviceFeatures = this->deviceFeatures;
 	 */
+	
 
 	int device = -1;
 	cudaGetDevice(&device);
@@ -355,9 +359,9 @@ vector<vector<unsigned int> *> *GPUMotifCalculator::Calculate() {
 	for (int node = 0; node < this->numOfNodes; node++) {
 		for (int motif = 0; motif < this->numOfMotifs; motif++) {
 			this->features->at(node)->at(motif) = globalDeviceFeatures[motif + this->numOfMotifs * node];
-			std::cout << globalDeviceFeatures[motif + this->numOfMotifs * node]<<"\t";
+	//		std::cout << globalDeviceFeatures[motif + this->numOfMotifs * node]<<"\t";
 		}
-		std::cout <<std::endl;
+	//	std::cout <<std::endl;
 	}
 	std::cout << "Num of nodes: " << this->numOfNodes << " features len: " << this->features->size()<<std::endl;
 	return this->features;
@@ -370,7 +374,12 @@ void Motif3Subtree(unsigned int root) {
 	int checker = 0;
 	//printf("Motif 3 checker: %i\n",checker++);
 	int idx_root =globalDevicePointerRemovalIndex[root];// root_idx is also our current iteration -
-	bool* visited_vertices = (bool*) malloc(globalNumOfNodes); // every node_idx smaller than root_idx is already handled
+//	bool* visited_vertices = (bool*) malloc(globalNumOfNodes); // every node_idx smaller than root_idx is already handled
+
+	// For test graphs that are regular with d=20, 500 is enough
+	bool* visited_vertices = (bool*) malloc(500); // every node_idx smaller than root_idx is already handled
+	if(visited_vertices==NULL)
+		printf("Error: No more memory to allocate visited vertices in node %u\n",root);
 	//printf("idx_root=%d\n",idx_root);
 	for (int i = 0; i < globalNumOfNodes; i++)
 		visited_vertices[i] = false;
