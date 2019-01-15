@@ -57,8 +57,8 @@ CONVERTER = ConvertedGNXReciever
 FEATURE_TEMPLATE=FeatureCalculator
 
 .PHONY:clean preScript
-accelerated_graph_features/$(OUTPUT_NAME).so: $(TARGET).o $(WRAPPER_OBJ_FILES) $(UTILS_OBJ_FILES) $(FEATURE_OBJ_FILES) $(GPU_FEATURE_OBJ_FILES) $(GPU_WRAPPER_OBJ_FILES) $(CACHE_GRAPH).o $(FEATURE_TEMPLATE).o
-	g++ -shared -Wl,--export-dynamic $^ gpuCode.o -L$(PYTHON_LIB) -lpython$(PYTHON_VERSION) -L$(BOOST_LIB) -lboost_python$(PYTHON_VERSION_SHORT) -o $@
+accelerated_graph_features/$(OUTPUT_NAME).so: $(TARGET).o $(WRAPPER_OBJ_FILES) $(UTILS_OBJ_FILES) $(FEATURE_OBJ_FILES) $(CACHE_GRAPH).o $(FEATURE_TEMPLATE).o
+	g++ -shared -Wl,--export-dynamic $^ -L$(PYTHON_LIB) -lpython$(PYTHON_VERSION) -L$(BOOST_LIB) -lboost_python$(PYTHON_VERSION_SHORT) -o $@
 
 
 ################  Changes for each feature #######################

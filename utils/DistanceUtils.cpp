@@ -18,7 +18,7 @@
 
 	The code is based on the code found here:https://www.geeksforgeeks.org/shortest-path-unweighted-graph/
 */
-std::vector<unsigned int> DistanceUtils::BfsSingleSourceShortestPath(const CacheGraph * g, int src)
+std::vector<unsigned int> DistanceUtils::BfsSingleSourceShortestPath(const CacheGraph * g,unsigned int src)
 {
 	const unsigned int numOfNodes = g->GetNumberOfNodes();
 

@@ -9,7 +9,7 @@
 class DistanceUtils
 {
 public:
-	static std::vector<int> BfsSingleSourceShortestPath(const CacheGraph * g, int src);
+	static std::vector<unsigned int> BfsSingleSourceShortestPath(const CacheGraph * g,unsigned int src);
 	static std::vector<float> DijkstraSingleSourceShortestPath(const CacheGraph * g, int src);
 };
 

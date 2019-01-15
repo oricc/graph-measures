@@ -57,9 +57,9 @@ void AttractionBasinCalculator::calc_attraction_basin_dists() {
 	// Build a distance matrix
 	std::vector<std::vector<unsigned int>*> dists;
 	dists.reserve(numOfNodes);
-	for (unsigned int node = 0; node < numOfNodes; node++) {
-		dists[node] = new std::vector<unsigned int>();
-		dists[node] = DistanceUtils::BfsSingleSourceShortestPath(mGraph, node);
+	for (unsigned int node = 0; node < numOfNodes; node++){ 
+		auto bfsDist = DistanceUtils::BfsSingleSourceShortestPath(mGraph, node);
+		dists[node] = new std::vector<unsigned int>(bfsDist.begin(),bfsDist.end());
 		(*ab_out_dist)[node] = new std::map<unsigned int, unsigned int>();
 		(*ab_in_dist)[node] = new std::map<unsigned int, unsigned int>();
 	}
@@ -75,7 +75,7 @@ void AttractionBasinCalculator::calc_attraction_basin_dists() {
 				(*(*ab_in_dist)[dest])[d] =
 						(ab_in_dist->at(dest)->find(d)
 								!= ab_in_dist->at(dest)->end()) ?
-								ab_in_dist[dest][d] + 1 : 1;
+								ab_in_dist->at(dest)->at(d) + 1 : 1;
 
 			} // end if
 		}  // end dest loop
@@ -120,7 +120,7 @@ void AttractionBasinCalculator::calc_average_per_dist() {
 		(*average_out_per_dist)[d.first] = d.second / (double) numOfNodes;
 	}
 	for (auto& d : *average_in_per_dist) {
-		(*average_in_per_dist[d.first]) = d.second / (double) numOfNodes;
+		(*average_in_per_dist)[d.first] = d.second / (double) numOfNodes;
 	}
 
 }
