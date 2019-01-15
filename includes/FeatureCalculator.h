@@ -29,7 +29,7 @@ private:
 
 template<class T>
 FeatureCalculator<T>::FeatureCalculator():
-	mGraph(NULL)
+	mGraph(NULL),isGPUEnabled(false)
 {
 
 }
