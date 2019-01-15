@@ -12,7 +12,7 @@ vector<floatTuple> BfsMomentsCalculator::Calculate() {
 		std::cout << "In main loop iter " << i << std::endl;
 
 		//calculate BFS distances
-		std::vector<int> distances = DistanceUtils::BfsSingleSourceShortestPath(
+		std::vector<unsigned int> distances = DistanceUtils::BfsSingleSourceShortestPath(
 				mGraph, i);
 
 //		std::cout<<"After DistanceUtils"<<std::endl;
@@ -21,7 +21,7 @@ vector<floatTuple> BfsMomentsCalculator::Calculate() {
 //			std::cout<<k<<" "<<distances[k]<<std::endl;
 
 //count the number of times each distance exists
-		std::unordered_map<int, int> distCounter;
+		std::unordered_map<unsigned int, int> distCounter;
 
 		for (int j = 0; j < distances.size(); j++) {
 //			std::cout<<"In internal loop iter "<<j<<" of "<<distances.size()<<std::endl;

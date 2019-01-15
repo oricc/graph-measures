@@ -58,21 +58,21 @@ void AttractionBasinCalculator::calc_attraction_basin_dists() {
 	std::vector<std::vector<unsigned int>*> dists;
 	dists.reserve(numOfNodes);
 	for (unsigned int node = 0; node < numOfNodes; node++) {
-		(*dists)[node] = new std::vector<unsigned int>(
-				DistanceUtils::BfsSingleSourceShortestPath(mGraph, node));
+		dists[node] = new std::vector<unsigned int>();
+		dists[node] = DistanceUtils::BfsSingleSourceShortestPath(mGraph, node);
 		(*ab_out_dist)[node] = new std::map<unsigned int, unsigned int>();
 		(*ab_in_dist)[node] = new std::map<unsigned int, unsigned int>();
 	}
 
 	for (unsigned int src = 0; src < numOfNodes; src++) {
 		for (unsigned int dest = 0; dest < numOfNodes; dest++) {
-			unsigned int d = dists[src][dest];
+			unsigned int d = dists.at(src)->at(dest);
 			if (d > 0) {
-				(*ab_out_dist)[src][d] =
+				(*(*ab_out_dist)[src])[d] =
 						(ab_out_dist->at(src)->find(d)
 								!= ab_out_dist->at(src)->end()) ?
 								ab_out_dist->at(src)->at(d) + 1 : 1;
-				(*ab_in_dist)[dest][d] =
+				(*(*ab_in_dist)[dest])[d] =
 						(ab_in_dist->at(dest)->find(d)
 								!= ab_in_dist->at(dest)->end()) ?
 								ab_in_dist[dest][d] + 1 : 1;
@@ -80,11 +80,14 @@ void AttractionBasinCalculator::calc_attraction_basin_dists() {
 			} // end if
 		}  // end dest loop
 	} //end src loop
+
+	for(auto& p:dists)
+		delete p;
 }
 
 void AttractionBasinCalculator::calc_average_per_dist() {
-	average_in_per_dist = std::map<unsigned int, double>();
-	average_out_per_dist = std::map<unsigned int, double>();
+	average_in_per_dist = new std::map<unsigned int, double>();
+	average_out_per_dist = new std::map<unsigned int, double>();
 
 	unsigned int numOfNodes = mGraph->GetNumberOfNodes();
 	for (unsigned int src = 0; src < numOfNodes; src++) {

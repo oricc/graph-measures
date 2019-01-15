@@ -18,16 +18,16 @@
 
 	The code is based on the code found here:https://www.geeksforgeeks.org/shortest-path-unweighted-graph/
 */
-std::vector<int> DistanceUtils::BfsSingleSourceShortestPath(const CacheGraph * g, int src)
+std::vector<unsigned int> DistanceUtils::BfsSingleSourceShortestPath(const CacheGraph * g, int src)
 {
 	const unsigned int numOfNodes = g->GetNumberOfNodes();
 
-	std::vector<int> dist(numOfNodes);
+	std::vector<unsigned int> dist(numOfNodes);
 
 	// a queue to maintain queue of vertices whose
 	// adjacency list is to be scanned as per normal
 	// DFS algorithm
-	std::list<int> queue;
+	std::list<unsigned int> queue;
 
 	// boolean array visited[] which stores the
 	// information whether ith vertex is reached
