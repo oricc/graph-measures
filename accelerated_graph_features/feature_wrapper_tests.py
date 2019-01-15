@@ -26,8 +26,8 @@ def silence_stdout():
 
 
 def test_features():
-    g = create_graph(2, GraphType=nx.DiGraph)
-	attraction_basin(g)
+    g = create_graph(3, GraphType=nx.DiGraph)
+    print(attraction_basin(g))
 """   
    motif_level = 4
     with silence_stdout():

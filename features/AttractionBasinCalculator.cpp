@@ -6,23 +6,28 @@
  */
 
 #include "../includes/AttractionBasinCalculator.h"
+#include <iostream>
 
 AttractionBasinCalculator::AttractionBasinCalculator(int alpha) :
-		alpha(alpha), ab_in_dist(NULL), ab_out_dist(NULL), average_out_per_dist(
-		NULL), average_in_per_dist(NULL), features(NULL) {
-}
+	alpha(alpha), ab_in_dist(NULL), ab_out_dist(NULL), average_out_per_dist(
+			NULL), average_in_per_dist(NULL), features(NULL) {
+	}
 AttractionBasinCalculator::AttractionBasinCalculator():AttractionBasinCalculator(2){}
 
 std::vector<double>* AttractionBasinCalculator::Calculate() {
+	std::cout << "Begin"<<std::endl;
 	this->calc_attraction_basin_dists();
+	std::cout << "After dists"<<std::endl;
 	this->calc_average_per_dist();
+	std::cout << "After avg"<<std::endl;
 	unsigned int numOfNodes = mGraph->GetNumberOfNodes();
 
+	features = new std::vector<double>();
 	for (unsigned int node = 0; node < numOfNodes; node++) {
 		auto out_dist = ab_out_dist->at(node);
 		auto in_dist = ab_in_dist->at(node);
 
-		(*features)[node] = -1;
+		features->push_back(-1);
 
 		double numerator = 0, denominator = 0;
 		for (auto& x : *out_dist) {
@@ -49,33 +54,32 @@ std::vector<double>* AttractionBasinCalculator::Calculate() {
 void AttractionBasinCalculator::calc_attraction_basin_dists() {
 
 	unsigned int numOfNodes = mGraph->GetNumberOfNodes();
-	this->ab_in_dist = new std::vector<std::map<unsigned int, unsigned int>*>(
-			numOfNodes);
-	this->ab_out_dist = new std::vector<std::map<unsigned int, unsigned int>*>(
-			numOfNodes);
+	this->ab_in_dist = new std::vector<std::map<unsigned int, unsigned int>*>();
+	this->ab_out_dist = new std::vector<std::map<unsigned int, unsigned int>*>();
 
 	// Build a distance matrix
 	std::vector<std::vector<unsigned int>*> dists;
 	dists.reserve(numOfNodes);
 	for (unsigned int node = 0; node < numOfNodes; node++){ 
 		auto bfsDist = DistanceUtils::BfsSingleSourceShortestPath(mGraph, node);
-		dists[node] = new std::vector<unsigned int>(bfsDist.begin(),bfsDist.end());
-		(*ab_out_dist)[node] = new std::map<unsigned int, unsigned int>();
-		(*ab_in_dist)[node] = new std::map<unsigned int, unsigned int>();
+		dists.push_back(new std::vector<unsigned int>(bfsDist.begin(),bfsDist.end()));
+		ab_out_dist->push_back( new std::map<unsigned int, unsigned int>());
+		ab_in_dist->push_back( new std::map<unsigned int, unsigned int>());
 	}
+
+	std:cout << ab_out_dist->size()<<std::endl;
 
 	for (unsigned int src = 0; src < numOfNodes; src++) {
 		for (unsigned int dest = 0; dest < numOfNodes; dest++) {
 			unsigned int d = dists.at(src)->at(dest);
 			if (d > 0) {
-				(*(*ab_out_dist)[src])[d] =
-						(ab_out_dist->at(src)->find(d)
-								!= ab_out_dist->at(src)->end()) ?
-								ab_out_dist->at(src)->at(d) + 1 : 1;
+				(*((*ab_out_dist)[src]))[d] =
+					(ab_out_dist->at(src)->count(d)==1) ?
+					ab_out_dist->at(src)->at(d) + 1 : 1;
 				(*(*ab_in_dist)[dest])[d] =
-						(ab_in_dist->at(dest)->find(d)
-								!= ab_in_dist->at(dest)->end()) ?
-								ab_in_dist->at(dest)->at(d) + 1 : 1;
+					(ab_in_dist->at(dest)->find(d)
+					 != ab_in_dist->at(dest)->end()) ?
+					ab_in_dist->at(dest)->at(d) + 1 : 1;
 
 			} // end if
 		}  // end dest loop
@@ -98,9 +102,9 @@ void AttractionBasinCalculator::calc_average_per_dist() {
 			auto dist = x.first;
 			auto occurances = x.second;
 			(*average_in_per_dist)[dist] =
-					(average_in_per_dist->find(dist)
-							!= average_in_per_dist->end()) ?
-							average_in_per_dist->at(dist) + 1 : 1;
+				(average_in_per_dist->find(dist)
+				 != average_in_per_dist->end()) ?
+				average_in_per_dist->at(dist) + 1 : 1;
 		}
 
 		// Unify the out distances
@@ -109,9 +113,9 @@ void AttractionBasinCalculator::calc_average_per_dist() {
 			auto dist = x.first;
 			auto occurances = x.second;
 			(*average_out_per_dist)[dist] =
-					(average_out_per_dist->find(dist)
-							!= average_out_per_dist->end()) ?
-							average_out_per_dist->at(dist) + 1 : 1;
+				(average_out_per_dist->find(dist)
+				 != average_out_per_dist->end()) ?
+				average_out_per_dist->at(dist) + 1 : 1;
 		}
 
 	} // End src loop
