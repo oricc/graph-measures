@@ -5,14 +5,15 @@
  *      Author: ori
  */
 
-#include "../AttractionBasinCalculator.h"
+#include "../includes/AttractionBasinCalculator.h"
 
 AttractionBasinCalculator::AttractionBasinCalculator(int alpha) :
 		alpha(alpha), ab_in_dist(NULL), ab_out_dist(NULL), average_out_per_dist(
 		NULL), average_in_per_dist(NULL), features(NULL) {
 }
+AttractionBasinCalculator::AttractionBasinCalculator():AttractionBasinCalculator(2){}
 
-std::vector<double>* AttractionBasinCalculator::Calulate() {
+std::vector<double>* AttractionBasinCalculator::Calculate() {
 	this->calc_attraction_basin_dists();
 	this->calc_average_per_dist();
 	unsigned int numOfNodes = mGraph->GetNumberOfNodes();
