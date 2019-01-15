@@ -7,7 +7,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from src.accelerated_graph_features.test_python_converter import create_graph
 from src.accelerated_graph_features.feature_wrappers import example_feature, clustering_coefficient, k_core, \
-    node_page_rank, bfs_moments, motif
+    node_page_rank, bfs_moments, motif,attraction_basin
 
 import networkx as nx
 
@@ -27,7 +27,9 @@ def silence_stdout():
 
 def test_features():
     g = create_graph(2, GraphType=nx.DiGraph)
-    motif_level = 4
+	attraction_basin(g)
+"""   
+   motif_level = 4
     with silence_stdout():
         example_feature(g)
         clustering_coefficient(g)
@@ -47,7 +49,7 @@ def test_features():
     # print(gpu_motif == m_res)
     G = nx.random_regular_graph(20,900,seed=123456)
     motif(G,level=3,gpu=True)
-
+"""
 
 if __name__ == '__main__':
     test_features()

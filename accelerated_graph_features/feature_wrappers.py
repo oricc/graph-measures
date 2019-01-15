@@ -61,6 +61,14 @@ def bfs_moments(graph, **kwargs):
 
     return res
 
+@FeatureWrapper
+def attraction_basin(graph,**kwargs):
+	import src.accelerated_graph_features._features as feat
+
+	alpha = kwargs.get('alpha',2)
+    res = feat.attraction_basin(graph,alpha)
+
+    return res
 
 @FeatureWrapper
 def motif(graph, **kwargs):
