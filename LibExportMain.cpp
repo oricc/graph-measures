@@ -17,6 +17,7 @@
 #include "wrappers/BFSMomentsWrapper.h"
 #include "wrappers/ClusteringCoefficientWrapper.h"
 #include "wrappers/MotifWrapper.h"
+#include "wrappers/AttractionBasinWrapper.h"
 
 // GPU features
 #include "gpu_wrappers/GPUMotifWrapper.h"
@@ -44,5 +45,6 @@ BOOST_PYTHON_MODULE(_features)
 	BoostDefBFSMoments();
 	BoostDefMotif();
 	BoostDefGPUMotifCalculator();
+	BoostDefAttractionBasinCalculator();
 }
 
