@@ -17,7 +17,7 @@
 class AttractionBasinCalculator: public FeatureCalculator<std::vector<double>*> {
 public:
 	AttractionBasinCalculator(int alpha = 2);
-	AttractionBasinCalculator():AttractionBasinCalculator(2){};
+	AttractionBasinCalculator():AttractionBasinCalculator(2){}
 
 	virtual std::vector<double>* Calulate();
 	virtual ~AttractionBasinCalculator();

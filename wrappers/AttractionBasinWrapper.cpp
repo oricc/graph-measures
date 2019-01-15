@@ -5,8 +5,11 @@
  *      Author: cohen
  */
 
+#include "AttractionBasinWrapper.h"
+
+
 void BoostDefAttractionBasinCalculator() {
-	def("attraction_basin",AttractionBasinCalculatorWrapper)
+	def("attraction_basin",AttractionBasinCalculatorWrapper);
 }
 py::list AttractionBasinCalculatorWrapper(dict converted_graph,int alpha){
 	ConvertedGNXReciever reciever(converted_graph);

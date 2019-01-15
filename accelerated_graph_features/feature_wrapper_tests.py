@@ -41,11 +41,11 @@ def test_features():
         for k, v in enumerate(node_list):
             if v != 0:
                 print('\t{}:{}'.format(k, v))
-    gpu_motif = motif(g,level=motif_level,gpu=True)
-    print(len(gpu_motif),'X',len(gpu_motif[0]))
+    # gpu_motif = motif(g,level=motif_level,gpu=True)
+    # print(len(gpu_motif),'X',len(gpu_motif[0]))
     # print(gpu_motif)
-    print(gpu_motif == m_res)
-    G = nx.random_regular_graph(20, 2000,seed=123456)
+    # print(gpu_motif == m_res)
+    G = nx.random_regular_graph(20,900,seed=123456)
     motif(G,level=3,gpu=True)
 
 

@@ -181,7 +181,11 @@ void GPUMotifCalculator::CopyAllToDevice() {
 //	std::cout << "Checker: " << i++ << std::endl;
 	gpuErrchk(
 			cudaDeviceSetLimit(cudaLimitMallocHeapSize,
-					size_t(numOfNodes) * size_t(numOfNodes) * sizeof(int)));
+					size_t(numOfNodes) * size_t(numOfNodes) * sizeof(int64)));
+	size_t currentLimit;
+	gpuErrchk(cudaDeviceGetLimit(&currentLimit,cudaLimitMallocHeapSize));
+
+	std::cout << "Current limit is: "<< currentLimit<<std::endl;
 	gpuErrchk(
 			cudaMallocManaged(&(this->devicePointerMotifVariations),
 					nodeVariations->size() * sizeof(unsigned int)));
@@ -318,7 +322,7 @@ vector<vector<unsigned int> *> *GPUMotifCalculator::Calculate() {
 	 globalDeviceFullGraphNeighbors = this->deviceFullGraphNeighbors;
 	 globalDeviceFeatures = this->deviceFeatures;
 	 */
-
+	cudaSetDevice(1);
 	int device = -1;
 	cudaGetDevice(&device);
 
