@@ -10,8 +10,8 @@ sys.path.append(os.path.abspath('../..'))
 from src.accelerated_graph_features.feature_wrappers import motif
 
 FEATURES = {
-    'Motif3': lambda g: motif(g, level=3),
-    'Motif4': lambda g: motif(g, level=4)
+    'Motif3': lambda g: motif(g, level=3,gpu=False),
+    'Motif4': lambda g: motif(g, level=4,gpu=False)
 }
 
 
@@ -29,4 +29,4 @@ def calculate_features_on_graph(file_name, feats):
 
 
 if __name__ == '__main__':
-    calculate_features_on_graph("itay_n_50_p_0.5_size_0", FEATURES)
+    calculate_features_on_graph("itay_n_1000_p_0.5_size_20_160119", FEATURES)

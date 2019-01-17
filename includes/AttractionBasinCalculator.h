@@ -12,7 +12,7 @@
 #include "DistanceUtils.h"
 #include <vector>
 #include <map>
-#include <cmath>
+#include <math.h>
 
 class AttractionBasinCalculator: public FeatureCalculator<std::vector<double>*> {
 public:
@@ -25,6 +25,7 @@ public:
 private:
 	void calc_attraction_basin_dists();
 	void calc_average_per_dist();
+	void printVars();
 
 	// The exponential decent coefficient
 	int alpha;

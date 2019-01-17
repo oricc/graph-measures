@@ -4,19 +4,19 @@
 
 
 /*
-	Calculate the distance of all nodes from a single node (the origin) using BFS.
+   Calculate the distance of all nodes from a single node (the origin) using BFS.
 
-	Assumptions:
-		1) The graph is not weighted. For weighted graphs consider using single_source_dijkstra.
-		2) There are no loop in the graph
-	Input:
-		g - a constant pointer to the GraphSnapsot to perform the calculation for
-		src - the integer ID of the origin node.
-	Output:
-		A vector that contains the distances of all the nodes from the origin.
-		The distance of node i is in position i in the vector.
+Assumptions:
+1) The graph is not weighted. For weighted graphs consider using single_source_dijkstra.
+2) There are no loop in the graph
+Input:
+g - a constant pointer to the GraphSnapsot to perform the calculation for
+src - the integer ID of the origin node.
+Output:
+A vector that contains the distances of all the nodes from the origin.
+The distance of node i is in position i in the vector.
 
-	The code is based on the code found here:https://www.geeksforgeeks.org/shortest-path-unweighted-graph/
+The code is based on the code found here:https://www.geeksforgeeks.org/shortest-path-unweighted-graph/
 */
 std::vector<unsigned int> DistanceUtils::BfsSingleSourceShortestPath(const CacheGraph * g,unsigned int src)
 {
@@ -89,27 +89,34 @@ std::vector<unsigned int> DistanceUtils::BfsSingleSourceShortestPath(const Cache
 
 		}
 
-	}
+}
 
-	return dist;
+for (int i = 0; i < numOfNodes; i++) {
+	if(dist[i] == INT_MAX)
+		dist[i] = 0;
+}
+
+
+
+return dist;
 }
 
 
 /*
-	Calculate the distance of all nodes from a single source using Dijkstra's algorithm.
-	Assumptions:
-		1) The graph has no negative weights
+   Calculate the distance of all nodes from a single source using Dijkstra's algorithm.
+Assumptions:
+1) The graph has no negative weights
 
-	Input:
-		g - a constant pointer to the GraphSnapsot to perfom the calculation for
-		src - the integer ID of the origin node.
-	
-	Output:
-		A vector that contains the distances of all the nodes from the origin.
-		The distance of node i is in position i in the vector.
-	
-	The code is based on the code found here:https://www.geeksforgeeks.org/greedy-algorithms-set-6-dijkstras-shortest-path-algorithm/
-		
+Input:
+g - a constant pointer to the GraphSnapsot to perfom the calculation for
+src - the integer ID of the origin node.
+
+Output:
+A vector that contains the distances of all the nodes from the origin.
+The distance of node i is in position i in the vector.
+
+The code is based on the code found here:https://www.geeksforgeeks.org/greedy-algorithms-set-6-dijkstras-shortest-path-algorithm/
+
 */
 std::vector<float> DistanceUtils::DijkstraSingleSourceShortestPath(const CacheGraph * g, int src)
 {
@@ -117,7 +124,7 @@ std::vector<float> DistanceUtils::DijkstraSingleSourceShortestPath(const CacheGr
 
 	//dist contains the shortest distance from src to other nodes
 	std::vector<float> dist(numOfNodes);
-	
+
 	//sptSet[i] will be true if the distance to i is finalized
 	std::vector<bool> sptSet(numOfNodes);
 
