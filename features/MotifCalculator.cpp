@@ -7,7 +7,7 @@
 
 #include "../includes/MotifCalculator.h"
 #include "../includes/MotifVariationConstants.h"
-
+#include <algorithm>
 void MotifCalculator::init() {
 	CacheGraph inverse(true);
 	mGraph->InverseGraph(inverse);
@@ -23,7 +23,7 @@ void MotifCalculator::init() {
 	this->SetRemovalIndex();
 	//std::cout << "Feature counters" << std::endl;
 	this->InitFeatureCounters();
-	//std::cout << "Done" << std::endl;
+	std::cout << "Done" << std::endl;
 	//std::cout << this->removalIndex->size() << std::endl;
 
 }
@@ -142,7 +142,7 @@ vector<vector<unsigned int>*>* MotifCalculator::Calculate() {
 		for (auto node : *(this->sortedNodesByDegree))
 			Motif4Subtree(node);
 	}
-	//std::cout << "Done All" << std::endl;
+	std::cout << "Done All" << std::endl;
 	return this->features;
 }
 
@@ -338,6 +338,10 @@ void MotifCalculator::GroupUpdater(std::vector<unsigned int> group) {
 // TODO: count overall number of motifs in graph (maybe different class)?
 	int groupNumber = GetGroupNumber(group);
 	int motifNumber = (*(this->nodeVariations))[groupNumber];
+	
+//	if(std::find(group.begin(),group.end(),0)!=group.end() && motifNumber == 17)
+//		std::cout << "A 0/17 group "<<group[0]<<","<<group[1]<<","<<group[2]<<","<<group[3]<<std::endl;
+	
 	if (motifNumber != -1)
 		for (auto node : group)
 			(*(*features)[node])[motifNumber]++;
