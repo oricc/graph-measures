@@ -16,7 +16,7 @@ except ModuleNotFoundError as e:
 CUR_PATH = os.path.realpath(__file__)
 BASE_PATH = os.path.dirname(os.path.dirname(CUR_PATH))
 VERBOSE = False
-DEBUG = False
+DEBUG = True
 SAVE_COUNTED_MOTIFS = False
 
 interesting_groups = [
@@ -243,13 +243,13 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         motif_counter = {motif_number: 0 for motif_number in self._all_motifs}
         self._features = {node: motif_counter.copy() for node in self._gnx}
         for i, (group, group_num, motif_num) in enumerate(self._calculate_motif()):
-            # if DEBUG:
-            #     if 21 in group and motif_num is 47:
-            #         print('A 21/47 group:', group, motif_num)
-            #         pass
-            #     if sorted(group) in interesting_groups:
-            #         print('An interesting group:', group, motif_num)
-            #
+            if DEBUG:
+                if 0 in group and motif_num is 17:
+                    print('A 21/47 group:', group, motif_num)
+                    pass
+                # if sorted(group) in interesting_groups:
+                #     print('An interesting group:', group, motif_num)
+
             # if SAVE_COUNTED_MOTIFS:
             #     h = hash(frozenset(group))
             #     # h = frozenset(group)
