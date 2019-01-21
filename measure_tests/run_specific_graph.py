@@ -1,8 +1,14 @@
+import os
+import sys
+
+sys.path.append(os.path.abspath('.'))
+sys.path.append(os.path.abspath('..'))
+sys.path.append(os.path.abspath('../..'))
+
 import networkx as nx
 from loggers import PrintLogger
 import numpy as np
 from features_algorithms.vertices.motifs import MotifsNodeCalculator
-import os
 import matplotlib.pyplot as plt
 
 logger = PrintLogger("MyLogger")
@@ -21,10 +27,6 @@ def load_graph(path):
 
 
 def run_feature(gnx):
-    feature = MotifsNodeCalculator(gnx, level=4, logger=logger)
-    feature.build()
-
-    mx = feature.to_matrix(mtype=np.matrix, should_zscore=False)
     return mx
 
 
@@ -45,8 +47,13 @@ def draw_graph(gnx: nx.Graph):
 def main():
     path = 'n_50_p_0.5_size_0'
     g = load_graph(path)
+    # g = nx.erdos_renyi_graph(50, 0.5)
     # draw_graph(nx.subgraph(g, [37, 11, 41, 40]))
-    res = run_feature(g)
+    feature = MotifsNodeCalculator(g, level=4, logger=logger)
+    feature.build()
+
+    mx = feature.to_matrix(mtype=np.matrix, should_zscore=False)
+    print(mx)
     pass
 
 
