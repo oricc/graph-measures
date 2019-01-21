@@ -9,7 +9,7 @@ import numpy as np
 
 try:
     from graph_measures.loggers import EmptyLogger
-except ModuleNotFoundError as e:
+except Exception as e:
     from loggers import EmptyLogger
 
 # Old zscore code.. should use scipy.stats.zscore

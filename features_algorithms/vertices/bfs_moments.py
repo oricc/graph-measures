@@ -10,6 +10,17 @@ class BfsMomentsCalculator(NodeFeatureCalculator):
     def is_relevant(self):
         return True
 
+    def weighted_avg_and_std(self, values, weights):
+        """
+        Return the weighted average and standard deviation.
+
+        values, weights -- Numpy ndarrays with the same shape.
+        """
+        average = np.average(values, weights=weights)
+        # Fast and numerically precise:
+        variance = np.average((values - average) ** 2, weights=weights)
+        return average, np.sqrt(variance)
+
     def _calculate(self, include: set):
         for node in self._gnx:
             # calculate BFS distances
@@ -22,8 +33,9 @@ class BfsMomentsCalculator(NodeFeatureCalculator):
             dists, weights = zip(*node_dist.items())
             # This was in the previous version
             # instead of the above commented fix
-            adjusted_dists = [x + 1 for x in dists]
-            self._features[node] = [float(np.average(weights, weights=adjusted_dists)), float(np.std(weights))]
+            adjusted_dists = np.asarray([x + 1 for x in dists])
+            weights = np.asarray(weights)
+            self._features[node] = [self.weighted_avg_and_std(adjusted_dists, weights)]
 
 
 feature_entry = {
@@ -32,4 +44,5 @@ feature_entry = {
 
 if __name__ == "__main__":
     from measure_tests.specific_feature_test import test_specific_feature
+
     test_specific_feature(BfsMomentsCalculator, is_max_connected=True)
