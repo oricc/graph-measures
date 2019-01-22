@@ -18,5 +18,6 @@ py::list FlowCalculatorWrapper(dict converted_graph, double threshold) {
 	calc.setGraph(reciever.getCacheGraph());
 	std::vector<double>* res = calc.Calculate();
 	auto ret_list = vectorToPythonList<double>(*res);
+	delete res;
 	return ret_list;
 }
