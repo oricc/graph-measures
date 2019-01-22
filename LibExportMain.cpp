@@ -18,6 +18,7 @@
 #include "wrappers/ClusteringCoefficientWrapper.h"
 #include "wrappers/MotifWrapper.h"
 #include "wrappers/AttractionBasinWrapper.h"
+#include "wrappers/FlowWrapper.h"
 
 #ifdef __NVCC__
 // GPU features
@@ -46,6 +47,7 @@ BOOST_PYTHON_MODULE(_features)
 	BoostDefBFSMoments();
 	BoostDefMotif();
 	BoostDefAttractionBasinCalculator();
+	BoostDefFlowCalculator();
 
 #ifdef __NVCC__	
 	BoostDefGPUMotifCalculator();

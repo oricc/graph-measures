@@ -7,7 +7,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from src.accelerated_graph_features.test_python_converter import create_graph
 from src.accelerated_graph_features.feature_wrappers import example_feature, clustering_coefficient, k_core, \
-        node_page_rank, bfs_moments, motif,attraction_basin
+        node_page_rank, bfs_moments, motif,attraction_basin,flow
 
 from graph_measures.loggers import PrintLogger
 import numpy as np
@@ -40,10 +40,16 @@ def pretify_motif_results(m_res,criteria=lambda x:x!=0):
             node_string += '\n'
         print(node_string)
 
+def test_specific():
+    g = create_graph(2, GraphType=nx.DiGraph)
+    # print(attraction_basin(g))
+    print(flow(g))
+
 
 def test_features():
     g = create_graph(2, GraphType=nx.DiGraph)
     # print(attraction_basin(g))
+    print(flow(g))
 
     motif_level = 4
     #with silence_stdout():
@@ -106,4 +112,5 @@ def test_features():
 
 
 if __name__ == '__main__':
-    test_features()
+   #test_features()
+    test_specific()

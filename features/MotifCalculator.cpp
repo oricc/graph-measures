@@ -227,23 +227,25 @@ void MotifCalculator::Motif4Subtree(unsigned int root) {
 	 *    for n1, n2, n3 in combinations(neighbors_first_deg, 3):
 	 yield [root, n1, n2, n3]
 	 */
-	vector<vector<unsigned int> *> *n1_3_comb = neighbors_combinations(
-			neighbors, offsets[root], offsets[root + 1], 3);
-	for (auto it = n1_3_comb->begin(); it != n1_3_comb->end(); ++it) {
-		unsigned int n11 = (**it)[0];
-		unsigned int n12 = (**it)[1];
-		unsigned int n13 = (**it)[2];
-		if (this->removalIndex->at(n11) <= idx_root
-				|| this->removalIndex->at(n12) <= idx_root
-				|| this->removalIndex->at(n13) <= idx_root) // motif already handled
-			continue;
-		this->GroupUpdater(std::vector<unsigned int> { root, n11, n12, n13 }); // update motif counter [r,n11,n12,n13]
+	int64 end = offsets[root + 1];
+	for (int64 i = offsets[root]; i < end; i++) {
+		for (int64 j = i + 1; j < end; j++) {
+			if (j == end - 1) //if j is the last element, we can't add an element and therefore it's not a 3-combination
+				continue;
+			for (int64 k = j + 1; k < end; k++) {
+				unsigned int n11 = neighbors[i];
+				unsigned int n12 = neighbors[j];
+				unsigned int n13 = neighbors[k];
+				if (this->removalIndex->at(n11) <= idx_root
+						|| this->removalIndex->at(n12) <= idx_root
+						|| this->removalIndex->at(n13) <= idx_root) // motif already handled
+					continue;
+				this->GroupUpdater(std::vector<unsigned int> { root, n11, n12, n13 }); // update motif counter [r,n11,n12,n13]
+			}
+		}
 	}
 
-	for (auto p : *n1_3_comb) {
-		delete p;
-	}
-	delete n1_3_comb;
+
 	// All other cases
 	for (int64 n1_idx = offsets[root]; n1_idx < offsets[root + 1]; n1_idx++) { // loop first neighbors
 		unsigned int n1 = neighbors[n1_idx];
@@ -283,24 +285,22 @@ void MotifCalculator::Motif4Subtree(unsigned int root) {
 
 		// The case of root-n1-n21-n22
 		//2-combinations on second neighbors
-		vector<vector<unsigned int> *> *n2_comb = neighbors_combinations(
-				neighbors, offsets[n1], offsets[n1 + 1]);
-		for (auto it = n2_comb->begin(); it != n2_comb->end(); ++it) {
-			unsigned int n21 = (**it)[0];
-			unsigned int n22 = (**it)[1];
-			if (this->removalIndex->at(n21) <= idx_root
-					|| this->removalIndex->at(n22) <= idx_root) // motif already handled
-				continue;
-			if (2 == visited_vertices[n21] && visited_vertices[n22] == 2) {
-				this->GroupUpdater(std::vector<unsigned int> { root, n1, n21,
-						n22 }); // update motif counter [r,n1,n21,n22]
+		end = offsets[n1 + 1];
+		for (int64 i = offsets[n1]; i < end; i++) {
+			for (int64 j = i + 1; j < end; j++) {
+
+				unsigned int n21 = neighbors[i];
+				unsigned int n22 = neighbors[j];
+				if (this->removalIndex->at(n21) <= idx_root
+						|| this->removalIndex->at(n22) <= idx_root) // motif already handled
+					continue;
+				if (2 == visited_vertices[n21] && visited_vertices[n22] == 2) {
+					this->GroupUpdater(std::vector<unsigned int> { root, n1, n21,
+							n22 }); // update motif counter [r,n1,n21,n22]
+				}
 			}
 		} // end loop SECOND NEIGHBOR COMBINATIONS
 
-		for (auto p : *n2_comb) {
-			delete p;
-		}
-		delete n2_comb;
 	}
 	//The case of n1-n2-n3
 	for (int64 n1_idx = offsets[root]; n1_idx < offsets[root + 1]; n1_idx++) { // loop first neighbors

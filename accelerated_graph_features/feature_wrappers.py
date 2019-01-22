@@ -71,6 +71,16 @@ def attraction_basin(graph,**kwargs):
     return res
 
 @FeatureWrapper
+def flow(graph,**kwargs):
+    import src.accelerated_graph_features._features as feat
+
+    t = kwargs.get('threshold',0)
+    res = feat.flow(graph,t)
+
+    return res
+
+
+@FeatureWrapper
 def motif(graph, **kwargs):
     import src.accelerated_graph_features._features as feat
 
