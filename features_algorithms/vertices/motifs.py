@@ -16,15 +16,11 @@ except ModuleNotFoundError as e:
 CUR_PATH = os.path.realpath(__file__)
 BASE_PATH = os.path.dirname(os.path.dirname(CUR_PATH))
 VERBOSE = False
-DEBUG = True
+DEBUG = False
 SAVE_COUNTED_MOTIFS = False
 
 interesting_groups = [
-    sorted([21, 36, 13, 43]),
-    sorted([21, 14, 45, 35]),
-    sorted([21, 14, 48, 41]),
-    sorted([21, 14, 48, 44]),
-    sorted([21, 12, 18, 41])
+    sorted([0, 1, 8, 27])
 ]
 
 
@@ -89,6 +85,9 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
     # checking whether the edge exist in the graph - and construct a bitmask of the existing edges
     def _get_group_number(self, nbunch):
         func = permutations if self._gnx.is_directed() else combinations
+        if DEBUG:
+            if 0 in nbunch and 16 in nbunch:
+                hi = 3
         return BitArray(self._gnx.has_edge(n1, n2) for n1, n2 in func(nbunch, 2)).uint
 
     # def _get_motif_sub_tree(self, root, length):
@@ -136,6 +135,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         for n1, n2, n3 in combinations(neighbors_first_deg, 3):
             group = [root, n1, n2, n3]
             if DEBUG:
+                print('A 3-comb group: ', group)
                 if sorted(group) in interesting_groups:
                     print('An interesting group:', group)
 
@@ -150,6 +150,9 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
             neighbors_sec_deg = visited_neighbors = list(neighbors_sec_deg)
             for n in visited_neighbors:
                 if n not in visited_vertices:
+                    if DEBUG:
+                        if n is 1:
+                            hi = 0.5
                     visited_vertices[n] = 2
             for n2 in neighbors_sec_deg:
                 for n11 in neighbors_first_deg:
@@ -187,16 +190,26 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
 
         for n1 in neighbors_first_deg:
             if DEBUG:
-                if root is 41:
+                if root is 0:
                     print('n1', n1)
             neighbors_sec_deg = set(nx.all_neighbors(self._gnx, n1))
             # neighbors_sec_deg, visited_neighbors, len_b = tee(neighbors_sec_deg, 3)
             neighbors_sec_deg = visited_neighbors = list(neighbors_sec_deg)
             for n2 in neighbors_sec_deg:
+                if visited_vertices[n2] == 1:
+                    continue
+
                 for n3 in set(nx.all_neighbors(self._gnx, n2)):
+                    if DEBUG:
+                        if root is 0 and n1 is 27 and n2 is 8 and n3 is 1:
+                            hi = 1.5
+
+                    if visited_vertices[n3] == 1:
+                        continue
+
                     if n3 not in visited_vertices:
                         if DEBUG:
-                            if root is 41:
+                            if root is 0:
                                 hi = 2
                         visited_vertices[n3] = 3
                         if visited_vertices[n2] == 2:
@@ -207,7 +220,15 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
 
                             yield group
                     else:
-                        if visited_vertices[n3] == 3 and visited_vertices[n2] == 2:
+                        if visited_vertices[n3] == 2 and not (self._gnx.has_edge(n1, n3) or self._gnx.has_edge(n3, n1)):
+                            group = [root, n1, n2, n3]
+                            if DEBUG:
+                                if sorted(group) in interesting_groups:
+                                    print('An interesting group:', group)
+
+                            yield group
+
+                        elif visited_vertices[n3] == 3 and visited_vertices[n2] == 2:
                             group = [root, n1, n2, n3]
                             if DEBUG:
                                 if sorted(group) in interesting_groups:
@@ -244,8 +265,8 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         self._features = {node: motif_counter.copy() for node in self._gnx}
         for i, (group, group_num, motif_num) in enumerate(self._calculate_motif()):
             if DEBUG:
-                if 0 in group and motif_num is 17:
-                    print('A 21/47 group:', group, motif_num)
+                if 0 in group:
+                    print('A 21/47 group:', group, motif_num, group_num)
                     pass
                 # if sorted(group) in interesting_groups:
                 #     print('An interesting group:', group, motif_num)

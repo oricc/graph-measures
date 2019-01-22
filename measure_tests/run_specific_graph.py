@@ -17,17 +17,20 @@ PREFIX = 'specific_graphs'
 
 
 def load_graph(path):
-    g = nx.read_gpickle(open(os.path.join(PREFIX, path), 'rb'))
-    # nodes = list({21, 36, 13, 43, 21, 14, 45, 35, 21, 14, 48, 44, 21, 14, 48, 41, 21, 12, 18, 41})
-    # nodes = [21, 14, 48, 41, 44, 45, 35, 21, 12, 18, 41]
-    # nodes = [21, 36, 13, 43, 21, 14, 48, 41, 44]
-    # nodes = list({21, 14, 48, 41, 44, 45, 35, 21, 12, 18, 41, 21, 36, 13, 43})
+    g: nx.Graph = nx.read_gpickle(open(os.path.join(PREFIX, path), 'rb'))
+    center_node = 0
+    # nodes = [center_node]
+    # for i in range(3):
+    #     addition = []
+    #     for n in nodes:
+    #         addition += list(g.neighbors(n))
+    #     nodes += addition
+    #
+    # nodes = list(set(nodes))
     nodes = g.nodes
-    return nx.subgraph(g, nodes)
 
-
-def run_feature(gnx):
-    return mx
+    # return nx.subgraph(g, nodes)
+    return g
 
 
 def draw_graph(gnx: nx.Graph):
@@ -45,10 +48,10 @@ def draw_graph(gnx: nx.Graph):
 
 
 def main():
-    path = 'n_50_p_0.5_size_0'
+    path = 'undirected_test.pickle'
+    # path = 'n_50_p_0.5_size_0'
     g = load_graph(path)
-    # g = nx.erdos_renyi_graph(50, 0.5)
-    # draw_graph(nx.subgraph(g, [37, 11, 41, 40]))
+    # draw_graph(g)
     feature = MotifsNodeCalculator(g, level=4, logger=logger)
     feature.build()
 
