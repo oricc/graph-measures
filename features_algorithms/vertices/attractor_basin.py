@@ -10,7 +10,7 @@ class AttractorBasinCalculator(NodeFeatureCalculator):
     def __init__(self, *args, alpha=2, **kwargs):
         super(AttractorBasinCalculator, self).__init__(*args, **kwargs)
         self._alpha = alpha
-        self._default_val = -1.
+        self._default_val = float('nan')
 
     def is_relevant(self):
         return self._gnx.is_directed()
