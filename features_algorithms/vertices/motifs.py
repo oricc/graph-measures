@@ -204,9 +204,6 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
                         if root is 0 and n1 is 27 and n2 is 8 and n3 is 1:
                             hi = 1.5
 
-                    if visited_vertices[n3] == 1:
-                        continue
-
                     if n3 not in visited_vertices:
                         if DEBUG:
                             if root is 0:
@@ -220,6 +217,9 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
 
                             yield group
                     else:
+                        if visited_vertices[n3] == 1:
+                            continue
+
                         if visited_vertices[n3] == 2 and not (self._gnx.has_edge(n1, n3) or self._gnx.has_edge(n3, n1)):
                             group = [root, n1, n2, n3]
                             if DEBUG:
