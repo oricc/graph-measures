@@ -41,7 +41,9 @@ def pretify_motif_results(m_res,criteria=lambda x:x!=0):
         print(node_string)
 
 def test_specific():
-    g = create_graph(2, GraphType=nx.DiGraph)
+    g = create_graph(3, GraphType=nx.DiGraph)
+    g = nx.gnp_random_graph(50,0.5,directed=True,seed=123456)
+
     # print(attraction_basin(g))
     print(flow(g))
 

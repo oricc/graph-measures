@@ -16,10 +16,10 @@
 #include <algorithm>
 
 
-class FlowCalculator: public FeatureCalculator<std::vector<double>>{
+class FlowCalculator: public FeatureCalculator<std::vector<double>*>{
 public:
 	FlowCalculator(double threshold=0);
-	virtual std::vector<double> Calculate();
+	virtual std::vector<double>* Calculate();
 
 	virtual ~FlowCalculator();
 
@@ -27,11 +27,12 @@ private:
 	virtual void init();
 	void CalcDists();
 	void CountReachables();
+	void printVars();
 
 	double threshold;
 	unsigned int numOfNodes;
 
-	std::vector<double> features;
+	std::vector<double>* features;
 
 	CacheGraph inverse,undirectedGraph;
 	std::vector<std::vector<unsigned int>*> directed_dists;
