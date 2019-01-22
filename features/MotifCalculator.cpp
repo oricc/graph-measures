@@ -240,11 +240,11 @@ void MotifCalculator::Motif4Subtree(unsigned int root) {
 						|| this->removalIndex->at(n12) <= idx_root
 						|| this->removalIndex->at(n13) <= idx_root) // motif already handled
 					continue;
-				this->GroupUpdater(std::vector<unsigned int> { root, n11, n12, n13 }); // update motif counter [r,n11,n12,n13]
+				this->GroupUpdater(std::vector<unsigned int> { root, n11, n12,
+						n13 }); // update motif counter [r,n11,n12,n13]
 			}
 		}
 	}
-
 
 	// All other cases
 	for (int64 n1_idx = offsets[root]; n1_idx < offsets[root + 1]; n1_idx++) { // loop first neighbors
@@ -295,8 +295,8 @@ void MotifCalculator::Motif4Subtree(unsigned int root) {
 						|| this->removalIndex->at(n22) <= idx_root) // motif already handled
 					continue;
 				if (2 == visited_vertices[n21] && visited_vertices[n22] == 2) {
-					this->GroupUpdater(std::vector<unsigned int> { root, n1, n21,
-							n22 }); // update motif counter [r,n1,n21,n22]
+					this->GroupUpdater(std::vector<unsigned int> { root, n1,
+							n21, n22 }); // update motif counter [r,n1,n21,n22]
 				}
 			}
 		} // end loop SECOND NEIGHBOR COMBINATIONS
@@ -309,11 +309,18 @@ void MotifCalculator::Motif4Subtree(unsigned int root) {
 			unsigned int n2 = neighbors[n2_idx];
 			if (this->removalIndex->at(n2) <= idx_root)	// n2 already handled
 				continue;
+			if (visited_vertices[n2] == 1)
+				continue;
+
 			for (int64 n3_idx = offsets[n2]; n3_idx < offsets[n2 + 1];
 					n3_idx++) { // loop third neighbors
 				unsigned int n3 = neighbors[n3_idx];
 				if (this->removalIndex->at(n3) <= idx_root)	// n2 already handled
 					continue;
+
+				if (visited_vertices[n3] == 1)
+					continue;
+
 				if (visited_vertices.find(n3) == visited_vertices.end()) { // check if n3 was *not* visited
 					visited_vertices[n3] = 3;
 					if (visited_vertices[n2] == 2) { // check if n2 is a visited second neighbor
@@ -322,11 +329,20 @@ void MotifCalculator::Motif4Subtree(unsigned int root) {
 					} // end check if n2 is a visited second neighbor
 				} // end check if n3 was not visited
 
-				else if (visited_vertices[n3] == 3
-						&& visited_vertices[n2] == 2) { //TODO: verify
-					this->GroupUpdater(std::vector<unsigned int> { root, n1, n2,
-							n3 }); // update motif counter [r,n1,n2,n3]
-				} // end if
+				else {
+
+					if (visited_vertices[n3] == 2
+							&& !(mGraph->areNeighbors(n1, n3)
+									|| mGraph->areNeighbors(n3, n1))) {
+						this->GroupUpdater(std::vector<unsigned int> { root, n1,
+								n2, n3 }); // update motif counter [r,n1,n2,n3]
+					} else if (visited_vertices[n3] == 3
+							&& visited_vertices[n2] == 2) { //TODO: verify
+						this->GroupUpdater(std::vector<unsigned int> { root, n1,
+								n2, n3 }); // update motif counter [r,n1,n2,n3]
+					} // end if
+
+				} //end else
 			} // end loop THIRD NEIGHBORS
 		} // end loop SECOND NEIGHBORS THIRD TIME'S THE CHARM
 
@@ -338,10 +354,10 @@ void MotifCalculator::GroupUpdater(std::vector<unsigned int> group) {
 // TODO: count overall number of motifs in graph (maybe different class)?
 	int groupNumber = GetGroupNumber(group);
 	int motifNumber = (*(this->nodeVariations))[groupNumber];
-	
+
 //	if(std::find(group.begin(),group.end(),0)!=group.end() && motifNumber == 17)
 //		std::cout << "A 0/17 group "<<group[0]<<","<<group[1]<<","<<group[2]<<","<<group[3]<<std::endl;
-	
+
 	if (motifNumber != -1)
 		for (auto node : group)
 			(*(*features)[node])[motifNumber]++;

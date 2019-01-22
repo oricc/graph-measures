@@ -181,11 +181,12 @@ void GPUMotifCalculator::CopyAllToDevice() {
 //	std::cout << "Checker: " << i++ << std::endl;
 	gpuErrchk(
 			cudaDeviceSetLimit(cudaLimitMallocHeapSize,
-					size_t(10)*size_t(numOfNodes) * size_t(numOfNodes) * sizeof(int64)));
+					size_t(10) * size_t(numOfNodes) * size_t(numOfNodes)
+							* sizeof(int64)));
 	size_t currentLimit;
-	gpuErrchk(cudaDeviceGetLimit(&currentLimit,cudaLimitMallocHeapSize));
+	gpuErrchk(cudaDeviceGetLimit(&currentLimit, cudaLimitMallocHeapSize));
 
-	std::cout << "Current limit is: "<< currentLimit<<std::endl;
+	std::cout << "Current limit is: " << currentLimit << std::endl;
 	gpuErrchk(
 			cudaMallocManaged(&(this->devicePointerMotifVariations),
 					nodeVariations->size() * sizeof(unsigned int)));
@@ -219,8 +220,9 @@ void GPUMotifCalculator::CopyAllToDevice() {
 
 	// Feature matrix
 	//	std::cout << "Checker: " << i++ << std::endl;
-	std::cout <<"Num of Nodes:" <<this->numOfNodes <<std::endl;
-	std::cout <<"Num of node variations: " <<this -> nodeVariations->size() <<std::endl;
+	std::cout << "Num of Nodes:" << this->numOfNodes << std::endl;
+	std::cout << "Num of node variations: " << this->nodeVariations->size()
+			<< std::endl;
 	unsigned int size = this->numOfNodes * this->nodeVariations->size()
 			* sizeof(unsigned int);
 //	std::cout << "between" << std::endl;
@@ -260,7 +262,6 @@ void GPUMotifCalculator::CopyAllToDevice() {
 			(this->fullGraph.GetNumberOfEdges()) * sizeof(unsigned int));
 	//	std::cout << "Checker: " << i++ << std::endl;
 
-
 	//Assign to global variables
 
 	globalNumOfNodes = this->numOfNodes;
@@ -294,7 +295,7 @@ void Motif3Kernel(bool* visited) {
 	//AreNeighbors(0,1);
 	for (int i = index; i < n; i += stride) {
 		//	printf("In motif 3 kernel, i=%i\n",i);
-		Motif3Subtree(globalDevicePointerSortedNodesByDegree[i],visited);
+		Motif3Subtree(globalDevicePointerSortedNodesByDegree[i], visited);
 	}
 }
 __global__
@@ -303,7 +304,7 @@ void Motif4Kernel(short* visited) {
 	int stride = blockDim.x * gridDim.x;
 	auto n = globalNumOfNodes;
 	for (int i = index; i < n; i += stride)
-		Motif4Subtree(globalDevicePointerSortedNodesByDegree[i],visited);
+		Motif4Subtree(globalDevicePointerSortedNodesByDegree[i], visited);
 }
 
 vector<vector<unsigned int> *> *GPUMotifCalculator::Calculate() {
@@ -356,8 +357,7 @@ vector<vector<unsigned int> *> *GPUMotifCalculator::Calculate() {
 		// 	Motif3Subtree(node);
 		// }
 		bool* visited_vertices;
-		gpuErrchk(cudaMalloc(&visited_vertices,numOfNodes*numOfNodes));
-
+		gpuErrchk(cudaMalloc(&visited_vertices, numOfNodes * numOfNodes));
 
 		Motif3Kernel<<<numBlocks, blockSize>>>(visited_vertices);
 		std::cout << "Starting Motif 3 kernel" << std::endl;
@@ -368,8 +368,8 @@ vector<vector<unsigned int> *> *GPUMotifCalculator::Calculate() {
 		// for (auto node : *(this->sortedNodesByDegree))
 		// 	Motif4Subtree(node);
 		short* visited_vertices;
-		gpuErrchk(cudaMalloc(&visited_vertices,numOfNodes*numOfNodes));
-		
+		gpuErrchk(cudaMalloc(&visited_vertices, numOfNodes * numOfNodes));
+
 		Motif4Kernel<<<numBlocks, blockSize>>>(visited_vertices);
 		std::cout << "Starting Motif 4 kernel" << std::endl;
 		//Motif4Kernel<<<1,1>>>(this);
@@ -378,7 +378,7 @@ vector<vector<unsigned int> *> *GPUMotifCalculator::Calculate() {
 	gpuErrchk(cudaPeekAtLastError());
 	gpuErrchk(cudaDeviceSynchronize());
 	//TODO: convert the device features to the vector format
-	std::cout << "Num of Motifs: " << this->numOfMotifs<<std::endl;
+	std::cout << "Num of Motifs: " << this->numOfMotifs << std::endl;
 	for (int node = 0; node < this->numOfNodes; node++) {
 		for (int motif = 0; motif < this->numOfMotifs; motif++) {
 			this->features->at(node)->at(motif) = globalDeviceFeatures[motif
@@ -393,7 +393,7 @@ vector<vector<unsigned int> *> *GPUMotifCalculator::Calculate() {
 }
 
 __device__
-void Motif3Subtree(unsigned int root,bool* visited) {
+void Motif3Subtree(unsigned int root, bool* visited) {
 	// Instead of yield call GroupUpdater function
 	// Don't forget to check each time that the nodes are in the graph (check removal index).
 	int checker = 0;
@@ -402,7 +402,7 @@ void Motif3Subtree(unsigned int root,bool* visited) {
 //	bool* visited_vertices = (bool*) malloc(globalNumOfNodes); // every node_idx smaller than root_idx is already handled
 
 	// For test graphs that are regular with d=20, 500 is enough
-	bool* visited_vertices = visited + idx_root*globalNumOfNodes; // every node_idx smaller than root_idx is already handled
+	bool* visited_vertices = visited + idx_root * globalNumOfNodes; // every node_idx smaller than root_idx is already handled
 	if (visited_vertices == NULL)
 		printf(
 				"Error: No more memory to allocate visited vertices in node %u\n",
@@ -471,13 +471,13 @@ void Motif3Subtree(unsigned int root,bool* visited) {
 			}
 		}
 	} // end loop COMBINATIONS_NEIGHBORS_N1
-	//free(visited_vertices);
+	  //free(visited_vertices);
 }
 
 __device__
-void Motif4Subtree(unsigned int root,short* visited) {
+void Motif4Subtree(unsigned int root, short* visited) {
 	int idx_root = globalDevicePointerRemovalIndex[root]; // root_idx is also our current iteration -
-	short* visited_vertices =visited + idx_root*globalNumOfNodes; // every node_idx smaller than root_idx is already handled
+	short* visited_vertices = visited + idx_root * globalNumOfNodes; // every node_idx smaller than root_idx is already handled
 	for (int i = 0; i < globalNumOfNodes; i++)
 		visited_vertices[i] = -1;
 	visited_vertices[root] = 0;
@@ -581,11 +581,18 @@ void Motif4Subtree(unsigned int root,short* visited) {
 			unsigned int n2 = neighbors[n2_idx];
 			if (globalDevicePointerRemovalIndex[n2] <= idx_root) // n2 already handled
 				continue;
+
+			if (visited_vertices[n2] == 1)
+				continue;
+
 			for (int64 n3_idx = offsets[n2]; n3_idx < offsets[n2 + 1];
 					n3_idx++) { // loop third neighbors
 				unsigned int n3 = neighbors[n3_idx];
 				if (globalDevicePointerRemovalIndex[n3] <= idx_root) // n2 already handled
 					continue;
+				if (visited_vertices[n3] == 1)
+					continue;
+
 				if (visited_vertices[n3] == -1) { // check if n3 was *not* visited
 					visited_vertices[n3] = 3;
 					if (visited_vertices[n2] == 2) { // check if n2 is a visited second neighbor
@@ -594,16 +601,24 @@ void Motif4Subtree(unsigned int root,short* visited) {
 					}		// end check if n2 is a visited second neighbor
 				}						// end check if n3 was not visited
 
-				else if (visited_vertices[n3] == 3
-						&& visited_vertices[n2] == 2) {
-					unsigned int arr[] = { root, n1, n2, n3 };
-					GroupUpdater(arr, 4); // update motif counter [r,n1,n2,n3]
-				}											   // end if
+				else {
+
+					if (visited_vertices[n3] == 2
+							&& !(AreNeighbors(n1, n3) || AreNeighbors(n3, n1))) {
+						unsigned int arr[] = { root, n1, n2, n3 };
+						GroupUpdater(arr, 4); // update motif counter [r,n1,n2,n3]
+					}
+					if (visited_vertices[n3] == 3
+							&& visited_vertices[n2] == 2) {
+						unsigned int arr[] = { root, n1, n2, n3 };
+						GroupUpdater(arr, 4); // update motif counter [r,n1,n2,n3]
+					}											   // end if
+				}											   //end else
 			}									// end loop THIRD NEIGHBORS
 		}				// end loop SECOND NEIGHBORS THIRD TIME'S THE CHARM
 
 	} // end loop FIRST NEIGHBORS
-	//free(visited_vertices);
+	  //free(visited_vertices);
 
 }
 
@@ -611,9 +626,9 @@ __device__
 bool AreNeighbors(unsigned int p, unsigned int q) {
 	// int64* deviceOriginalGraphOffsets;
 	// unsigned int* deviceOriginalGraphNeighbors;
-	unsigned int first = globalDeviceOriginalGraphOffsets[p], //first array element
-			last = globalDeviceOriginalGraphOffsets[p + 1] - 1, //last array element
-			middle;                       //mid point of search
+	unsigned int first = globalDeviceOriginalGraphOffsets[p],//first array element
+			last = globalDeviceOriginalGraphOffsets[p + 1] - 1,	//last array element
+			middle;		//mid point of search
 
 	while (first <= last) {
 		middle = (first + last) / 2; //this finds the mid point
@@ -646,7 +661,7 @@ void GroupUpdater(unsigned int group[], int size) {
 		for (int i = 0; i < size; i++)
 			atomicAdd(
 					globalDeviceFeatures
-							+ (motifNumber + globalNumOfMotifs * group[i]), 1); //atomic add + access as 1D array : features[motif + M*node] // @suppress("Function cannot be resolved")
+							+ (motifNumber + globalNumOfMotifs * group[i]), 1);	//atomic add + access as 1D array : features[motif + M*node] // @suppress("Function cannot be resolved")
 		// where M is the number of motifs
 	}
 }
