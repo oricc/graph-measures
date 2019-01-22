@@ -61,21 +61,25 @@ def bfs_moments(graph, **kwargs):
 
     return res
 
+
 @FeatureWrapper
-def attraction_basin(graph,**kwargs):
+def attraction_basin(graph, **kwargs):
     import src.accelerated_graph_features._features as feat
 
-    alpha = kwargs.get('alpha',2)
-    res = feat.attraction_basin(graph,alpha)
-
+    alpha = kwargs.get('alpha', 2)
+    res = feat.attraction_basin(graph, alpha)
+    for i, x in enumerate(res):
+        if x < 0:
+            res[i] = float('nan')
     return res
 
+
 @FeatureWrapper
-def flow(graph,**kwargs):
+def flow(graph, **kwargs):
     import src.accelerated_graph_features._features as feat
 
-    t = kwargs.get('threshold',0)
-    res = feat.flow(graph,t)
+    t = kwargs.get('threshold', 0)
+    res = feat.flow(graph, t)
 
     return res
 
@@ -89,9 +93,9 @@ def motif(graph, **kwargs):
     except KeyError:
         raise AttributeError('Level must be specified!')
 
-    gpu = kwargs.get('gpu',False)
+    gpu = kwargs.get('gpu', False)
     if not gpu:
         res = feat.motif(graph, level)
     else:
-        res = feat.motif_gpu(graph,level)
+        res = feat.motif_gpu(graph, level)
     return res
