@@ -2,15 +2,20 @@ import sys
 import os
 
 # Leave the path changes here!!!
+sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..'))
+sys.path.append(os.path.join(os.path.dirname(__file__),'graph_measures'))
+
 
 from src.accelerated_graph_features.feature_wrappers import clustering_coefficient, k_core, node_page_rank, bfs_moments, \
-    motif
+    motif,attraction_basin,flow
 from src.accelerated_graph_features.graph_timer import FeatureTimer
 from src.accelerated_graph_features.original_features_check import original_bfs_moments
 # from Git.graph_measures.cpp_comparison import compare_motifs
+from graph_measures.features_algorithms.vertices.attractor_basin import AttractorBasinCalculator
+from graph_measures.features_algorithms.vertices.flow import FlowCalculator
 import networkx as nx
 
 matching_python_functions = {
@@ -20,8 +25,11 @@ matching_python_functions = {
     # 'BFSMoments': [bfs_moments, original_bfs_moments]
     # 'Motif3': [lambda G,timer: motif(G, level=3,timer=timer), lambda G: compare_motifs(G, level=3)]
     # 'Motif4': [lambda G,timer: motif(G, level=4,timer=timer), lambda G: compare_motifs(G, level=4)]
-	'Motif3_GPU': {'cpp':lambda G,timer: motif(G, level=3,timer=timer),'gpu':lambda G,timer: motif(G, level=3,timer=timer,gpu=True)},
-	'Motif4_GPU': {'cpp':lambda G,timer: motif(G, level=4,timer=timer),'gpu':lambda G,timer: motif(G, level=4,timer=timer,gpu=True)},
+    #	'Motif3_GPU': {'cpp':lambda G,timer: motif(G, level=3,timer=timer),'gpu':lambda G,timer: motif(G, level=3,timer=timer,gpu=True)},
+    #	'Motif4_GPU': {'cpp':lambda G,timer: motif(G, level=4,timer=timer),'gpu':lambda G,timer: motif(G, level=4,timer=timer,gpu=True)},
+    'attraction_basin':[attraction_basin,lambda G: AttractorBasinCalculator(G).build()],
+    'flow':[flow,lambda G: FlowCalculator(G).build()]
+    
 }
 
 SEED = 123456
@@ -127,4 +135,5 @@ def run_all_feature_tests_erdos_renyi():
 
 
 if __name__ == '__main__':
-    run_all_feature_with_gpu_tests_regular_graphs()
+    # run_all_feature_with_gpu_tests_regular_graphs()
+    run_all_feature_tests_regular_graphs()
