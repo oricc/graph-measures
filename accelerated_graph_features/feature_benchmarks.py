@@ -47,7 +47,7 @@ def benchmark_gpu_feature_regular_graph(feature_name, type='cpp', d=20):
                          titles=titles)
 
     for n in nodes:
-        G = nx.random_regular_graph(d, n,seed=SEED)
+        G = nx.random_regular_graph(d, n,seed=SEED,directed=True)
         run_id = '{}_nodes_and_{}_edges'.format(n, G.size())
         print(run_id)
         timer.start(run_id)
