@@ -321,8 +321,6 @@ void MotifCalculator::Motif4Subtree(unsigned int root) {
 				if (this->removalIndex->at(n3) <= idx_root)	// n2 already handled
 					continue;
 
-				if (visited_vertices[n3] == 1)
-					continue;
 
 				if (visited_vertices.find(n3) == visited_vertices.end()) { // check if n3 was *not* visited
 					visited_vertices[n3] = 3;
@@ -333,6 +331,9 @@ void MotifCalculator::Motif4Subtree(unsigned int root) {
 				} // end check if n3 was not visited
 
 				else {
+					if (visited_vertices[n3] == 1)
+						continue;
+
 
 					if (visited_vertices[n3] == 2
 							&& !(mGraph->areNeighbors(n1, n3)
