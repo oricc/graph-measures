@@ -37,6 +37,7 @@ MotifCalculator::MotifCalculator(int level, bool directed, string motif_path) :
 		throw invalid_argument("Level must be 3 or 4");
 	this->level = level;
 	this->features = new std::vector<vector<unsigned int>*>;
+//	interesting_motifs =  {3, 4, 6, 15, 17,23, 24, 26, 27, 29, 78, 80};
 
 }
 
@@ -246,7 +247,7 @@ void MotifCalculator::Motif4Subtree(unsigned int root) {
 		}
 	}
 
-	// All other cases
+	// All other casesDone All
 	for (int64 n1_idx = offsets[root]; n1_idx < offsets[root + 1]; n1_idx++) { // loop first neighbors
 		unsigned int n1 = neighbors[n1_idx];
 		if (this->removalIndex->at(n1) <= idx_root)	// n1 already handled
@@ -305,6 +306,8 @@ void MotifCalculator::Motif4Subtree(unsigned int root) {
 	//The case of n1-n2-n3
 	for (int64 n1_idx = offsets[root]; n1_idx < offsets[root + 1]; n1_idx++) { // loop first neighbors
 		unsigned int n1 = neighbors[n1_idx];
+		if (this->removalIndex->at(n1) <= idx_root)	// n1 already handled
+			continue;
 		for (int64 n2_idx = offsets[n1]; n2_idx < offsets[n1 + 1]; n2_idx++) { // loop second neighbors (third time's the charm)
 			unsigned int n2 = neighbors[n2_idx];
 			if (this->removalIndex->at(n2) <= idx_root)	// n2 already handled
@@ -355,9 +358,19 @@ void MotifCalculator::GroupUpdater(std::vector<unsigned int> group) {
 	int groupNumber = GetGroupNumber(group);
 	int motifNumber = (*(this->nodeVariations))[groupNumber];
 
+//	int interestingMotifs[] = { 3, 4, 6, 15, 17, 23, 24, 26, 27, 29, 78, 80 };
+
 //	if(std::find(group.begin(),group.end(),0)!=group.end() && motifNumber == 17)
 //		std::cout << "A 0/17 group "<<group[0]<<","<<group[1]<<","<<group[2]<<","<<group[3]<<std::endl;
-
+//	if (std::find(group.begin(),group.end(),4)!=group.end()) {
+//
+//		if (motifNumber == 15) {
+//			std::cout << motifNumber << " : ";
+//			for (auto n : group)
+//				std::cout << n << ",";
+//			std::cout << std::endl;
+//		}
+//	}
 	if (motifNumber != -1)
 		for (auto node : group)
 			(*(*features)[node])[motifNumber]++;
