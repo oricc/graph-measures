@@ -1,7 +1,8 @@
 import networkx as nx
 from loggers import PrintLogger
 import numpy as np
-from features_algorithms.vertices.attractor_basin import AttractorBasinCalculator
+from features_algorithms.vertices.flow import FlowCalculator
+from features_algorithms.vertices.motifs import MotifsNodeCalculator
 import os
 import matplotlib.pyplot as plt
 
@@ -26,14 +27,16 @@ def build_graph():
 
 def main():
     g = build_graph()
-    pos = nx.spring_layout(g)
-    nx.draw(g,pos)
-    nx.draw_networkx_labels(g,pos)
-    plt.show()
-    feature = AttractorBasinCalculator(g)
+    g = nx.erdos_renyi_graph(30, 0.3, directed=True, seed=123453525)
+    # pos = nx.spring_layout(g)
+    # nx.draw(g,pos)
+    # nx.draw_networkx_labels(g,pos)
+    # plt.show()
+    # feature = FlowCalculator(g)
+    feature = MotifsNodeCalculator(g, level=4)
     feature.build()
     mx = feature.to_matrix(mtype=np.matrix, should_zscore=False)
-    print(mx)
+    # print(mx)
 
 
 if __name__ == '__main__':

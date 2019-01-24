@@ -86,8 +86,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
     def _get_group_number(self, nbunch):
         func = permutations if self._gnx.is_directed() else combinations
         if DEBUG:
-            if 0 in nbunch and 16 in nbunch:
-                hi = 3
+            pass
         return BitArray(self._gnx.has_edge(n1, n2) for n1, n2 in func(nbunch, 2)).uint
 
     # def _get_motif_sub_tree(self, root, length):
@@ -135,7 +134,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         for n1, n2, n3 in combinations(neighbors_first_deg, 3):
             group = [root, n1, n2, n3]
             if DEBUG:
-                print('A 3-comb group: ', group)
+
                 if sorted(group) in interesting_groups:
                     print('An interesting group:', group)
 
@@ -143,8 +142,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
 
         for n1 in neighbors_first_deg:
             if DEBUG:
-                if root is 41:
-                    print('n1', n1)
+                pass
             neighbors_sec_deg = set(nx.all_neighbors(self._gnx, n1))
             # neighbors_sec_deg, visited_neighbors, len_b = tee(neighbors_sec_deg, 3)
             neighbors_sec_deg = visited_neighbors = list(neighbors_sec_deg)
@@ -265,9 +263,12 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         self._features = {node: motif_counter.copy() for node in self._gnx}
         for i, (group, group_num, motif_num) in enumerate(self._calculate_motif()):
             if DEBUG:
-                if 0 in group:
-                    print('A 21/47 group:', group, motif_num, group_num)
-                    pass
+                # if 0 in group:
+                #     print('A 21/47 group:', group, motif_num, group_num)
+                #     pass
+                if 4 in group and motif_num == 15:
+                    hi = 4
+                    print(','.join([str(x) for x in group]))
                 # if sorted(group) in interesting_groups:
                 #     print('An interesting group:', group, motif_num)
 
