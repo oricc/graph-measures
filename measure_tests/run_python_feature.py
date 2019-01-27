@@ -27,7 +27,8 @@ def build_graph():
 
 def main():
     g = build_graph()
-    g = nx.erdos_renyi_graph(30, 0.3, directed=True, seed=123453525)
+    G = nx.erdos_renyi_graph(10, 0.3, directed=True, seed=123453525)
+    g = G
     # pos = nx.spring_layout(g)
     # nx.draw(g,pos)
     # nx.draw_networkx_labels(g,pos)

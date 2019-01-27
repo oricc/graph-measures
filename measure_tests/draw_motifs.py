@@ -89,5 +89,5 @@ class MotifDrawer:
 
 if __name__ == '__main__':
     md = MotifDrawer(level=4, directed=True)
-    md.draw_motif([4,5,48,49])
+    md.draw_motif([44,22])
     # md.draw_motif([3, 4, 15,17, 23, 24, 80])

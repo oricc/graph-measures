@@ -188,8 +188,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
 
         for n1 in neighbors_first_deg:
             if DEBUG:
-                if root is 0:
-                    print('n1', n1)
+                pass
             neighbors_sec_deg = set(nx.all_neighbors(self._gnx, n1))
             # neighbors_sec_deg, visited_neighbors, len_b = tee(neighbors_sec_deg, 3)
             neighbors_sec_deg = visited_neighbors = list(neighbors_sec_deg)
@@ -266,11 +265,12 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
                 # if 0 in group:
                 #     print('A 21/47 group:', group, motif_num, group_num)
                 #     pass
-                if 4 in group and motif_num == 15:
-                    hi = 4
-                    print(','.join([str(x) for x in group]))
+                # if 4 in group and motif_num == 15:
+                #     hi = 4
+                #     print(','.join([str(x) for x in group]))
                 # if sorted(group) in interesting_groups:
-                #     print('An interesting group:', group, motif_num)
+                #     print('An interesting group:', group, motif_num)\
+                print(str(motif_num)+','+','.join([str(x) for x in group]))
 
             # if SAVE_COUNTED_MOTIFS:
             #     h = hash(frozenset(group))
@@ -289,12 +289,6 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         # print('Number of motifs counted twice:', len(self._double_counter))
 
         self._gnx = m_gnx
-        motif_sum = 0
-        for counter in self._features.values():
-            for v in counter.values():
-                motif_sum += v
-
-        print('Total num of motifs:', motif_sum)
 
     def _get_feature(self, element):
         all_motifs = self._all_motifs.difference(set([None]))
