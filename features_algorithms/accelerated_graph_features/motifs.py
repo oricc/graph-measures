@@ -1,8 +1,16 @@
 import os
+import sys
+
+sys.path.append(os.path.abspath('.'))
+sys.path.append(os.path.abspath('..'))
+sys.path.append(os.path.abspath('../..'))
+sys.path.append(os.path.abspath('../../..'))
+sys.path.append(os.path.abspath('src'))
+sys.path.append(os.path.abspath('src/accelerated_graph_features'))
 from functools import partial
 
 import numpy as np
-from features_algorithms.accelerated_graph_features.__c_kernel import motif
+from features_algorithms.accelerated_graph_features.src import motif
 from features_infra.feature_calculators import NodeFeatureCalculator, FeatureMeta
 
 CUR_PATH = os.path.realpath(__file__)

@@ -60,6 +60,8 @@ $(WRAPPER_OBJ_DIR)/%.o: $(WRAPPER_SRC_DIR)/%.cpp $(WRAPPER_SRC_DIR)/%.h
 
 ############### From here, always the same #######################
 $(TARGET).o: $(TARGET).cpp
+	mkdir -p obj
+	mkdir -p $(FEATURE_OBJ_DIR) $(WRAPPER_OBJ_DIR) $(UTILS_OBJ_DIR)
 	g++  $^  $(CFLAGS) -I$(PYTHON_INCLUDE) -I$(BOOST_INC)
 	
 $(CACHE_GRAPH).o: arch/$(CACHE_GRAPH).cpp
