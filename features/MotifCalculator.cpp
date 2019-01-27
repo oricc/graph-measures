@@ -372,6 +372,10 @@ void MotifCalculator::GroupUpdater(std::vector<unsigned int> group) {
 //			std::cout << std::endl;
 //		}
 //	}
+//	std::cout << motifNumber << ",";
+//	for (auto n : group)
+//		std::cout << n << ",";
+//	std::cout << std::endl;
 	if (motifNumber != -1)
 		for (auto node : group)
 			(*(*features)[node])[motifNumber]++;

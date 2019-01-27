@@ -376,24 +376,23 @@ std::vector<unsigned short> CacheGraph::ComputeKCore() const {
  */
 bool CacheGraph::areNeighbors(const unsigned int p,
 		const unsigned int q) const {
-	unsigned int first = m_Offsets[p],  //first array element
+	int first = m_Offsets[p],  //first array element
 			last = m_Offsets[p + 1] - 1,     //last array element
 			middle;                       //mid point of search
-
+//	std::cout << "In bin search"<<std::endl;
+//	std::cout << "p="<<p<<" q="<<q<<std::endl;
 	while (first <= last) {
-		middle = (first + last) / 2; //this finds the mid point
-		//std::cout << "Binary search: " << middle << std::endl;
+		middle = (int) (first + last) / 2; //this finds the mid point
+//		std::cout << "Binary search: " << first<< " "<< last<< " "<< middle << std::endl;
 		//TODO: fix overflow problem
 		if (m_Graph[middle] == q) {
 			return true;
-		} else if (middle == 0) {
-			// and the element is not here
-			return false;
-		} else if (m_Graph[middle] > q) // if it's in the lower half
+		} else if (m_Graph[middle] < q)
 				{
-			last = middle - 1;
-		} else {
-			first = middle + 1;      //if it's in the upper half
+			first = middle + 1;     //if it's in the upper half
+
+		} else { //m_Graph[middle] < q
+			last = middle - 1; // if it's in the lower half
 		}
 	}
 	return false;  // not found

@@ -626,12 +626,12 @@ __device__
 bool AreNeighbors(unsigned int p, unsigned int q) {
 	// int64* deviceOriginalGraphOffsets;
 	// unsigned int* deviceOriginalGraphNeighbors;
-	unsigned int first = globalDeviceOriginalGraphOffsets[p],//first array element
+	 int first = globalDeviceOriginalGraphOffsets[p],//first array element
 			last = globalDeviceOriginalGraphOffsets[p + 1] - 1,	//last array element
 			middle;		//mid point of search
 
 	while (first <= last) {
-		middle = (first + last) / 2; //this finds the mid point
+		middle = (int)(first + last) / 2; //this finds the mid point
 		//std::cout << "Binary search: " << middle << std::endl;
 		//TODO: fix overflow problem
 		if (globalDeviceOriginalGraphNeighbors[middle] == q) {
@@ -639,11 +639,12 @@ bool AreNeighbors(unsigned int p, unsigned int q) {
 		} else if (middle == 0) {
 			// and the element is not here
 			return false;
-		} else if (globalDeviceOriginalGraphNeighbors[middle] > q) // if it's in the lower half
+		} else if (globalDeviceOriginalGraphNeighbors[middle] > q)
 				{
-			last = middle - 1;
-		} else {
 			first = middle + 1;      //if it's in the upper half
+
+		} else {
+			last = middle - 1; // if it's in the lower half
 		}
 	}
 	return false;  // not found

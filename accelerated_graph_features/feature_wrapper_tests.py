@@ -68,7 +68,7 @@ def test_features():
     # print(gpu_motif)
     # print(gpu_motif == m_res)
     # G = nx.random_regular_graph(20,100,seed=123456).to_directed()
-    G = nx.erdos_renyi_graph(10, 0.3, directed=True, seed=123453525)
+    G = nx.erdos_renyi_graph(30, 0.3, directed=True, seed=None)
     # nx.write_gpickle(G,"test.pickle")
     # G = g
     # assert type(G) is nx.DiGraph
