@@ -98,9 +98,9 @@ def plot_benchmark_comparison(feature_name):
 
 if __name__ == '__main__':
 
-    features = ['Motif3', 'Motif4']
+    features = ['flow']
     # features = ['clustering', 'k_core', 'page_rank']
 
     for f in features:
-        # plot_benchmark_comparison(f)
-        plot_gpu_benchmark_comparison(f)
+        plot_benchmark_comparison(f)
+        # plot_gpu_benchmark_comparison(f)
