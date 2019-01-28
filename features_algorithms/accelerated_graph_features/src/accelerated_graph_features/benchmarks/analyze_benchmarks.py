@@ -4,9 +4,46 @@ import sys
 sys.path.append(os.path.abspath('..'))
 sys.path.append(os.path.abspath('../..'))
 sys.path.append(os.path.abspath('../../..'))
+sys.path.append(os.path.abspath('../../../..'))
+sys.path.append(os.path.abspath('../../../../..'))
 import matplotlib.pyplot as plt
 import numpy as np
 from src.accelerated_graph_features.utils.data_reader import get_number_data
+
+
+def plot_gpu_benchmark_comparison(feature_name):
+    cpp_file = feature_name + '_GPU_cpp_benchmark.csv'
+    gpu_file = feature_name + '_GPU_gpu_benchmark.csv'
+
+    cpp_results = get_number_data(cpp_file)
+    gpu_results = get_number_data(gpu_file)
+
+    cpp_feature_time = [d['Feature calculation time'] / 10 ** 6 for d in cpp_results]
+    cf = cpp_feature_time
+
+    gpu_feature_time = [d['Feature calculation time'] / 10 ** 6 for d in gpu_results]
+    gf = gpu_feature_time
+
+    runs = [d['run id'] for d in gpu_results]
+
+    N = len(cpp_results)
+
+    X = np.arange(N)
+    width = 0.2
+
+    # Plot bar chart
+    plt.figure(1)
+
+    cpp_feature_bar = plt.bar(X + width, cf, width, color='orange')
+    gpu_feature_bar = plt.bar(X, gf, width, color='red')
+
+    plt.ylabel('Time')
+    plt.title('Feature Time Comparison for ' + feature_name.capitalize())
+    plt.xticks(X, runs, rotation=90)
+    plt.legend((cpp_feature_bar[0], gpu_feature_bar[0]),
+               ('C++ Feature', 'GPU Feature'))
+
+    plt.show()
 
 
 def plot_benchmark_comparison(feature_name):
@@ -61,8 +98,9 @@ def plot_benchmark_comparison(feature_name):
 
 if __name__ == '__main__':
 
-    features = ['Motif3','Motif4']
+    features = ['Motif3', 'Motif4']
     # features = ['clustering', 'k_core', 'page_rank']
 
     for f in features:
-        plot_benchmark_comparison(f)
+        # plot_benchmark_comparison(f)
+        plot_gpu_benchmark_comparison(f)
