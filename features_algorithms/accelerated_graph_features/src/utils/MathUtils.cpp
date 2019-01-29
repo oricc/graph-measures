@@ -7,7 +7,7 @@ float MathUtils::calculateStd(const std::vector<float>& data) {
 	float mean = calculateMeanWithoutZeroes(data);
 	for (int i = 0; i < len; i++)
 		if (data[i] != 0) {
-			nonZero ++;
+			nonZero++;
 			standartDeviation += (data[i] - mean) * (data[i] - mean);
 		}
 
@@ -59,4 +59,23 @@ float MathUtils::calculateWeightedAverage(const std::vector<float>& data,
 
 	sum = sum / weightSum;
 	return sum;
+}
+
+float MathUtils::calculateWeightedStd(const std::vector<float>& data,
+		const std::vector<float>& weights) {
+
+	int lenData = data.size();
+	int lenWeights = weights.size();
+
+	if (lenData != lenWeights)
+		throw std::length_error("Data and weights must have the same size");
+
+	float avg = calculateWeightedAverage(data,weights);
+	std::vector<float> modified_data(lenData);
+	for(auto& p:data)
+		modified_data.push_back((p-avg)*(p-avg));
+	float variance = calculateWeightedAverage(modified_data,weights);
+	return sqrt(variance);
+
+
 }

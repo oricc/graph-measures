@@ -143,7 +143,7 @@ vector<vector<unsigned int>*>* MotifCalculator::Calculate() {
 		for (auto node : *(this->sortedNodesByDegree))
 			Motif4Subtree(node);
 	}
-	std::cout << "Done All" << std::endl;
+//	std::cout << "Done All" << std::endl;
 	return this->features;
 }
 

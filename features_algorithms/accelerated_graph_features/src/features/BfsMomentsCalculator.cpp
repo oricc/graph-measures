@@ -8,8 +8,8 @@ vector<floatTuple> BfsMomentsCalculator::Calculate() {
 	const int numOfNodes = mGraph->GetNumberOfNodes();
 	vector<floatTuple> features(numOfNodes);
 
-	for (int i = 0; i < numOfNodes; i++) {
-		std::cout << "In main loop iter " << i << std::endl;
+//	for (int i = 0; i < numOfNodes; i++) {
+//		std::cout << "In main loop iter " << i << std::endl;
 
 		//calculate BFS distances
 		std::vector<unsigned int> distances = DistanceUtils::BfsSingleSourceShortestPath(
@@ -40,16 +40,16 @@ vector<floatTuple> BfsMomentsCalculator::Calculate() {
 			weights.push_back((float) n.second); //the value is the number of times it has been counted
 		}
 
-		for (int k = 0; k < dists.size(); k++)
-			std::cout << dists[k] << " " << weights[k] << std::endl;
+//		for (int k = 0; k < dists.size(); k++)
+//			std::cout << dists[k] << " " << weights[k] << std::endl;
 
 
 		std::cout<<MathUtils::calculateMeanWithoutZeroes(weights)<<std::endl;
 		features[i] = std::make_tuple(
 				MathUtils::calculateWeightedAverage(weights, dists),
-				MathUtils::calculateStd(weights));
+				MathUtils::calculateWeightedStd(weights));
 
-		cout<<std::get<0>(features[i]) << " "<<std::get<1>(features[i])<<std::endl;
+//		cout<<std::get<0>(features[i]) << " "<<std::get<1>(features[i])<<std::endl;
 	}
 
 	return features;

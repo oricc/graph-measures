@@ -82,18 +82,16 @@ std::vector<double>* FlowCalculator::Calculate() {
 	CalcDists();
 	CountReachables();
 
-	printVars();
+//	printVars();
 
 	double max_b_u = (double) (*std::max_element(b_u.begin(), b_u.end()));
 
 	for (unsigned int node = 0; node < numOfNodes; node++) {
-		std::cout << "In node " << node << std::endl;
 		features->push_back(0);
 		// Check threshold
 		if ((b_u[node] / max_b_u) <= threshold) {
 			continue;
 		}
-		std::cout << "Mark" << std::endl;
 		auto udists = undirected_dists[node];
 		auto dists = directed_dists[node];
 
@@ -103,7 +101,6 @@ std::vector<double>* FlowCalculator::Calculate() {
 			if (dists->at(n) == 0) {
 				continue;
 			}
-			std::cout << "Mark n=" << n << std::endl;
 
 			sum += (double) udists->at(n) / dists->at(n);
 			(*features)[node] = sum / (double) b_u[node];
