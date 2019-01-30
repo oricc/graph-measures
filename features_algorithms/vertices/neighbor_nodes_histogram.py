@@ -17,7 +17,7 @@ from loggers import PrintLogger
 class NthNeighborNodeHistogramCalculator(NodeFeatureCalculator):
     def __init__(self, neighbor_order, *args, **kwargs):
         super(NthNeighborNodeHistogramCalculator, self).__init__(*args, **kwargs)
-        self._num_classes = len(self._gnx.graph["node_labels"])
+        self._num_classes = len(self._gnx.graph["labels"])
         self._neighbor_order = neighbor_order
         self._relation_types = ["".join(x) for x in cartesian(*(["io"] * self._neighbor_order))]
         self._print_name += "_%d" % (neighbor_order,)
@@ -49,7 +49,7 @@ class NthNeighborNodeHistogramCalculator(NodeFeatureCalculator):
 
     def _calculate(self, include: set):
         # Translating each label to a relevant index to save memory
-        labels_map = {label: idx for idx, label in enumerate(self._gnx.graph["node_labels"])}
+        labels_map = {label: idx for idx, label in enumerate(self._gnx.graph["labels"])}
 
         if self._gnx.is_directed():
             self._calculate_directed(include, labels_map)
@@ -116,8 +116,8 @@ def test_neighbor_histogram():
                              all_colors)
     logger = PrintLogger()
     calc = NthNeighborNodeHistogramCalculator(2, gnx, logger=logger)
-    calc.calculate()
-    n = calc._to_ndarray()
+    calc.build(include=set(gnx.nodes))
+    n = calc.to_matrix(should_zscore=False)
     # (self, gnx, name, abbreviations, logger=None):
     # m = calculate_second_neighbor_vector(gnx, colors)
     print('bla')
