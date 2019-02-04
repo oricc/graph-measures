@@ -222,7 +222,7 @@ void GPUMotifCalculator::CopyAllToDevice() {
 	//	//std::cout << "Checker: " << i++ << std::endl;
 	//std::cout << "Num of Nodes:" << this->numOfNodes << std::endl;
 	//std::cout << "Num of node variations: " << this->nodeVariations->size()
-			<< std::endl;
+			//<< std::endl;
 	unsigned int size = this->numOfNodes * this->nodeVariations->size()
 			* sizeof(unsigned int);
 //	//std::cout << "between" << std::endl;
