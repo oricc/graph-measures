@@ -19,7 +19,7 @@ from datetime import datetime
 class NthNeighborNodeHistogramCalculator(NodeFeatureCalculator):
     def __init__(self, neighbor_order, *args, **kwargs):
         super(NthNeighborNodeHistogramCalculator, self).__init__(*args, **kwargs)
-        self._num_classes = len(self._gnx.graph["node_labels"])
+        self._num_classes = len(self._gnx.graph["labels"])
         self._neighbor_order = neighbor_order
         self._relation_types = ["".join(x) for x in cartesian(*(["io"] * self._neighbor_order))]
         self._print_name += "_%d" % (neighbor_order,)
@@ -62,9 +62,13 @@ class NthNeighborNodeHistogramCalculator(NodeFeatureCalculator):
                 for neighbor2 in self._iter_nodes_of_order(neighbor, order - 1):
                     yield (neighbor2)
 
-    def _calculate(self, include: set):
+    def _calculate(self, include: set, labels_to_consider=None):
+
+        labels_to_consider = labels_to_consider if labels_to_consider else self._gnx.graph["labels"]
+        self._num_classes = len(labels_to_consider)
+
         # Translating each label to a relevant index to save memory
-        labels_map = {label: idx for idx, label in enumerate(self._gnx.graph["node_labels"])}
+        labels_map = {label: idx for idx, label in enumerate(labels_to_consider)}
 
         if self._gnx.is_directed():
             # self._calculate_directed2(include, labels_map)
@@ -94,10 +98,13 @@ class NthNeighborNodeHistogramCalculator(NodeFeatureCalculator):
             color = self._gnx.node[node]["label"]
             if color in labels_map:
                 color = labels_map[color]
+            else:
+                continue
             history = {rtype: set() for rtype in self._relation_types}
             for r_type, neighbor in self._iter_nodes_of_order(node, self._neighbor_order):
                 full_type = "".join(r_type)
-                if node == neighbor or neighbor in history[full_type]:
+                neighbor_color = self._gnx.node[node]["label"]
+                if node == neighbor or neighbor in history[full_type] or neighbor_color not in labels_map:
                     continue
                 history[full_type].add(neighbor)
 
@@ -139,7 +146,6 @@ class NthNeighborNodeHistogramCalculator(NodeFeatureCalculator):
         return np.array([[cur_feature[r_type][x] for x in range(self._num_classes)]
                          for r_type in self._relation_types]).flatten()
 
-
     # def _to_ndarray(self):
     #     mx = np.matrix([self._get_feature(node) for node in self._nodes()])
     #     return mx.astype(np.float32)
@@ -171,8 +177,8 @@ def test_neighbor_histogram():
                              all_colors)
     logger = PrintLogger()
     calc = NthNeighborNodeHistogramCalculator(2, gnx, logger=logger)
-    calc._calculate()
-    n = calc._to_ndarray()
+    calc._calculate(include=set(gnx.nodes))
+    # n = calc._to_ndarray()
     # (self, gnx, name, abbreviations, logger=None):
     # m = calculate_second_neighbor_vector(gnx, colors)
     print('bla')
