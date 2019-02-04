@@ -8,7 +8,7 @@ vector<floatTuple> BfsMomentsCalculator::Calculate() {
 	const int numOfNodes = mGraph->GetNumberOfNodes();
 	vector<floatTuple> features(numOfNodes);
 
-//	for (int i = 0; i < numOfNodes; i++) {
+	for (int i = 0; i < numOfNodes; i++) {
 //		std::cout << "In main loop iter " << i << std::endl;
 
 		//calculate BFS distances
@@ -46,8 +46,8 @@ vector<floatTuple> BfsMomentsCalculator::Calculate() {
 
 		std::cout<<MathUtils::calculateMeanWithoutZeroes(weights)<<std::endl;
 		features[i] = std::make_tuple(
-				MathUtils::calculateWeightedAverage(weights, dists),
-				MathUtils::calculateWeightedStd(weights));
+				MathUtils::calculateWeightedAverage(dists,weights),
+				MathUtils::calculateWeightedStd(dists,weights));
 
 //		cout<<std::get<0>(features[i]) << " "<<std::get<1>(features[i])<<std::endl;
 	}
