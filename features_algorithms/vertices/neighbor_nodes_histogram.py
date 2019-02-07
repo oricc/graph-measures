@@ -150,6 +150,7 @@ class NthNeighborNodeHistogramCalculator(NodeFeatureCalculator):
 
 
 def nth_neighbor_calculator(order, **kwargs):
+    # Kwargs are used to pass the labels to consider argument
     return partial(NthNeighborNodeHistogramCalculator, order, **kwargs)
 
 
