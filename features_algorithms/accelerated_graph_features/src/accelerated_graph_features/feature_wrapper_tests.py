@@ -4,6 +4,9 @@ import os
 # Leave the path changes here!!!
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..','..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..','..','..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..','..','..','..'))
 
 from src.accelerated_graph_features.test_python_converter import create_graph
 from src.accelerated_graph_features.feature_wrappers import example_feature, clustering_coefficient, k_core, \
@@ -44,10 +47,10 @@ def pretify_motif_results(m_res, criteria=lambda x: x != 0):
 
 def test_specific():
     g = create_graph(3, GraphType=nx.DiGraph)
-    g = nx.gnp_random_graph(50, 0.5, directed=True, seed=123456)
+    #g = nx.gnp_random_graph(50, 0.5, directed=True, seed=123456)
 
     # print(attraction_basin(g))
-    print(flow(g))
+    print(motif(g,level=3,gpu=True))
 
 
 def test_features():
@@ -79,14 +82,17 @@ def test_features():
     # print(mx[0])
     m_res = motif(G, level=motif_level, gpu=False)
     # pretify_motif_results(m_res) 
-    # gpu_res = motif(G,level=motif_level,gpu=True)
-    pretify_motif_results([mx.tolist(), m_res])
+    gpu_res = motif(G,level=motif_level,gpu=True)
+    pretify_motif_results([ m_res,gpu_res])
     # pretify_motif_results([mx.tolist(),m_res,gpu_res])
 
     m_res_arr = np.asarray(m_res)
+    gpu_res_arr = np.asarray(gpu_res)
 
     print(mx.shape, m_res_arr.shape)
 
+    mx = gpu_res_arr
+    # np_diff = mx - m_res_arr
     np_diff = mx - m_res_arr
     print('diff avg:', np.average(np_diff[np.abs(np_diff) > 1]))
     print('number of elements:', np.size(np_diff))
@@ -99,8 +105,8 @@ def test_features():
         list_diff.append(l.tolist())
     #     print(list_diff[count-1])
 
-    list_diff = [l[0] for l in list_diff]
-    #   print(list_diff)
+#    list_diff = [l[0] for l in list_diff]
+ #   print(list_diff)
     #    print('count',count)
     pretify_motif_results([list_diff], lambda x: x != 0 and abs(x) > 1)
 
@@ -117,4 +123,4 @@ def test_features():
 
 if __name__ == '__main__':
     test_features()
-    # test_specific()
+    #test_specific()
