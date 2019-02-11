@@ -5,12 +5,14 @@ from itertools import chain
 
 import networkx as nx
 import numpy as np
+
 # from scipy.stats import zscore
 
 try:
     from graph_measures.loggers import EmptyLogger
 except Exception as e:
     from loggers import EmptyLogger
+
 
 # Old zscore code.. should use scipy.stats.zscore
 def z_scoring(matrix):
@@ -42,7 +44,7 @@ def time_log(func):
 class FeatureCalculator:
     META_VALUES = ["_gnx", "_logger"]
 
-    def __init__(self, gnx, logger=None):
+    def __init__(self, gnx, *args, logger=None, **kwargs):
         # super(FeatureCalculator, self).__init__()
         self._is_loaded = False
         self._features = {}
@@ -99,7 +101,7 @@ class FeatureCalculator:
     def _params_order(self, input_order: list = None):
         raise NotImplementedError()
 
-    def to_matrix(self, params_order: list = None, mtype=np.matrix, should_zscore: bool=True):
+    def to_matrix(self, params_order: list = None, mtype=np.matrix, should_zscore: bool = True):
         mx = np.matrix([self._get_feature(element) for element in self._params_order(params_order)]).astype(np.float32)
         # infinity is possible due to the change of the matrix type (i.e. overflow from 64 bit to 32 bit)
         mx[np.isinf(mx)] = self._default_val

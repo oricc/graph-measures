@@ -222,7 +222,7 @@ void GPUMotifCalculator::CopyAllToDevice() {
 	//	//std::cout << "Checker: " << i++ << std::endl;
 	//std::cout << "Num of Nodes:" << this->numOfNodes << std::endl;
 	//std::cout << "Num of node variations: " << this->nodeVariations->size()
-			<< std::endl;
+			//<< std::endl;
 	unsigned int size = this->numOfNodes * this->nodeVariations->size()
 			* sizeof(unsigned int);
 //	//std::cout << "between" << std::endl;
@@ -350,15 +350,15 @@ vector<vector<unsigned int> *> *GPUMotifCalculator::Calculate() {
 					* sizeof(unsigned int), device, NULL);
 
 	if (this->level == 3) {
-		////std::cout << "Start 3" << std::endl;
+		//std::cout << "Start 3" << std::endl;
 
 		// for (auto node : *(this->sortedNodesByDegree)) {
 		// 	////std::cout << node << std::endl;
 		// 	Motif3Subtree(node);
 		// }
 		bool* visited_vertices;
-		gpuErrchk(cudaMalloc(&visited_vertices, numOfNodes * numOfNodes*sizeof(bool)));
-		cudaMemPrefetchAsync(visited_vertices, numOfNodes * numOfNodes*sizeof(bool),device,NULL);
+		gpuErrchk(cudaMallocManaged(&visited_vertices, numOfNodes * numOfNodes*sizeof(bool)));
+		gpuErrchk(cudaMemPrefetchAsync(visited_vertices, numOfNodes * numOfNodes*sizeof(bool),device,NULL));
 		Motif3Kernel<<<numBlocks, blockSize>>>(visited_vertices);
 		//std::cout << "Starting Motif 3 kernel" << std::endl;
 		//Motif3Kernel<<<1,1>>>(this);
@@ -368,8 +368,8 @@ vector<vector<unsigned int> *> *GPUMotifCalculator::Calculate() {
 		// for (auto node : *(this->sortedNodesByDegree))
 		// 	Motif4Subtree(node);
 		short* visited_vertices;
-		gpuErrchk(cudaMalloc(&visited_vertices, numOfNodes * numOfNodes*sizeof(short)));
-		cudaMemPrefetchAsync(visited_vertices, numOfNodes * numOfNodes*sizeof(short),device,NULL);
+		gpuErrchk(cudaMallocManaged(&visited_vertices, numOfNodes * numOfNodes*sizeof(short)));
+		gpuErrchk(cudaMemPrefetchAsync(visited_vertices, numOfNodes * numOfNodes*sizeof(short),device,NULL));
 		Motif4Kernel<<<numBlocks, blockSize>>>(visited_vertices);
 		//std::cout << "Starting Motif 4 kernel" << std::endl;
 		//Motif4Kernel<<<1,1>>>(this);
@@ -448,7 +448,7 @@ void Motif3Subtree(unsigned int root, bool* visited) {
 		}											// end LOOP_SECOND_NEIGHBORS
 
 	} // end LOOP_FIRST_NEIGHBORS
-	  ////std::cout << "Mark" << std::endl;
+	 // std::cout << "Mark" << std::endl;
 	  // vector<vector<unsigned int> *> *n1_comb = neighbors_combinations(neighbors,
 	  // 	offsets[root], offsets[root + 1]);
 	  //printf("Motif 3 checker: %i\n",checker++);
@@ -636,10 +636,7 @@ bool AreNeighbors(unsigned int p, unsigned int q) {
 		//TODO: fix overflow problem
 		if (globalDeviceOriginalGraphNeighbors[middle] == q) {
 			return true;
-		} else if (middle == 0) {
-			// and the element is not here
-			return false;
-		} else if (globalDeviceOriginalGraphNeighbors[middle] > q)
+		} else if (globalDeviceOriginalGraphNeighbors[middle] < q)
 				{
 			first = middle + 1;      //if it's in the upper half
 
