@@ -1,0 +1,2922 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+\usepackage{algorithm,algpseudocode}
+\usepackage[section]{placeins}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder true
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Motif Counting Algorithm
+\end_layout
+
+\begin_layout Author
+Ori Cohen
+\end_layout
+
+\begin_layout Abstract
+This report aims to describe the algorithm used to count all the motifs
+ of a graph in an Optimal manner.
+ The algorithm is optimal in the sense that each motif is only counted once,
+ resulting in an algorithm that is linear in the number of motifs in the
+ graph.
+ The algorithm takes advantage of the combinatorics of the 3- and 4-motifs
+ to explicitly iterate over them.
+ This report further describes the new c++ kernel that has been implemented
+ to facilitate work on large graphs, which can run both on CPU and GPU devices.
+\end_layout
+
+\begin_layout Abstract
+This report presents a top-down approach to the algorithm and the theory
+ behind it.
+\end_layout
+
+\begin_layout Abstract
+All the code described in this report can be found as an open source library
+ at the 
+\bar under
+
+\begin_inset CommandInset href
+LatexCommand href
+name "GitHub repository"
+target "https://github.com/oricc/graph_measures"
+literal "false"
+
+\end_inset
+
+
+\bar default
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset FloatList algorithm
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Algorithm Description
+\end_layout
+
+\begin_layout Subsection
+Overview and main concepts
+\end_layout
+
+\begin_layout Standard
+There are two main ideas implemented in this algorithm.
+\end_layout
+
+\begin_layout Standard
+The first is that of explicit counting - since we know all the possible
+ ways a motif can look, we can iterate over them directly, thus enabling
+ us to enumerate all of them in an efficient fashion, both in memory and
+ in time.
+\end_layout
+
+\begin_layout Standard
+The second is the well known concept of divide and conquer.
+ We use this concept by removing from the graph each node we have gone over.
+ This concept is strengthened by a simple preprocessing of the graph, sorting
+ all the nodes by their degree from highest to lowest.
+ Having the nodes sorted in this way allows us to deal with the 
+\begin_inset Quotes eld
+\end_inset
+
+heavier
+\begin_inset Quotes erd
+\end_inset
+
+ nodes (the ones with a higher degree) first, and in so doing break up the
+ graph into smaller, independent sub-graphs.
+\end_layout
+
+\begin_layout Standard
+These two ideas give us the general shape of the algorithm, which can be
+ seen, from above, as an iteration over the sorted nodes.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float algorithm
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Motif Counter Overview
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Preview
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{algorithmic}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+Function{MotifCounter}{g,level}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Comment $g$ is a graph (either directed or undirected)
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Comment $level$ is either 3 or 4, the level of motif to count
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State 
+\backslash
+textbf{global} $motifCounter 
+\backslash
+gets$ {list of motif counters}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State 
+\backslash
+Comment A motif counter is a dictionary containing a counter for each motif
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State $sortdNodes
+\backslash
+gets$ g.vertices
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State sort $sortedNodes$ by node degree
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+For { $node$ in $sortedNodes$}
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+If {$level == 3$}
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+State
+\backslash
+Call{CreateNodeSubtree3}{$g$,$node$}
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+Else 
+\backslash
+Comment level is 4
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+State
+\backslash
+Call{CreateNodeSubtree4}{$g$,$node$}
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+EndIf
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+State $g.remove(node)$ 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{flushright} 
+\backslash
+Comment We remove the node after iterating over it so as to not repeat the
+ motifs that were already seen.
+\backslash
+end{flushright}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFor
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFunction
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{algorithmic}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The 
+\begin_inset Formula $CreateNodeSubtree$
+\end_inset
+
+ function is where most of the hard work occurs, as that is the function
+ where the actual motif counting is performed.
+\end_layout
+
+\begin_layout Subsection
+Motif combinatorics
+\end_layout
+
+\begin_layout Standard
+Counting all motifs containing a given node is done using a 
+\series bold
+depth first approach.
+ 
+\series default
+For each motif, we can define a 
+\emph on
+depth.
+
+\emph default
+ The depth of a motif is defined as the distance of the furthest vertex
+ in the motif from the root node.
+ This can also be though of as the furthest ring of neighbors that needs
+ to be accessed to build the motif (for example, for a motif a depth 2 we
+ must first select a vertex from the root's first neighbors, and then proceed
+ to selecting a node from that vertex's neighbors, totaling two neighbor
+ rings that we needed to see to build the motif).
+ The second view is the one employed by us in implementing this algorithm.
+ We separate the motifs by their 
+\emph on
+depth
+\emph default
+ and count all motifs of the same depth together.
+\end_layout
+
+\begin_layout Standard
+It is obvious that the depth of a motif is bound by the number of nodes
+ in the motif:
+\end_layout
+
+\begin_layout Itemize
+A 3-motif can only be of depth 1 or 2
+\end_layout
+
+\begin_layout Itemize
+A 4-motif can be of depth 1,2 or 3
+\end_layout
+
+\begin_layout Standard
+In order to count all of the motifs of a certain depth, we must understand
+ how each motif looks.
+\end_layout
+
+\begin_layout Standard
+TODO : add images of motifs
+\end_layout
+
+\begin_layout Standard
+It can be seen that we can easily iterate over the necessary neighbors (whether
+ they are first degree or second degree neighbors) to construct all the
+ possible motifs containing the root vertex.
+\end_layout
+
+\begin_layout Subsection
+Subtree Construction
+\end_layout
+
+\begin_layout Standard
+A 
+\emph on
+subtree
+\emph default
+ is considered to be the vicinity of the node where motifs containing is
+ could appear.
+ The 
+\begin_inset Formula $CreateNodeSubtree$
+\end_inset
+
+ is responsible for going over all the possible depths and counting all
+ the motifs in each.
+ For readability, we have separated the depths into separate functions.
+\end_layout
+
+\begin_layout Paragraph
+It is important to note that when we say we iterate over all of a node's
+ neighbors, we iterate over the neighbors in the 
+\emph on
+full graph
+\emph default
+, i.e.
+ we consider both the vertices connected to the node and the ones the node
+ is connected to (which, in a directed graph, are not equivalent).
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float algorithm
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Create Node Subtree for 3-motifs
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{algorithmic}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+Function{CreateNodeSubtree3}{g,root}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Comment $g$ is a graph (either directed or undirected)
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Comment $root$ is the vertex that must be in all motifs
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+For{$n_1$ in root's neighbors}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State 
+\backslash
+textbf{Mark} that we saw $n_1$
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFor
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Call{Count3MotifsDepth2}{g,root}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Call{Count3MotifsDepth1}{g,root}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFunction
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{algorithmic}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float algorithm
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Create Node Subtree for 4-motifs
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{algorithmic}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+Function{CreateNodeSubtree4}{g,root}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Comment $g$ is a graph (either directed or undirected)
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Comment $root$ is the vertex that must be in all motifs
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+For{$n_1$ in root's first neighbors}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State 
+\backslash
+textbf{Mark} $n_1$ as seen at level 1
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFor
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Call{Count4MotifsDepth1}{g,root}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Call{Count4MotifsDepth2}{g,root}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Call{Count4MotifsDepth3}{g,root}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFunction
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{algorithmic}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+FloatBarrier
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Motif Counting
+\end_layout
+
+\begin_layout Subsubsection
+Motif Counter updating
+\end_layout
+
+\begin_layout Standard
+While each is slightly different, all motif counting function are essentially
+ the same.
+\end_layout
+
+\begin_layout Standard
+All of these functions, broadly speaking, have similar behavior:
+\end_layout
+
+\begin_layout Itemize
+Iterate over all the motifs of the specified depth that you can build
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+For each of those motif update the relevant motif counters
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+The way of iterating over the motifs is the main difference between each
+ of the functions.
+\end_layout
+
+\begin_layout Standard
+Updating the motif counters is done by calculating the motif index (as discussed
+ in the next section), and is relatively straightforward:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float algorithm
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Updating Motif Counters
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{algorithmic}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+Function{UpdateMotifCount}{g,motif}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Comment $g$ is a graph (either directed or undirected)
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Comment $motif$ is the motif that is being updated
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State $motifIndex 
+\backslash
+gets$ 
+\backslash
+Call{GetMotifIndex}{g,motif}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+For node in motif
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State $motifCounters[node][motifIndex] ++ $
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFor
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFunction
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{algorithmic}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+3-Motif building algorithms
+\end_layout
+
+\begin_layout Standard
+As we discussed in the previous section, 3-motifs can only be of depth 1
+ or 2.
+\end_layout
+
+\begin_layout Standard
+For both depths, we know what their form looks like:
+\end_layout
+
+\begin_layout Itemize
+A 3-motif of depth 1 must be the root node connected to two of it's first
+ neighbors.
+\end_layout
+
+\begin_layout Itemize
+A 3-motif of depth 2 can only be the root, a first neighbor and a second
+ neighbor.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float algorithm
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Motif 3 builders
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{algorithmic}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+Function{Count3MotifsDepth2}{g,root}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Comment $g$ is a graph (either directed or undirected)
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Comment $root$ is the vertex that must be in all motifs
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+For{$n_1$ in root's neighbors}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+For{$n_2$ in $n_1$'s neighbors}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+If{$n_2$ is a neighbor of root's}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+If{we saw $n_1$ before $n_2$} 
+\backslash
+Comment{Count the pair only once}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Call{UpdateMotifCount}{$g$,$[root,n_1,n_2]$}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndIf
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+Else
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State 
+\backslash
+textbf{Mark} that we saw n2
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Call{UpdateMotifCount}{$g$,$[root,n_1,n_2]$}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndIf
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFor
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFor
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFunction
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+Function{Count3MotifsDepth1}{g,root}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Comment $g$ is a graph (either directed or undirected)
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Comment $root$ is the vertex that must be in all motifs
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State $neighborCombinations 
+\backslash
+gets$ all 2-combinations of root's neighbors
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+For {$tuple$ in $neighborCombinations$}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State $n_1 
+\backslash
+gets tuple.first$
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State $n_2 
+\backslash
+gets tuple.second$
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+If{we saw $n_1$ before $n_2$ and they aren't neighbors}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{flushright}
+\backslash
+Comment{We only want to count $(n_1,n_2)$ once, and if they are neighbors,
+  we would have discovered the motif as a motif of depth 2}
+\backslash
+end{flushright}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Call{UpdateMotifCount}{$g$,$[root,n_1,n_2]$}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndIf
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFor
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFunction
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{algorithmic}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+FloatBarrier
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+4-Motif Building algorithms
+\end_layout
+
+\begin_layout Standard
+Like 3-motifs, we can separate the different 4-motifs into groups by their
+ respective depths
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Depth 1 
+\series default
+are 4- motifs constructed from the root and three of it's first neighbors
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Depth 2 
+\series default
+can be one of two options:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+The root, two of it's first neighbors and one of it's second neighbors (which
+ is a neighbor of one of the first neighbors)
+\end_layout
+
+\begin_layout Itemize
+The root, one first neighbors, and two second neighbors who are connected
+ to the first neighbor.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\series bold
+Depth 3
+\series default
+ can only be a chain of the root, and a first, second and third neighbors.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+FloatBarrier
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float algorithm
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Motif 4 depth 1 and 2 builders
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{algorithmic}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+Function{Count4MotifsDepth1}{g,root}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Comment $g$ is a graph (either directed or undirected)
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Comment $root$ is the vertex that must be in all motifs
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State $neighborCombinations 
+\backslash
+gets$ all 3-combinations of root's neighbors
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+For {$tuple$ in $neighborCombinations$}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State $n_{11} 
+\backslash
+gets tuple.first$
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State $n_{12} 
+\backslash
+gets tuple.second$
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State $n_{13} 
+\backslash
+gets tuple.third$
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Call{UpdateMotifCount}{$g$,$[root,n_{11},n_{12},n_{13}]$}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFor
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFunction
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+Function{Count4MotifsDepth2}{$g$,$root$}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Comment $g$ is a graph (either directed or undirected)
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Comment $root$ is the vertex that must be in all motifs
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+For {$n_1$ in $root$'s neighbors}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+For{$n_2$ in $n_1$'s neighbors}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+If{$n_2$ was not seen at level 1}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State 
+\backslash
+textbf{Mark} $n_2$ as seen at level 2
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndIf
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{flushright}
+\backslash
+Comment{Motifs of the form root, two first neighbors and a second neighbor}
+\backslash
+end{flushright}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+For{$n_{11}$ in root's neighbors}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+If{$n_2$ was seen at level 2 and $n_1 
+\backslash
+neq n_{11}$}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State edgeExists $
+\backslash
+gets (n_2,n_{11}) 
+\backslash
+in E$ or $(n_{11},n_{2}) 
+\backslash
+in E$
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+If {not edgeExists or (edgeExists and $n_1 < n_{11}$)}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{flushright}
+\backslash
+Comment{If there is an edge between $n_1$ and $n_{11}$,
+\backslash
+
+\backslash
+ we would have already counted the motif
+\backslash
+
+\backslash
+ as a motif of depth 2.
+ If no such edge exists,
+\backslash
+
+\backslash
+ we only want to count the motif once.}
+\backslash
+end{flushright}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Call{UpdateMotifCount}{$g$,$[root,n_{1},n_{11},n_{2}]$}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndIf
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndIf
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFor
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFor
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFor
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Comment{Motifs of the form root, a first neighbors and two second neighbors}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State $secondNeighborCombinations 
+\backslash
+gets$ all 2-combinations of $n_1$'s neighbors
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+For{$combination$ in $secondNeighborCombinations$}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State $n_{21} 
+\backslash
+gets secondNeighborCombinations.first$
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State $n_{22} 
+\backslash
+gets secondNeighborCombinations.second$
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+If{$n_{21}$ and $n_{22}$ were seen at level 2}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{flushright}
+\backslash
+Comment{If both nodes were seen at level 2 then the motif wasn't counted
+ as a depth 1 motif}
+\backslash
+end{flushright}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Call{UpdateMotifCount}{$g$,$[root,n_{1},n_{21},n_{22}]$}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndIf
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFor
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFunction
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{algorithmic}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float algorithm
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Motif 4 depth 3 builder
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{algorithmic}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+Function{Count4MotifsDepth3}{$g$,$root$}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Comment $g$ and $root$ are as before 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+For {$n_1$ in $root$'s neighbors}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+For{$n_2$ in $n_1$'s neighbors}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+If {$n_2$ was seen at level 1}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{flushright}
+\backslash
+Comment{If $n_2$ was seen at level 1 then we can't complete a depth-3 motif}
+\backslash
+end{flushright}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State 
+\backslash
+textbf{continue}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndIf
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+For{$n_3$ in $n_2$'s neighbors}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+If{$n_3$ was not seen yet}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State 
+\backslash
+textbf{Mark} $n_3$ as seen at level 3
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+If{$n_2$ was seen at level 2}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Call{UpdateMotifCount}{$g$,$[root,n_{1},n_{2},n_{3}]$}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndIf
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+Else
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+If {$n_3$ was seen at level 1}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{flushright}
+\backslash
+Comment{This motif was already counted as a depth-1 or -2 motif}
+\backslash
+end{flushright}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State 
+\backslash
+textbf{continue}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndIf
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State edgeExists $
+\backslash
+gets (n_1,n_3) 
+\backslash
+in E$ or $(n_1,n_3) 
+\backslash
+in E$
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+If {$n_3$ was seen at level 2 and not edgeExists}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{flushright}
+\backslash
+Comment{If an edge exists we already counted 
+\backslash
+
+\backslash
+this motif as a depth-1 or -2 motif}
+\backslash
+end{flushright}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Call{UpdateMotifCount}{$g$,$[root,n_{1},n_{2},n_{3}]$}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndIf
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+If{$n_3$ was seen at level 3 and $n_2$ was seen at level 2}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Call{UpdateMotifCount}{$g$,$[root,n_{1},n_{2},n_{3}]$}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndIf
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndIf
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFor
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFor
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFor
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFunction
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end {algorithmic}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+FloatBarrier
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Motif representation
+\end_layout
+
+\begin_layout Standard
+Another important idea contributing to the efficiency of this method is
+ that we can generate a list of all possible motifs and their corresponding
+ isomorphisims beforehand.
+ We can then build a list of all motifs and the motif index they correspond
+ to, and access that list at run-time.
+\end_layout
+
+\begin_layout Standard
+In order to build such a list we must be able to represent each motif in
+ a fashion that is both unique and concise.
+ The representation we use is that of a bit array of adjacency.
+ Since each motif contains only 3 or 4 nodes,we can build a miniature adjacency
+ matrix which represents the motif.
+ If we then read the matrix as a single string of bits and convert it to
+ an unsigned int - we have effectively represented the motif using a single,
+ easy to interpret, number.
+\end_layout
+
+\begin_layout Standard
+There are two important points to note about this representation method:
+\end_layout
+
+\begin_layout Enumerate
+The connections between a node and itself is not considered when transforming
+ the adjacency matrix of the motif into a number.
+ The reason for that is simply that we assume we are dealing with a graph
+ 
+\series bold
+without self-loops
+\series default
+.
+ As this is a common assumption, it is considered legitimate in this case.
+\end_layout
+
+\begin_layout Enumerate
+The way of building the adjacency matrix for directed and undirected graphs
+ is slightly different.
+ While for a motif in a directed graph a link of 
+\begin_inset Formula $a\to b$
+\end_inset
+
+ does not necessarily imply a connection in the other direction (
+\begin_inset Formula $b\to a$
+\end_inset
+
+), In an 
+\series bold
+undirected
+\series default
+ graph we do know this, and therefor can limit ourselves to writing only
+ 
+\emph on
+half 
+\emph default
+of the adjacency matrix.
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+Algorithmically, this distinction is implemented by using different combinatoric
+al functions.
+\end_layout
+
+\begin_layout Itemize
+For a directed graph we use the 
+\emph on
+permutations
+\emph default
+ function
+\end_layout
+
+\begin_layout Itemize
+For an undirected graph we use the 
+\emph on
+combinations 
+\emph default
+function.
+\end_layout
+
+\begin_layout Standard
+For a further explanation about these functions, refer to Appendix A.
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Float algorithm
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Motif to number representation
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{algorithmic}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+Function{GetMotifIndex}{g, motif}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Comment $g$ is a graph (either directed or undirected)
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Comment $motif$ is the motif that is being represented
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State $edges$ is an empty list of booleans
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+If{$g$ is directed}
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+State $options 
+\backslash
+gets permutations(motif)$
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+Else
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+State $options 
+\backslash
+gets combinations(motif)$
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndIf
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+For{tuple in options}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State $n_1 
+\backslash
+gets tuple.first$
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State $n_2 
+\backslash
+gets tuple.second$
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State $neighbors 
+\backslash
+gets$ whether $n_1$ and $n_2$ are neighbors in $g$
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State append $neighbors$ to $edges$
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFor
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State $motifNumber 
+\backslash
+gets$  the unsigned int represented by $edges$
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State $motifIndex 
+\backslash
+gets$ the index corresponding to the motif number
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Comment The index is read from the index file we created ahead of time
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+State
+\backslash
+Return motifIndex
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+EndFunction
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{algorithmic}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+C++ Kernel
+\end_layout
+
+\begin_layout Subsection
+Overview
+\end_layout
+
+\begin_layout Standard
+As we have reached the optimal algorithmic performance of motif counting
+ (we count each motif only once), in order to facilitate analyzing motifs
+ in larger graphs, we must write faster 
+\series bold
+code
+\series default
+.
+\end_layout
+
+\begin_layout Standard
+Previously, the code to count the motifs has been written in Python.
+ Python, while easy to use and develop code in, is inherently slow, as the
+ language itself is interpreted.
+ Faster code performance is obtained through the use of code in C++, both
+ running on the CPU and on the GPU.
+ Running the algorithms using a C++ kernel requires two additional changes:
+\end_layout
+
+\begin_layout Enumerate
+The graph must be saved in a LIL (List of Lists) format.
+\end_layout
+
+\begin_layout Enumerate
+The algorithm must be modified so as to that the nodes are not actually
+ removed from the graph, as that is inefficient using this format.
+\end_layout
+
+\begin_layout Subsection
+Algorithm changes
+\end_layout
+
+\begin_layout Subsubsection
+Graph Format
+\end_layout
+
+\begin_layout Standard
+In the C++ kernel, the graph is saved using a graph format which is commonly
+ used for sparse graph, but can be used to our advantage in this case.
+\end_layout
+
+\begin_layout Standard
+As our format is aimed at increasing the efficiency of our code by leveraging
+ the computer's internal cache mechanism, we call this structure a CacheGraph.
+\end_layout
+
+\begin_layout Standard
+The CacheGraph is composed of two arrays:
+\end_layout
+
+\begin_layout Enumerate
+An array which is composed of all the neighborhood lists placed back to
+ back (Neighbors).
+\end_layout
+
+\begin_layout Enumerate
+An array which holds the starting index of each node's neighbor list (Indices).
+\end_layout
+
+\begin_layout Standard
+There follows an example of the conversion routine for a simple graph.
+ The given graph is the one composed of these edges: (0->1, 0->2,0->3,2->0,3->1,
+3->2).
+\end_layout
+
+\begin_layout Standard
+The behavior of the conversion now depends on whether the graph is directed
+ or undirected.
+\end_layout
+
+\begin_layout Itemize
+If the graph is directed, the result is as follows: Indices: [0, 3, 3, 4,
+ 6], Neighbors: [1, 2, 3, 0, 1, 2]
+\end_layout
+
+\begin_layout Itemize
+Else, the results for the undirected graph are: Indices: [0, 3, 5, 7, 10],
+ Neighbors: [1, 2, 3, 0, 3, 0, 3, 0, 1, 2]
+\end_layout
+
+\begin_layout Standard
+The CacheGraph object is designed around the principle of cache-awareness.
+ The most important thing to remember when accessing the graph in the C++
+ code is that we are aiming to accelerate the computations by loading sections
+ of the graph into the cache ahead of time for quick access.
+ When using the CacheGraph, this comes into effect when we iterate over
+ the offset vector first and then access the blocks of neighbor nodes in
+ the graph vector.
+ By doing this, we are pulling the entire list of a certain node’s neighbors
+ into the cache, allowing us to iterate over them extremely quickly.
+\end_layout
+
+\begin_layout Standard
+A concrete example of a good use and bad use case of the CacheGraph are
+ the two popular search strategies BFS and DFS.
+ When using BFS we are utilizing the full power of the cache-aware storage
+ mechanism by pulling in the entire list of a node’s neighbors to be processed
+ at once, which is fast due to the fact that the neighbors are in the cache.
+ In contrast, when using DFS, we are not going over all of a node’s neighbors
+ at once but jumping from one node to the other, which completely nullifies
+ the speed advantage that the cache can give us, as the contents of the
+ cache need to be constantly swapped out by the processor.
+\end_layout
+
+\begin_layout Subsubsection
+Removal Index
+\end_layout
+
+\begin_layout Standard
+One disadvantage of the CacheGraph is that it can't be modified at runtime,
+ as that is an extremely costly operation.
+ Instead, we will hold an array where each node has a corresponding 
+\begin_inset Quotes eld
+\end_inset
+
+removal index
+\begin_inset Quotes erd
+\end_inset
+
+, which will be the first iteration where the node no longer exists in the
+ graph.
+ As the algorithm removes each node immediately after it iterates it's subtree,
+ computing the removal indices of all nodes is simply a matter of 
+\begin_inset Quotes eld
+\end_inset
+
+flipping
+\begin_inset Quotes erd
+\end_inset
+
+ the list which contains the order in which the nodes will be traversed,
+ i.e.
+ the nodes as ordered by their degree.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Flipping
+\begin_inset Quotes erd
+\end_inset
+
+ the list entails saving each node's position in the nodes list as the value
+ corresponding to that node in the removal indices array.
+\end_layout
+
+\begin_layout Standard
+For example, if the nodes were traversed in this order : [2,0,1], then the
+ corresponding removal indices array will be [1,2,0] (i.e.
+ node 0 is removed at iteration 1, node 1 at iteration 2, etc.)
+\end_layout
+
+\begin_layout Standard
+We now need to further modify our code to check each node we use, to verify
+ that it's removal index of the node is lower than the removal index of
+ the root of the current subtree.
+\end_layout
+
+\begin_layout Standard
+To further accelerate the motif counting code, a version of it was written
+ for the GPU using the CUDA library.
+ Writing the code for the GPU means that we will run all of the motif subtree
+ calculations for each node in parallel, which in turn means we must be
+ able to run each of those calculations independently of the others.
+ Luckily, using the removal indices we can already make the subtrees independent
+ of one another, as the removal indices were pre-computed.
+\end_layout
+
+\begin_layout Subsection
+Performance comparison
+\end_layout
+
+\begin_layout Standard
+The C++ kernel gives us code that runs several times faster than the original
+ python code, and the GPU version gives us an additional 10X factor on top
+ of the regular C++ code.
+ Below are graph comparing the run-time of the various kernels on Erdos-renyi
+ graphs of varying size.
+ Figures 1 & 2 show the comparisons between the various kernels.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "45text%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename features_algorithms/accelerated_graph_features/src/accelerated_graph_features/benchmarks/figures/motif_3_benchmark_comparison.png
+	lyxscale 45
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "45text%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename features_algorithms/accelerated_graph_features/src/accelerated_graph_features/benchmarks/figures/motif_4_benchmark_comparison.png
+	lyxscale 45
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Run time comparison for python/C++ kernels
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "45text%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename features_algorithms/accelerated_graph_features/src/accelerated_graph_features/benchmarks/figures/gpu_motif_3_benchmark_comparison.png
+	lyxscale 45
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "45text%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename features_algorithms/accelerated_graph_features/src/accelerated_graph_features/benchmarks/figures/gpu_motif_4_benchmark_comparison.png
+	lyxscale 45
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Run time comparison for C++/GPU kernels
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+FloatBarrier
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+\start_of_appendix
+Combinatorical functions
+\end_layout
+
+\begin_layout Subsection
+Permutations
+\end_layout
+
+\begin_layout Standard
+The 
+\emph on
+permutations 
+\emph default
+function is used to create all the possible tuples of a given size which
+ are comprised of elements of the original set 
+\series bold
+with respect to order
+\series default
+.
+ In our case we only use 2-permutations, which give us all the possible
+ edges that can exist between a given set of nodes.
+\end_layout
+
+\begin_layout Standard
+For example, assume our motif is comprised of nodes 1,2 and 3.
+ The possible 2-permutations in this case would be:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+perm(\{1,2,3\})=\{(1,2),(1,3),(2,1),(2,3),(3,1),(3,2)\}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+And since the order matters, we can see that, for example, both 
+\begin_inset Formula $(1,2)$
+\end_inset
+
+ and 
+\begin_inset Formula $(2,1)$
+\end_inset
+
+ appear in the resulting list.
+\end_layout
+
+\begin_layout Standard
+A more intuitive way to view this function, and the one employed by us,
+ is as looking at all of the elements of a matrix, without the main diagonal:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\begin{matrix}0 & X & X\\
+X & 0 & X\\
+X & X & 0
+\end{matrix}
+\]
+
+\end_inset
+
+Where X is an element accessed by the permutations, 0 is one which was not.
+\end_layout
+
+\begin_layout Subsection
+Combinations
+\end_layout
+
+\begin_layout Standard
+The 
+\emph on
+combinations 
+\emph default
+function is very similar to the 
+\emph on
+permutations 
+\emph default
+function in that it gives us a list of tuples derived from the original
+ sets, but differs from it in that it 
+\series bold
+does not respect order
+\series default
+, and so only gives us a single instance of each tuple:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+comb(\{1,2,3\})=\{(1,2),(1,3),(2,3)\}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In the context of adjacency matrices, the function only iterated over the
+ top half of the matrix:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\begin{matrix}0 & X & X\\
+0 & 0 & X\\
+0 & 0 & 0
+\end{matrix}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
