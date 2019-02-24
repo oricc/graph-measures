@@ -37,6 +37,8 @@ class BfsMomentsCalculator(NodeFeatureCalculator):
             weights = np.asarray(weights)
             self._features[node] = [self.weighted_avg_and_std(adjusted_dists, weights)]
 
+    def _get_feature(self,element):
+        return list(self._features[element])
 
 feature_entry = {
     "bfs_moments": FeatureMeta(BfsMomentsCalculator, {"bfs"}),
