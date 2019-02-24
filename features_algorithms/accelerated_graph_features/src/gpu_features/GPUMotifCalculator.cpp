@@ -357,6 +357,7 @@ vector<vector<unsigned int> *> *GPUMotifCalculator::Calculate() {
 		// 	Motif3Subtree(node);
 		// }
 		bool* visited_vertices;
+		std::cout << "Num of motifs: "<<globalNumOfMotifs <<std::endl;
 		gpuErrchk(cudaMallocManaged(&visited_vertices, numOfNodes * numOfNodes*sizeof(bool)));
 		gpuErrchk(cudaMemPrefetchAsync(visited_vertices, numOfNodes * numOfNodes*sizeof(bool),device,NULL));
 		Motif3Kernel<<<numBlocks, blockSize>>>(visited_vertices);
@@ -436,7 +437,8 @@ void Motif3Subtree(unsigned int root, bool* visited) {
 				continue;
 			if (visited_vertices[n2]) {			// check if n2 was visited &&
 				//			printf("n2 was seen");
-				if (n1 < n2) {// n2 is after n1 (stops counting the motif twice)
+				bool edgeExists = AreNeighbors(root,n2) || AreNeighbors(n2,root);
+				if (!edgeExists || (edgeExists && n1 < n2)) {// n2 is after n1 (stops counting the motif twice)
 					unsigned int arr[] = { root, n1, n2 };
 					GroupUpdater(arr, 3); // update motif counter [r,n1,n2]
 				}
@@ -652,8 +654,14 @@ __device__
 void GroupUpdater(unsigned int group[], int size) {
 	// TODO: count overall number of motifs in graph (maybe different class)?
 	//printf("In GroupUpdater");
+	
 	int groupNumber = GetGroupNumber(group, size);
 	int motifNumber = (globalDevicePointerMotifVariations)[groupNumber];
+//	if(size==3){
+		//std::cout << motifNumber <<","<<group[0]<<","<<group[1]<<","<<group[2]<<std::endl;
+//		printf("%d,%u,%u,%u\n",motifNumber,group[0],group[1],group[2]);
+//	}
+
 	if (motifNumber != -1) {
 		//	printf("Found motif!\n");
 		for (int i = 0; i < size; i++)

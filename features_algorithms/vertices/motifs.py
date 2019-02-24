@@ -16,7 +16,7 @@ except ModuleNotFoundError as e:
 CUR_PATH = os.path.realpath(__file__)
 BASE_PATH = os.path.dirname(os.path.dirname(CUR_PATH))
 VERBOSE = False
-DEBUG = False
+DEBUG =False 
 SAVE_COUNTED_MOTIFS = False
 
 interesting_groups = [
@@ -253,7 +253,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
             self._gnx.remove_node(node)
 
     def _update_nodes_group(self, group, motif_num):
-        for node in group:
+       for node in group:
             self._features[node][motif_num] += 1
 
     def _calculate(self, include=None):

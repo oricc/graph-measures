@@ -58,7 +58,7 @@ def test_features():
     # print(attraction_basin(g))
     # print(flow(g))
 
-    motif_level = 4
+    motif_level = 3
     # with silence_stdout():
     # example_feature(g)
     # clustering_coefficient(g)
@@ -71,7 +71,7 @@ def test_features():
     # print(gpu_motif)
     # print(gpu_motif == m_res)
     # G = nx.random_regular_graph(20,100,seed=123456).to_directed()
-    G = nx.erdos_renyi_graph(30, 0.3, directed=True, seed=None)
+    G = nx.erdos_renyi_graph(100, 0.5, directed=True, seed=None)
     # nx.write_gpickle(G,"test.pickle")
     # G = g
     # assert type(G) is nx.DiGraph
@@ -83,21 +83,22 @@ def test_features():
     m_res = motif(G, level=motif_level, gpu=False)
     # pretify_motif_results(m_res) 
     gpu_res = motif(G,level=motif_level,gpu=True)
-    pretify_motif_results([ m_res,gpu_res])
+  #  pretify_motif_results([ m_res,gpu_res])
     # pretify_motif_results([mx.tolist(),m_res,gpu_res])
 
     m_res_arr = np.asarray(m_res)
     gpu_res_arr = np.asarray(gpu_res)
 
-    print(mx.shape, m_res_arr.shape)
+    # print(mx.shape, m_res_arr.shape)
 
-    mx = gpu_res_arr
-    # np_diff = mx - m_res_arr
+    #mx = gpu_res_arr
+   # np_diff = mx - m_res_arr
+    m_res_arr = gpu_res_arr
     np_diff = mx - m_res_arr
-    print('diff avg:', np.average(np_diff[np.abs(np_diff) > 1]))
+    print('diff avg:', np.average(np_diff[np.abs(np_diff) >= 1]))
     print('number of elements:', np.size(np_diff))
-    print('number of different elements:', np.size(np_diff[np.abs(np_diff) > 1]))
-    print('Which is {}% of the elements'.format(100 * np.size(np_diff[np.abs(np_diff) > 1]) / np.size(np_diff)))
+    print('number of different elements:', np.size(np_diff[np.abs(np_diff) >= 1]))
+    print('Which is {}% of the elements'.format(100 * np.size(np_diff[np.abs(np_diff) >= 1]) / np.size(np_diff)))
     list_diff = []
     count = 0
     for l in np_diff:
@@ -105,7 +106,7 @@ def test_features():
         list_diff.append(l.tolist())
     #     print(list_diff[count-1])
 
-#    list_diff = [l[0] for l in list_diff]
+    list_diff = [l[0] for l in list_diff]
  #   print(list_diff)
     #    print('count',count)
     pretify_motif_results([list_diff], lambda x: x != 0 and abs(x) > 1)
