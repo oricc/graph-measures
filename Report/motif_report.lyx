@@ -122,7 +122,7 @@ This report aims to describe the algorithm used to count all the motifs
  graph.
  The algorithm takes advantage of the combinatorics of the 3- and 4-motifs
  to explicitly iterate over them.
- This report further describes the new c++ kernel that has been implemented
+ This report further describes the new C++ kernel that has been implemented
  to facilitate work on large graphs, which can run both on CPU and GPU devices.
 \end_layout
 
@@ -3403,7 +3403,7 @@ status open
 \begin_inset Graphics
 	filename motif3_log_log_benchmarks.png
 	lyxscale 45
-	width 100text%
+	width 100line%
 
 \end_inset
 
@@ -3455,6 +3455,11 @@ Run time comparison for different kernels
 \end_inset
 
 
+\end_layout
+
+\begin_layout Plain Layout
+The benchmarks were ran on regular graphs with a regular degree of 20, which
+ is why the graphs are linear in nature.
 \end_layout
 
 \end_inset
@@ -3518,9 +3523,7 @@ One more change that could possible increase the number of cases in which
 \end_inset
 
  memory.
- For sparse graphs, this approach is wasteful.
- An implementation specific to sparse graphs could possibly increase the
- size of the graph which the GPU version could work for.
+ For sparse graphs, this approach is wasteful, and could be improved.
 \end_layout
 
 \begin_layout Standard
