@@ -16,11 +16,13 @@ except ModuleNotFoundError as e:
 CUR_PATH = os.path.realpath(__file__)
 BASE_PATH = os.path.dirname(os.path.dirname(CUR_PATH))
 VERBOSE = False
+
 DEBUG =False 
 SAVE_COUNTED_MOTIFS = False
 
 interesting_groups = [
     sorted([0, 1, 8, 27])
+
 ]
 
 
@@ -143,6 +145,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         for n1 in neighbors_first_deg:
             if DEBUG:
                 pass
+
             neighbors_sec_deg = set(nx.all_neighbors(self._gnx, n1))
             # neighbors_sec_deg, visited_neighbors, len_b = tee(neighbors_sec_deg, 3)
             neighbors_sec_deg = visited_neighbors = list(neighbors_sec_deg)
@@ -189,6 +192,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         for n1 in neighbors_first_deg:
             if DEBUG:
                 pass
+
             neighbors_sec_deg = set(nx.all_neighbors(self._gnx, n1))
             # neighbors_sec_deg, visited_neighbors, len_b = tee(neighbors_sec_deg, 3)
             neighbors_sec_deg = visited_neighbors = list(neighbors_sec_deg)
@@ -203,8 +207,8 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
 
                     if n3 not in visited_vertices:
                         if DEBUG:
-                            if root is 0:
-                                hi = 2
+                            pass
+
                         visited_vertices[n3] = 3
                         if visited_vertices[n2] == 2:
                             group = [root, n1, n2, n3]
@@ -214,6 +218,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
 
                             yield group
                     else:
+
                         if visited_vertices[n3] == 1:
                             continue
 
@@ -226,6 +231,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
                             yield group
 
                         elif visited_vertices[n3] == 3 and visited_vertices[n2] == 2:
+
                             group = [root, n1, n2, n3]
                             if DEBUG:
                                 if sorted(group) in interesting_groups:
@@ -262,24 +268,21 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         self._features = {node: motif_counter.copy() for node in self._gnx}
         for i, (group, group_num, motif_num) in enumerate(self._calculate_motif()):
             if DEBUG:
-                # if 0 in group:
-                #     print('A 21/47 group:', group, motif_num, group_num)
-                #     pass
-                # if 4 in group and motif_num == 15:
-                #     hi = 4
-                #     print(','.join([str(x) for x in group]))
-                # if sorted(group) in interesting_groups:
-                #     print('An interesting group:', group, motif_num)\
-                print(str(motif_num)+','+','.join([str(x) for x in group]))
 
-            # if SAVE_COUNTED_MOTIFS:
-            #     h = hash(frozenset(group))
-            #     # h = frozenset(group)
-            #     if h in self._counted_motifs:
-            #         print("\033[91m Group {} already counted \033[00m".format(group))
-            #         self._double_counter[frozenset(group)] += 1
-            #     else:
-            #         self._counted_motifs.add(h)
+                if 21 in group and motif_num is 47:
+                    print('A 21/47 group:', group, motif_num)
+                    pass
+                if sorted(group) in interesting_groups:
+                    print('An interesting group:', group, motif_num)
+
+            if SAVE_COUNTED_MOTIFS:
+                h = hash(frozenset(group))
+                # h = frozenset(group)
+                if h in self._counted_motifs:
+                    print("\033[91m Group {} already counted \033[00m".format(group))
+                    self._double_counter[frozenset(group)] += 1
+                else:
+                    self._counted_motifs.add(h)
 
             self._update_nodes_group(group, motif_num)
             if (i + 1) % 1000 == 0 and VERBOSE:
@@ -289,6 +292,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         # print('Number of motifs counted twice:', len(self._double_counter))
 
         self._gnx = m_gnx
+
 
     def _get_feature(self, element):
         all_motifs = self._all_motifs.difference(set([None]))
