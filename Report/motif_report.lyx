@@ -3044,7 +3044,7 @@ main
  The scripts outputs an image using networkx and matplotlib of the motif
  with the given index.
  You can also change the motif level and toggle whether the graph is directional.
- An example output is the motif given in figure 1.
+ An example output is the motif given in figure 6.
 \end_layout
 
 \begin_layout Standard
@@ -3534,6 +3534,239 @@ One more change that could possible increase the number of cases in which
 
  memory.
  For sparse graphs, this approach is wasteful, and could be improved.
+\end_layout
+
+\begin_layout Section
+Useful resources
+\end_layout
+
+\begin_layout Standard
+This section is intended for future researchers and developers who have
+ an interest in understanding/modifying the code.
+ The section will contain links to various resources that could help understand
+ the code.
+ Some of the resources are specifically related to the motif code, but most
+ are more general resources, such as guides to understanding the components
+ used in the GPU code.
+\end_layout
+
+\begin_layout Subsection
+General Requirements
+\end_layout
+
+\begin_layout Standard
+Running the code in any version requires some basic python libraries.
+ The recommended way to install them is through the Conda
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+https://conda.io/en/latest/
+\end_layout
+
+\end_inset
+
+ package manager:
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Networkx
+\series default
+ is a graph library used to create, store and manipulate graphs, including
+ those used as input to the motif counting algorithm.
+ (All versions)
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Bitstring
+\series default
+ is used for the motif conversion.
+ (Python only)
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Numpy, 
+\series default
+a general mathematical library, is used various calculations.
+ (Python only)
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Boost.Python
+\series default
+ is a tool used to create the python interface with the C code.
+ (C & GPU versions only).
+\end_layout
+
+\begin_layout Standard
+Instructions for using the FeatureCalculator framework can be found at the
+ repositories README
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+\begin_inset CommandInset href
+LatexCommand href
+target "https://github.com/oricc/graph_measures/blob/master/README.md"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+C code
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Installation instructions
+\series default
+ as well as further information for developers about the C and GPU code
+ can be found in GitHub repository: 
+\bar under
+
+\begin_inset CommandInset href
+LatexCommand href
+name "C++ Manual"
+target "https://github.com/oricc/graph_measures/blob/master/features_algorithms/accelerated_graph_features/Cache%20Accelerated%20Graph%20Features%20Manual.pdf"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Makefiles
+\series default
+ are used for the compilation of the C & GPU code.
+ An introduction to makefiles can be found at the GNU site
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+\begin_inset CommandInset href
+LatexCommand href
+target "https://www.gnu.org/software/make/manual/html_node/Introduction.html"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Boost
+\series default
+ is used as a framework for linking the C and python code.
+ For more on boost, see their official website
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+\begin_inset CommandInset href
+LatexCommand href
+target "https://www.boost.org/"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+.
+ Notice that we install boost using Conda and that we use a custom build
+ system (via Makefile).
+\end_layout
+
+\begin_layout Subsection
+GPU code
+\end_layout
+
+\begin_layout Standard
+Diving into GPU programming requires understanding several key concepts,
+ following provide a simple explanation of the most important of them.
+\end_layout
+
+\begin_layout Itemize
+NVIDIA developers
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\series bold
+Introduction to CUDA : 
+\series default
+
+\begin_inset CommandInset href
+LatexCommand href
+target "https://devblogs.nvidia.com/even-easier-introduction-cuda/"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Unified memory
+\series default
+ is a method in which we can allocate memory both the CPU and GPU can access:
+ 
+\begin_inset CommandInset href
+LatexCommand href
+target "https://devblogs.nvidia.com/unified-memory-cuda-beginners/https://devblogs.nvidia.com/unified-memory-cuda-beginners/"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\series bold
+CUDA Programming Guide 
+\series default
+is an extensive overview of every aspect of the CUDA programming model,
+ including explanations, examples and best practices.
+ While long, this is the go-to handbook when writing GPU code, and is highly
+ recommended.
+ The guide can be found here: 
+\begin_inset CommandInset href
+LatexCommand href
+target "https://docs.nvidia.com/pdf/CUDA_C_Programming_Guide.pdf"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
