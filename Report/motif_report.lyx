@@ -3370,7 +3370,18 @@ The C++ kernel gives us code that runs several times faster than the original
  of the regular C++ code.
  Below are graph comparing the run-time of the various kernels on Erdos-renyi
  graphs of varying size.
- Figures 1 & 2 show the comparisons between the various kernels.
+ Figure 7 shows the comparisons between the various kernels.
+ The raw benchmarks and code to generate the plots can be found in the repositor
+y 
+\begin_inset CommandInset href
+LatexCommand href
+name "features_algorithms/accelerated_graph_features/ src/ accelerated_graph_features/benchmarks"
+target "https://github.com/oricc/graph_measures/tree/master/features_algorithms/accelerated_graph_features/src/accelerated_graph_features/benchmarks"
+literal "false"
+
+\end_inset
+
+ directory.
 \end_layout
 
 \begin_layout Standard
@@ -3508,8 +3519,7 @@ Further work could also include an implementation of the algorithm with
  In order to enable this, the algorithm must be able to divide the nodes
  into smaller groups, perform the algorithm on each group and combine the
  results.
- This step is not as trivial as it seems, as it requires coordination between
- the different groups so that motifs are not double counted.
+ 
 \end_layout
 
 \begin_layout Standard

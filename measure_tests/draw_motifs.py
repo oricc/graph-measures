@@ -34,7 +34,7 @@ class MotifDrawer:
                 self.draw_motif(idx)
             return
 
-        motif_number = min([x for x in self._motif_variations.keys() if self._motif_variations[x] == index])
+        motif_number = max([x for x in self._motif_variations.keys() if self._motif_variations[x] == index])
         if VERBOSE:
             print(motif_number)
 
@@ -88,6 +88,6 @@ class MotifDrawer:
 
 
 if __name__ == '__main__':
-    md = MotifDrawer(level=4, directed=True)
-    md.draw_motif([44,22])
+    md = MotifDrawer(level=3, directed=True)
+    md.draw_motif([10])
     # md.draw_motif([3, 4, 15,17, 23, 24, 80])

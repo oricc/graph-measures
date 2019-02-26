@@ -17,7 +17,7 @@ PREFIX = 'specific_graphs'
 
 
 def load_graph(path):
-    g: nx.Graph = nx.read_gpickle(open(os.path.join(PREFIX, path), 'rb'))
+    g = nx.read_gpickle(open(os.path.join(PREFIX, path), 'rb'))
     center_node = 0
     # nodes = [center_node]
     # for i in range(3):

@@ -122,7 +122,7 @@ This report aims to describe the algorithm used to count all the motifs
  graph.
  The algorithm takes advantage of the combinatorics of the 3- and 4-motifs
  to explicitly iterate over them.
- This report further describes the new c++ kernel that has been implemented
+ This report further describes the new C++ kernel that has been implemented
  to facilitate work on large graphs, which can run both on CPU and GPU devices.
 \end_layout
 
@@ -1626,6 +1626,11 @@ Depth 3
 \begin_layout Standard
 The order between the depths is doubly important for 4-motifs.
  The order is as they were listed above.
+ It is important to note that 
+\series bold
+all
+\series default
+ motifs of a certain depth are counted before moving on to the next depth.
 \end_layout
 
 \begin_layout Standard
@@ -3302,6 +3307,16 @@ No vectors
  the CPU motif calculator.
 \end_layout
 
+\begin_layout Standard
+Furthermore, the GPU's memory itself is limited, and so we can't run graphs
+ of any size on it.
+ The GPU code, because of it's parallel nature, requires 
+\begin_inset Formula $n^{2}$
+\end_inset
+
+ memory space, and so is unsuited for large graphs.
+\end_layout
+
 \begin_layout Subsection
 GPU requirements
 \end_layout
@@ -3355,7 +3370,18 @@ The C++ kernel gives us code that runs several times faster than the original
  of the regular C++ code.
  Below are graph comparing the run-time of the various kernels on Erdos-renyi
  graphs of varying size.
- Figures 1 & 2 show the comparisons between the various kernels.
+ Figure 7 shows the comparisons between the various kernels.
+ The raw benchmarks and code to generate the plots can be found in the repositor
+y 
+\begin_inset CommandInset href
+LatexCommand href
+name "features_algorithms/accelerated_graph_features/ src/ accelerated_graph_features/benchmarks"
+target "https://github.com/oricc/graph_measures/tree/master/features_algorithms/accelerated_graph_features/src/accelerated_graph_features/benchmarks"
+literal "false"
+
+\end_inset
+
+ directory.
 \end_layout
 
 \begin_layout Standard
@@ -3386,9 +3412,9 @@ status open
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
-	filename ../features_algorithms/accelerated_graph_features/src/accelerated_graph_features/benchmarks/figures/motif_3_benchmark_comparison.png
+	filename motif3_log_log_benchmarks.png
 	lyxscale 45
-	width 100text%
+	width 100line%
 
 \end_inset
 
@@ -3419,7 +3445,7 @@ status open
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
-	filename ../features_algorithms/accelerated_graph_features/src/accelerated_graph_features/benchmarks/figures/motif_4_benchmark_comparison.png
+	filename motif4_log_log_benchmarks.png
 	lyxscale 45
 	width 100text%
 
@@ -3434,101 +3460,17 @@ status open
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-Run time comparison for python/C++ kernels
+Run time comparison for different kernels
 \end_layout
 
 \end_inset
 
 
 \end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status open
 
 \begin_layout Plain Layout
-\begin_inset Box Frameless
-position "t"
-hor_pos "c"
-has_inner_box 1
-inner_pos "t"
-use_parbox 0
-use_makebox 0
-width "45text%"
-special "none"
-height "1in"
-height_special "totalheight"
-thickness "0.4pt"
-separation "3pt"
-shadowsize "4pt"
-framecolor "black"
-backgroundcolor "none"
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename ../features_algorithms/accelerated_graph_features/src/accelerated_graph_features/benchmarks/figures/gpu_motif_3_benchmark_comparison.png
-	lyxscale 45
-	width 100text%
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\begin_inset Box Frameless
-position "t"
-hor_pos "c"
-has_inner_box 1
-inner_pos "t"
-use_parbox 0
-use_makebox 0
-width "45text%"
-special "none"
-height "1in"
-height_special "totalheight"
-thickness "0.4pt"
-separation "3pt"
-shadowsize "4pt"
-framecolor "black"
-backgroundcolor "none"
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename ../features_algorithms/accelerated_graph_features/src/accelerated_graph_features/benchmarks/figures/gpu_motif_4_benchmark_comparison.png
-	lyxscale 45
-	width 100text%
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Run time comparison for C++/GPU kernels
-\end_layout
-
-\end_inset
-
-
+The benchmarks were ran on regular graphs with a regular degree of 20, which
+ is why the graphs are linear in nature.
 \end_layout
 
 \end_inset
@@ -3579,6 +3521,20 @@ Further work could also include an implementation of the algorithm with
  results.
  This step is not as trivial as it seems, as it requires coordination between
  the different groups so that motifs are not double counted.
+\end_layout
+
+\begin_layout Standard
+One more change that could possible increase the number of cases in which
+ the GPU can be used is a sparse-graph implementation of the GPU algorithm.
+ In contrast to the python/C++ algorithms, the GPU can't utilize expandable
+ structures like dictionaries or hashmaps, instead relying on an array with
+ a size of the number of nodes to store the neighbors of each node we iterate
+ over, as we iterate over all nodes concurrently, this results in 
+\begin_inset Formula $O(n^{2})$
+\end_inset
+
+ memory.
+ For sparse graphs, this approach is wasteful, and could be improved.
 \end_layout
 
 \begin_layout Standard
